@@ -9,11 +9,11 @@ from selfdrive.modeld.constants import T_IDXS
 # WARNING: this value was determined based on the model's training distribution,
 #          model predictions above this speed can be unpredictable
 # V_CRUISE's are in kph
-V_CRUISE_MIN = 8
-V_CRUISE_MAX = 145
-V_CRUISE_UNSET = 255
-V_CRUISE_INITIAL = 40
-V_CRUISE_INITIAL_EXPERIMENTAL_MODE = 105
+V_CRUISE_MIN = 0
+V_CRUISE_MAX = 80
+V_CRUISE_UNSET = 80
+V_CRUISE_INITIAL = 5
+V_CRUISE_INITIAL_EXPERIMENTAL_MODE = 80
 IMPERIAL_INCREMENT = 1.6  # should be CV.MPH_TO_KPH, but this causes rounding errors
 
 MIN_SPEED = 1.0
@@ -113,7 +113,7 @@ class VCruiseHelper:
     if CS.gasPressed and button_type in (ButtonType.decelCruise, ButtonType.setCruise):
       self.v_cruise_kph = max(self.v_cruise_kph, CS.vEgo * CV.MS_TO_KPH)
 
-    self.v_cruise_kph = clip(round(self.v_cruise_kph, 1), V_CRUISE_MIN, V_CRUISE_MAX)
+    #self.v_cruise_kph = clip(round(self.v_cruise_kph, 1), V_CRUISE_MIN, V_CRUISE_MAX)
 
   def update_button_timers(self, CS, enabled):
     # increment timer for buttons still pressed
