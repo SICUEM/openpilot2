@@ -109,20 +109,17 @@ class planner:
     return self.vel_vector[self.cont]
 
   def set_speed(self, t, CS):
-    if self.perfil == 1:
-      if self.fase == 1:
-        if (t-self.t_1 <= self.tau):
-          vel = self.acc_max*(t-self.t_1)
-        else:
-          self.fase = 0
-      if self.fase == -1:
-        if (t-self.t_2 <= self.tau):
-          vel = self.v_target-self.acc_max*(t-self.t_2)
-    if vel > self.v_target:
-      vel = self.v_target
-    elif vel < self.v_ini:
-      vel = self.v_ini
-    self.cont += 1
+    vel=CS.vEgo
+    if self.perfil == 1 and self.fase == 1 and (t-self.t_1 <= self.tau):
+      vel = self.acc_max*(t-self.t_1)
+    elif self.perfil == 1 and self.fase == 1 and (t-self.t_1 > self.tau):
+      self.fase = 0
+    elif self.perfil == 1 and self.fase == -1 and (t-self.t_2 <= self.tau):
+      vel = self.v_target-self.acc_max*(t-self.t_2)
+    elif self.perfil == 1 and self.fase == -1 and (t-self.t_2 > self.tau):
+      self.perfil = 0
+      self.fase = 0
+      vel = 0
     return vel
 
 
