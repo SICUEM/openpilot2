@@ -2,7 +2,8 @@ import time
 from cereal import car
 from common.numpy_fast import clip, interp
 from common.realtime import DT_CTRL
-from selfdrive.controls.lib.drive_helpers import CONTROL_N, apply_deadzone
+from common.conversions import Conversions as CV
+from selfdrive.controls.lib.drive_helpers import CONTROL_N, apply_deadzone, V_CRUISE_MAX_TEST
 from selfdrive.controls.lib.pid import PIDController
 from selfdrive.modeld.constants import T_IDXS
 
@@ -87,11 +88,11 @@ class planner:
       self.enable = True
       self.perfil = 1
       self.fase = 1
-      self.t_1 = t
+      self.t_1 = t-self.t_ini
     if (CS.rightBlinker == True and self.perfil == 1 and self.fase == 0):
       self.enable = True
       self.fase = -1
-      self.t_2 = t
+      self.t_2 = t-self.t_ini
     if (CS.leftBlinker == True and self.perfil == 0):
       self.enable = False
     if (self.tipo == REACTIVO and self.enable==True):
@@ -107,6 +108,9 @@ class planner:
     return self.vel_vector[self.cont]
 
   def set_speed(self, t, CS):
+    vel=0.0
+    if (self.perfil == 1 and self.fase==0):
+      vel=self.v_target
     if (self.perfil == 1 and self.fase == 1 and (t-self.t_1 <= self.tau)):
       vel = self.acc_max*(t-self.t_1)
     elif (self.perfil == 1 and self.fase == 1 and (t-self.t_1 > self.tau)):
@@ -131,7 +135,6 @@ class LongControl:
     self.v_pid_fake = 0.0
     self.last_output_accel = 0.0
     self.vpid_flag = False
-    self.t_ini = time.time_ns()
     self.vel_profile = planner(REACTIVO)
 
   def reset(self, v_pid):
@@ -168,7 +171,7 @@ class LongControl:
     self.pid.pos_limit = accel_limits[1]
 
     output_accel = self.last_output_accel
-    dt_ini = (time.time_ns()-self.t_ini)/1000000000.0
+    dt_ini = (time.time_ns())/1000000000.0
     self.long_control_state = long_control_state_trans(self.CP, active, self.long_control_state, CS.vEgo,
                                                        v_target, v_target_1sec, CS.brakePressed,
                                                        CS.cruiseState.standstill)
@@ -189,7 +192,11 @@ class LongControl:
 
     elif self.long_control_state == LongCtrlState.pid:
       self.v_pid_fake, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
-      self.v_pid=v_target
+      if not self.vpid_flag:
+        self.v_pid=v_target
+      else:
+        if(CS.vEgo < V_CRUISE_MAX_TEST*CV.KPH_TO_MS):
+          self.v_pid = self.v_pid_fake
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
