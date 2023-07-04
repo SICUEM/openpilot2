@@ -83,20 +83,18 @@ class planner:
     self.tau = self.v_target/self.acc_max
 
   def update(self, t, CS):
-    if CS.rightBlinker and self.perfil == 0:
+    if (CS.rightBlinker == True and self.perfil == 0):
       self.enable = True
       self.perfil = 1
       self.fase = 1
       self.t_1 = t
-    if CS.rightBlinker and self.fase == 0:
+    if (CS.rightBlinker == True and self.perfil == 1 and self.fase == 0):
       self.enable = True
       self.fase = -1
       self.t_2 = t
-    if CS.leftBlinker and self.perfil == 0:
+    if (CS.leftBlinker == True and self.perfil == 0):
       self.enable = False
-    if self.tipo == TRAPEZOIDAL and self.enable:
-      vel = self.read_trapezoidal(t-self.t_ini)
-    elif self.tipo == REACTIVO and self.enable:
+    if (self.tipo == REACTIVO and self.enable==True):
       vel = self.set_speed(t-self.t_ini, CS)
     else:
       vel = 0.0
@@ -110,16 +108,16 @@ class planner:
 
   def set_speed(self, t, CS):
     vel=CS.vEgo
-    if self.perfil == 1 and self.fase == 1 and (t-self.t_1 <= self.tau):
+    if (self.perfil == 1 and self.fase == 1 and (t-self.t_1 <= self.tau)):
       vel = self.acc_max*(t-self.t_1)
-    elif self.perfil == 1 and self.fase == 1 and (t-self.t_1 > self.tau):
+    elif (self.perfil == 1 and self.fase == 1 and (t-self.t_1 > self.tau)):
       self.fase = 0
-    elif self.perfil == 1 and self.fase == -1 and (t-self.t_2 <= self.tau):
+    elif (self.perfil == 1 and self.fase == -1 and (t-self.t_2 <= self.tau)):
       vel = self.v_target-self.acc_max*(t-self.t_2)
-    elif self.perfil == 1 and self.fase == -1 and (t-self.t_2 > self.tau):
+    elif (self.perfil == 1 and self.fase == -1 and (t-self.t_2 > self.tau)):
       self.perfil = 0
       self.fase = 0
-      vel = 0
+      vel = 0.0
     return vel
 
 
@@ -190,7 +188,11 @@ class LongControl:
       self.reset(CS.vEgo)
 
     elif self.long_control_state == LongCtrlState.pid:
-      self.v_pid, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
+      v_pid, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
+      if self.vpid_flag:
+        self.v_pid=v_pid
+      else:
+        self.v_pid=v_target
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
