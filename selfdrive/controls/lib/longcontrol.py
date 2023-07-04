@@ -129,6 +129,7 @@ class LongControl:
                              (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
                              k_f=CP.longitudinalTuning.kf, rate=1 / DT_CTRL)
     self.v_pid = 0.0
+    self.v_pid_fake = 0.0
     self.last_output_accel = 0.0
     self.vpid_flag = False
     self.t_ini = time.time_ns()
@@ -188,12 +189,8 @@ class LongControl:
       self.reset(CS.vEgo)
 
     elif self.long_control_state == LongCtrlState.pid:
-      v_pid = CS.vEgo
-      v_pid, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
-      if self.vpid_flag:
-        self.v_pid=v_pid
-      else:
-        self.v_pid=v_target
+      self.v_pid_fake, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
+      self.v_pid=v_target
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration

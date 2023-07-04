@@ -893,7 +893,7 @@ class Controls:
         str_lB = ("1" if KS.leftBlinker else "0")
         str_rB = ("1" if KS.rightBlinker else "0")
         doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(
-            self.LoC.v_pid)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
+            self.LoC.v_pid_fake)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
       contador = contador + 1
 
 
