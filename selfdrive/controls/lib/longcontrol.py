@@ -77,7 +77,7 @@ class planner:
     self.cont = 1
     self.change_stage = False
     self.t_ini = (time.time_ns())/1000000000.0
-    self.v_target = 5.5 
+    self.v_target = 15.0*CV.KPH_TO_MS
     self.v_ini = 0.0
     self.t_1 = 0.0
     self.t_2 = 0.0
