@@ -880,10 +880,10 @@ class Controls:
     KS = car.CarState.new_message()
     KC = car.CarControl.new_message()  # CarControl Struct
     separator = "\t"
-    KS, KC = self.step()
+    KS, KC = self.step()  
     self.rk.monitor_time()
-    self.prof.display()  
-    if (KS.rightBlinker and self.test_flag==False):  
+    self.prof.display()
+    if (KS.rightBlinker and not self.test_flag):  
       self.test_flag=True
       t_ini = time.time_ns()
       contador = 0
@@ -900,7 +900,7 @@ class Controls:
         str_rB = ("1" if KS.rightBlinker else "0")
         doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(self.LoC.v_pid_fake)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
       contador = contador + 1
-      if(KS.leftBlinker):
+      if (KS.leftBlinker):
         self.test_flag=False
         doc.close()
 
