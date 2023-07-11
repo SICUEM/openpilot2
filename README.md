@@ -1,8 +1,8 @@
-![](https://i.imgur.com/b0ZyIx5.jpg)
-
 Modified by: 
 
 <img src="/docs/img/UE_Madrid_Logo_Positive_RGB.png" width="225"></img>
+
+![](https://i.imgur.com/b0ZyIx5.jpg)
 
 Table of Contents
 =======================
