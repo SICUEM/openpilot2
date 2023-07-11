@@ -83,6 +83,10 @@ class planner:
     self.t_2 = 0.0
     self.tau = self.v_target/self.acc_max
 
+  def set_vtarget(self, v_target):
+    self.v_target = v_target
+    self.tau = self.v_target/self.acc_max
+
   def update(self, t, CS):
     if (CS.rightBlinker == True and self.perfil == 0):
       self.enable = True
@@ -191,7 +195,7 @@ class LongControl:
       self.reset(CS.vEgo)
 
     elif self.long_control_state == LongCtrlState.pid:
-      self.vel_profile.v_target = v_target
+      self.vel_profile.set_vtarget(v_target)
       self.v_pid_fake, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
       if not self.vpid_flag:
         self.v_pid=v_target
