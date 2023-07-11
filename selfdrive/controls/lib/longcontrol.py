@@ -14,7 +14,7 @@ REACTIVO = 9
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
 def long_control_state_trans(CP, active, long_control_state, v_ego, v_target,
-                             v_target_1sec, brake_pressed, cruise_standstill):
+                             v_target_1sec, brake_pressed, cruise_standstill, experimental_mode):
   # Ignore cruise standstill if car has a gas interceptor
   cruise_standstill = cruise_standstill and not CP.enableGasInterceptor
   accelerating = v_target_1sec > v_target
@@ -23,7 +23,7 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target,
                   not accelerating)
   stay_stopped = (v_ego < CP.vEgoStopping and
                   (brake_pressed or cruise_standstill))
-  stopping_condition = False #planned_stop or stay_stopped
+  stopping_condition = False if experimental_mode else (planned_stop or stay_stopped)
 
   starting_condition = (v_target_1sec > CP.vEgoStarting and
                         accelerating and
@@ -135,6 +135,7 @@ class LongControl:
     self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                              (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
                              k_f=CP.longitudinalTuning.kf, rate=1 / DT_CTRL)
+    self.experimental_mode = False
     self.v_pid = 0.0
     self.v_pid_fake = 0.0
     self.last_output_accel = 0.0
@@ -147,8 +148,9 @@ class LongControl:
     self.v_pid = v_pid
     self.vpid_flag = False
 
-  def update(self, active, CS, long_plan, accel_limits, t_since_plan):
+  def update(self, active, CS, long_plan, accel_limits, t_since_plan, experimental_mode):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
+    self.experimental_mode = experimental_mode
     # Interp control trajectory
     speeds = long_plan.speeds
     if len(speeds) == CONTROL_N:
@@ -178,7 +180,7 @@ class LongControl:
     dt_ini = (time.time_ns())/1000000000.0
     self.long_control_state = long_control_state_trans(self.CP, active, self.long_control_state, CS.vEgo,
                                                        v_target, v_target_1sec, CS.brakePressed,
-                                                       CS.cruiseState.standstill)
+                                                       CS.cruiseState.standstill, experimental_mode)
 
     if self.long_control_state == LongCtrlState.off:
       self.reset(CS.vEgo)
