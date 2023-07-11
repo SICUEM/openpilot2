@@ -60,6 +60,8 @@ ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None, CI=None):
     config_realtime_process(4, Priority.CTRL_HIGH)
+    # Flags
+    self.test_flag = False
 
     # Ensure the current branch is cached, otherwise the first iteration of controlsd lags
     self.branch = get_short_branch("")
@@ -877,24 +879,32 @@ class Controls:
   def controlsd_thread(self):
     KS = car.CarState.new_message()
     KC = car.CarControl.new_message()  # CarControl Struct
-    t_ini = time.time_ns()
-    contador = 0
     separator = "\t"
-    my_date = datetime.fromtimestamp(time.time())
-    doc = open("data_"+my_date.strftime("%Y%m%d_%H%M")+".txt", 'a')
-    doc.write("Time: "+separator+"vEgo: "+separator+"hud_speed: "+separator +
-              "v_pid: "+separator+"State: "+separator+"str_lB: "+separator+"str_rB: "+"\n")
-    while True:
-      KS, KC = self.step()
-      self.rk.monitor_time()
-      self.prof.display()
-      if (contador % 25) == 0:
-        dt = (time.time_ns()-t_ini)/1000000
-        str_lB = ("1" if KS.leftBlinker else "0")
-        str_rB = ("1" if KS.rightBlinker else "0")
-        doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(
-            self.LoC.v_pid_fake)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
-      contador = contador + 1
+    KS, KC = self.step()
+    self.rk.monitor_time()
+    self.prof.display()  
+    if (KS.rightBlinker and self.test_flag==False):  
+      self.test_flag=True
+      t_ini = time.time_ns()
+      contador = 0
+      my_date = datetime.fromtimestamp(time.time())
+      doc = open("data_"+my_date.strftime("%Y%m%d_%H%M")+".txt", 'a')
+      doc.write("Time: "+separator+"vEgo: "+separator+"hud_speed: "+separator +
+                "v_pid: "+separator+"State: "+separator+"str_lB: "+separator+"str_rB: "+"\n")
+      while self.test_flag:
+        KS, KC = self.step()
+        self.rk.monitor_time()
+        self.prof.display()
+        if (contador % 25) == 0:
+          dt = (time.time_ns()-t_ini)/1000000
+          str_lB = ("1" if KS.leftBlinker else "0")
+          str_rB = ("1" if KS.rightBlinker else "0")
+          doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(
+              self.LoC.v_pid_fake)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
+        contador = contador + 1
+        if(KS.leftBlinker):
+          self.test_flag=False
+      doc.close()
 
 
 def main(sm=None, pm=None, logcan=None):

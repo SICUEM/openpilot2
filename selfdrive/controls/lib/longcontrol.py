@@ -191,6 +191,7 @@ class LongControl:
       self.reset(CS.vEgo)
 
     elif self.long_control_state == LongCtrlState.pid:
+      self.vel_profile.v_target = v_target
       self.v_pid_fake, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
       if not self.vpid_flag:
         self.v_pid=v_target
