@@ -197,8 +197,10 @@ class LongControl:
       self.reset(CS.vEgo)
 
     elif self.long_control_state == LongCtrlState.pid:
-      self.vel_profile.set_vtarget(v_target)
+      #self.vel_profile.set_vtarget(v_target)
       self.v_pid_fake, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
+      self.v_pid = self.v_pid_fake
+      '''
       if not self.vpid_flag:
         self.v_pid=v_target
       else:
@@ -206,6 +208,7 @@ class LongControl:
           self.v_pid = self.v_pid_fake
         else:
           self.v_pid = V_CRUISE_MAX_TEST*CV.KPH_TO_MS
+      '''
 
 
       # Toyota starts braking more when it thinks you want to stop
