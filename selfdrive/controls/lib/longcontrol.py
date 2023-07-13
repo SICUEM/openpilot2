@@ -199,7 +199,10 @@ class LongControl:
     elif self.long_control_state == LongCtrlState.pid:
       #self.vel_profile.set_vtarget(v_target)
       self.v_pid_fake, self.vpid_flag = self.vel_profile.update(dt_ini, CS)
-      self.v_pid = self.v_pid_fake
+      if (self.vel_profile.enable):
+        self.v_pid = self.v_pid_fake
+      else:
+        self.v_pid = v_target
       '''
       if not self.vpid_flag:
         self.v_pid=v_target
