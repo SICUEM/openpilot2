@@ -23,7 +23,7 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target,
                   not accelerating)
   stay_stopped = (v_ego < CP.vEgoStopping and
                   (brake_pressed or cruise_standstill))
-  stopping_condition = False if experimental_mode else (planned_stop or stay_stopped)
+  stopping_condition = False #if experimental_mode else (planned_stop or stay_stopped)
 
   starting_condition = (v_target_1sec > CP.vEgoStarting and
                         accelerating and
@@ -204,6 +204,9 @@ class LongControl:
       else:
         if(CS.vEgo < V_CRUISE_MAX_TEST*CV.KPH_TO_MS):
           self.v_pid = self.v_pid_fake
+        else:
+          self.v_pid = V_CRUISE_MAX_TEST*CV.KPH_TO_MS
+
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
