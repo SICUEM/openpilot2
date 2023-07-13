@@ -879,10 +879,12 @@ class Controls:
     KS = car.CarState.new_message()
     KC = car.CarControl.new_message()  # CarControl Struct
     separator = "\t"
+    contador = 0
     while True:
       KS, KC = self.step()  
       self.rk.monitor_time()
       self.prof.display()
+      contador = contador + 1
       if (KS.rightBlinker and self.test_flag==False): 
         self.test_flag=True
         t_ini = time.time_ns()
@@ -890,19 +892,15 @@ class Controls:
         my_date = datetime.fromtimestamp(time.time())
         doc = open("data_"+my_date.strftime("%Y%m%d_%H%M")+".txt", 'a')
         doc.write("Time: "+separator+"vEgo: "+separator+"hud_speed: "+separator +"v_pid: "+separator+"State: "+separator+"str_lB: "+separator+"str_rB: "+"\n")
-      while (self.test_flag==True):
-        KS, KC = self.step()
-        self.rk.monitor_time()
-        self.prof.display()
+      if (self.test_flag):
         if (contador % 25) == 0:
           dt = (time.time_ns()-t_ini)/1000000
           str_lB = ("1" if KS.leftBlinker else "0")
           str_rB = ("1" if KS.rightBlinker else "0")
           doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(self.LoC.v_pid_fake)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
-        contador = contador + 1
-        if (KS.leftBlinker):
-          self.test_flag=False
-          doc.close()
+      if (KS.leftBlinker and self.test_flag):
+        self.test_flag=False
+        doc.close()
 
 
 def main(sm=None, pm=None, logcan=None):
