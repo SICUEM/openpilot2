@@ -1,4 +1,11 @@
-figure
+%-------------------------------------------------------------------------
+%Programa para graficar los archivos generados por nosotros en openpilot
+%Se debe tener una matriz A con al menos 5 columnas
+%jul. 2023
+% Modified by: Juan S. Cely
+%-------------------------------------------------------------------------
+close all
+% ---
 t=A(:,1)/1000;
 vego=A(:,2);
 hud=A(:,3);
