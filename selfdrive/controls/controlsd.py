@@ -891,13 +891,18 @@ class Controls:
         contador = 0
         my_date = datetime.fromtimestamp(time.time())
         doc = open("data_"+my_date.strftime("%Y%m%d_%H%M")+".txt", 'a')
-        doc.write("Time: "+separator+"vEgo: "+separator+"hud_speed: "+separator +"v_pid: "+separator+"State: "+separator+"str_lB: "+separator+"str_rB: "+"\n")
+        doc.write("Time: "+separator+"vEgo: "+separator+"hud_speed: "+separator +"v_pid: "+separator+"State: "+separator+"str_lB: "+separator+"str_rB: "+separator+
+                  "locationGPS1"+separator+
+                  "\n") 
       if (self.test_flag):
         if (contador % 25) == 0:
           dt = (time.time_ns()-t_ini)/1000000
           str_lB = ("1" if KS.leftBlinker else "0")
           str_rB = ("1" if KS.rightBlinker else "0")
-          doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(self.LoC.v_pid_fake)[:8]+separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+"\n")
+          doc.write(str(dt)[:9]+separator+str(KS.vEgo)[:8]+separator+str(KC.hudControl.setSpeed)[:8]+separator+str(self.LoC.v_pid_fake)[:8]
+                    +separator+str(self.LoC.long_control_state)[:8]+separator+str_lB+separator+str_rB+separator+str(self.params.get("LastGPSPosition"))[:8]+
+                    "\n")
+            
       if (KS.leftBlinker and self.test_flag):
         self.test_flag=False
         doc.close()

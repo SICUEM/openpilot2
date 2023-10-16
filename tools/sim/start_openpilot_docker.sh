@@ -28,10 +28,10 @@ docker run --net=host\
   --device=/dev/dri:/dev/dri \
   --device=/dev/input:/dev/input \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v /home/juanscelyg/openpilot/selfdrive/controls/controlsd.py:/openpilot/selfdrive/controls/controlsd.py \
-  -v /home/juanscelyg/openpilot/selfdrive/controls/lib/drive_helpers.py:/openpilot/selfdrive/controls/lib/drive_helpers.py \
-  -v /home/juanscelyg/openpilot/selfdrive/controls/lib/longcontrol.py:/openpilot/selfdrive/controls/lib/longcontrol.py \
-  -v /home/juanscelyg/openpilot/selfdrive/controls/tests:/openpilot/selfdrive/controls/tests \
+  -v /home/drago/Escritorio/openpilot/selfdrive/controls/controlsd.py:/openpilot/selfdrive/controls/controlsd.py \
+  -v /home/drago/Escritorio/openpilot/selfdrive/controls/lib/drive_helpers.py:/openpilot/selfdrive/controls/lib/drive_helpers.py \
+  -v /home/drago/Escritorio/openpilot/selfdrive/controls/lib/longcontrol.py:/openpilot/selfdrive/controls/lib/longcontrol.py \
+  -v /home/drago/Escritorio/openpilot/selfdrive/controls/tests:/openpilot/selfdrive/controls/tests \
   --shm-size 1G \
   -e DISPLAY=$DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
