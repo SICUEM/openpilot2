@@ -863,11 +863,27 @@ class Controls:
       self.state_transition(CS)
       self.prof.checkpoint("State transition")
 
+    if self.distance_traveled > 100 and self.distance_traveled < 200:
+      self.v_cruise_helper.v_cruise_kph =30   # esto fija el cruise a 30 cuando el coche ha recorrido 100 mts
+
+    elif self.distance_traveled > 200 and self.distance_traveled < 200:
+              self.v_cruise_helper.v_cruise_kph =20   # esto fija el cruise a 30 cuando el coche ha recorrido 200 mts
+
+    elif self.distance_traveled > 300:
+              self.v_cruise_helper.v_cruise_kph =0      # esto fija el cruise a 0 cuando el coche ha recorrido 300 mts (¿detiene el coche?)
+    
     # Compute actuators (runs PID loops and lateral MPC)
     CC, lac_log = self.state_control(CS)
 
     self.prof.checkpoint("State Control")
 
+    if self.distance_traveled > 100 and self.distance_traveled < 105:
+
+              CC.actuators.accel = -0.5             # esto aplica un frenado al coche cuando llega a los 100 metros
+
+    elif self.distance_traveled > 105 and self.distance_traveled < 110:
+
+              CC.actuators.accel = 0.5              # esto acelera el coche durante 5 metros
     # Publish data
     self.publish_logs(CS, start_time, CC, lac_log)
     self.prof.checkpoint("Sent")
