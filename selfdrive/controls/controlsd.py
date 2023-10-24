@@ -866,7 +866,7 @@ class Controls:
     if self.distance_traveled > 100 and self.distance_traveled < 200:
       self.v_cruise_helper.v_cruise_kph =30   # esto fija el cruise a 30 cuando el coche ha recorrido 100 mts
 
-    elif self.distance_traveled > 200 and self.distance_traveled < 200:
+    elif self.distance_traveled > 200 and self.distance_traveled < 300:
               self.v_cruise_helper.v_cruise_kph =20   # esto fija el cruise a 30 cuando el coche ha recorrido 200 mts
 
     elif self.distance_traveled > 300:
