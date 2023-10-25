@@ -1,0 +1,98 @@
+
+
+
+
+src: https://github.com/commaai/openpilot/blob/master/tools/README.md
+
+# === Ignorar esto, solo pasa con la conexión de mi casa...  === #
+Nota: Problema con resolución de nombres DNS en 
+mi máquina:
+NetworkMagaer configura un servidor DNS no
+válido para la conexión WiFi:
+Editar /etc/resolv.conf y cambiar nameserver a servidor DNS válido,
+
+[añadir] => nameserver 8.8.8.8
+# ============================================================== #
+
+
+# === Para realizar la instalación en una sesión remota ======== #
+
+[src]: https://stackoverflow.com/a/74869846
+
+Añadir esto a ~/.bashrc para realizar la instalación desde una
+shell remota (error Failed to unlock the collection! en 
+/tools/ubuntu_setup.sh 
+
+# Linux unlock gnome keyring
+function unlock-keyring ()
+{
+    read -rsp "Password: " pass
+    export $(echo -n "$pass" | gnome-keyring-daemon --replace --unlock)
+    unset pass
+}
+
+
+1.CLONE OPEN PILOT
+
+# clonar el último release (no descargar .zip)
+git clone --recurse-submodules https://github.com/commaai/openpilot.git
+
+
+
+2.SETUP
+
+$> cd openpilot
+$> tools/ubuntu_setup.sh
+$> poetry shell
+$> scons -u -j$(nproc)
+
+------------------- (esto no es necesario) -------------------------
+(editar el fichero pyproject.toml y añadir el
+siguiente contenido encima de la linea "[build-system]"
+
+Tiene que quedar así:
+
+[tool.poetry.group.carla]
+optional = true
+
+[tool.poetry.group.carla.dependencies]
+carla = { url = "https://github.com/commaai/carla/releases/download/3.11.4/carla-0.9.14-cp311-cp311-linux_x86_64.whl", platform = "linux", markers = "platform_machine == 'x86_64'" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api".
+---------------------------------------------
+
+$> poetry install --with=carla
+
+-----------------------------------------------
+Aquí puede que advierta de una inconsistencia en
+las dependencias:
+para solucionarla:
+$> poetry lock --no-update
+------------------------------------------------
+$> exit
+$> poetry shell
+
+
+
+3.LAUNCH OPEN PILOT
+
+tools/sim/launch_openpilot.sh 
+
+
+
+
+4.BRIDGE
+
+./tools/sim/run_bridge.py --simulator=carla
+
+
+# Run locally
+./tools/sim/launch_openpilot.sh
+
+# Terminal 1
+sudo ./tools/sim/start_carla.sh
+
+# Terminal 2
+./tools/sim/run_bridge.py --simulator carla
