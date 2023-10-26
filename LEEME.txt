@@ -1,18 +1,109 @@
+carlos@iglesias.io
+26/10/2023
 
-
-
-
+GITHUB OPs:
+===========
 # Clonar el repositorio github SICUEM/openpilot:
 git clone --recurse-submodules https://github.com/sicuem/openpilot.git
 cd openpilot
-# Ver branchs
+# Listar todas las ramas:
 git branch -a
-# Pasar a branck kstopman
-git checkout kstopman
+# Pasar a branck kstopmanii:
+git checkout kstopman-ii
 
 
 # Push con token:
 # src: https://techglimpse.com/git-push-github-token-based-passwordless/
-git push https://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@github.com/SICUEM/openpilot.git
+git push https://[ACCESS TOKEN]@github.com/SICUEM/openpilot.git
+
+
+REPO OPs:
+==========
+src: https://github.com/commaai/openpilot/blob/master/tools/README.md
+
+# -------- Para realizar la instalación en una sesión remota -------- #
+
+[src]: https://stackoverflow.com/a/74869846
+
+Añadir esto a ~/.bashrc para realizar la instalación desde una
+shell remota (error Failed to unlock the collection! en 
+/tools/ubuntu_setup.sh 
+
+# Linux unlock gnome keyring
+function unlock-keyring ()
+{
+    read -rsp "Password: " pass
+    export $(echo -n "$pass" | gnome-keyring-daemon --replace --unlock)
+    unset pass
+}
+# --------------------------------------------------------------------- #
+
+
+1.CLONE OPEN PILOT
+------------------
+# clonar el último release (no descargar .zip)
+git clone --recurse-submodules https://github.com/commaai/openpilot.git
+
+
+
+2.SETUP
+--------
+$> cd openpilot
+$> tools/ubuntu_setup.sh
+$> source ~/.bashrc
+$> poetry shell
+$> scons -u -j$(nproc)
+
+------------------- (esto no es necesario en versiones de octubre de 2023) -------------------------
+(editar el fichero pyproject.toml y añadir el
+siguiente contenido encima de la linea "[build-system]"
+
+Tiene que quedar así:
+
+[tool.poetry.group.carla]
+optional = true
+
+[tool.poetry.group.carla.dependencies]
+carla = { url = "https://github.com/commaai/carla/releases/download/3.11.4/carla-0.9.14-cp311-cp311-linux_x86_64.whl", platform = "linux", markers = "platform_machine == 'x86_64'" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api".
+---------------------------------------------
+
+$> poetry install --with=carla
+
+-----------------------------------------------
+Aquí puede que advierta de una inconsistencia en
+las dependencias:
+para solucionarla:
+$> poetry lock --no-update
+------------------------------------------------
+$> exit
+$> poetry shell
+
+
+
+3.LAUNCH OPEN PILOT
+-------------------
+
+tools/sim/launch_openpilot.sh 
+
+
+
+4.BRIDGE
+--------
+
+./tools/sim/run_bridge.py --simulator=carla
+
+# Run locally
+./tools/sim/launch_openpilot.sh
+
+# Terminal 1
+sudo ./tools/sim/start_carla.sh
+
+# Terminal 2
+./tools/sim/run_bridge.py --simulator carla
+
 
 
