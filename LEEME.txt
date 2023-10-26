@@ -1,0 +1,18 @@
+
+
+
+
+# Clonar el repositorio github SICUEM/openpilot:
+git clone --recurse-submodules https://github.com/sicuem/openpilot.git
+cd openpilot
+# Ver branchs
+git branch -a
+# Pasar a branck kstopman
+git checkout kstopman
+
+
+# Push con token:
+# src: https://techglimpse.com/git-push-github-token-based-passwordless/
+git push https://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@github.com/SICUEM/openpilot.git
+
+
