@@ -21,7 +21,7 @@ gh auth login
 
 
 # Commit sin verificacion:
-git commit -n -m "kstopman ii updates"
+git commit -na -m "kstopman ii updates"
 
 
 # Push con token:
