@@ -13,7 +13,7 @@ def date_to_str(c_date: datetime, frmt="%d/%m/%Y"):
 
 
 # datetime to String (date + hour)
-def date_time_to_str(c_date: datetime, frmt="%d%m%y::%H:%M:%S"):
+def date_time_to_str(c_date: datetime, frmt="%d/%m/%Y %H:%M:%S.%f"):
     """
     Convierte un datetime a string (fecha y hora).
 

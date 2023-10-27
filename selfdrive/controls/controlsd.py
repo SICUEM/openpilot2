@@ -67,6 +67,9 @@ KLOG_FREQ = 0.5
 # Timer de iteración de kstopmanii
 kstopmanii_timer = KTimer(KLOG_FREQ)
 
+# Velocidad inicial del cruise
+kcrs_v = 20
+
 # kstopmanii
 kstopmanii = KStopManII()
 # ================================================= #
@@ -192,6 +195,11 @@ class Controls:
     self.desired_curvature_rate = 0.0
     self.experimental_mode = False
     self.v_cruise_helper = VCruiseHelper(self.CP)
+    # ====== CIA2000 ===== #
+    # Se configuró una velocidad inicial para el cruise:
+    if kcrs_v is not None:
+      self.v_cruise_helper.v_cruise_kph = kcrs_v
+    # ===================== #
     self.recalibrating_seen = False
 
     # TODO: no longer necessary, aside from process replay
@@ -891,7 +899,7 @@ class Controls:
     if kstopmanii_timer.flag:
       gps_data = self.sm["gpsLocationExternal"]
       k_gps_data: KGPSLocWrapper = KGPSLocWrapper(gps_data)
-      k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data)
+      k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data, self.distance_traveled)
       desired_v = k_stmn_output.velocity
       if desired_v is not None:
         self.v_cruise_helper.v_cruise_kph = desired_v

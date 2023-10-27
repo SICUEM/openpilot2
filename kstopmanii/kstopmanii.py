@@ -4,6 +4,7 @@ import json
 from enum import Enum
 import configparser
 import math
+from datetime import datetime
 
 from kstopmanii.kloggerii import KLoggerII, KLoggerMode, KLoggerChannel
 from kstopmanii.ktimers import KTimer
@@ -95,7 +96,7 @@ class KStopManII:
         self._klogger.log(gps_points, KLoggerChannel.KPARAMS_LOG)
 
     # ==== OPS ==== #
-    def update(self, gps_data: KGPSLocWrapper):
+    def update(self, gps_data: KGPSLocWrapper, dist_trv: int ):
 
         if self._params is not None \
                 and self._gps_points is not None \
@@ -128,7 +129,7 @@ class KStopManII:
             kout.v_ego = 1.0
 
             # If GPS II LOG is active, logs gps data
-            self._live_log_gps_data(gps_data, gps_error, kout, self._state)
+            self._live_log_gps_data(gps_data, gps_error, kout, self._state, dist_trv)
 
             return kout
 
@@ -147,7 +148,7 @@ class KStopManII:
                 self._update_next_point()
         elif self._state == KStopManIIState.DRIVING:
             if gps_error <= self._params.in_area_dist:
-                self._last_speed = math.floor(speed * 3.6)
+                # self._last_speed = math.floor(speed * 3.6)
                 self._state = KStopManIIState.IN_AREA
         elif self._state == KStopManIIState.IN_AREA:
             if gps_error <= self._params.approaching_dist:
@@ -181,7 +182,10 @@ class KStopManII:
         elif self._state == KStopManIIState.STOPPED:
             speed = 1
         elif self._state == KStopManIIState.RESUME:
-            speed = self._last_speed
+            #speed = self._last_speed
+            speed = self._params.resume_max_speed
+        elif self._state == KStopManIIState.DRIVING:
+            speed = self._params.resume_max_speed
 
         return speed
 
@@ -219,14 +223,15 @@ class KStopManII:
         print(f"NEXT::{self._next_waypoint.lat}::{self._next_waypoint.long}")
 
     # ==== LOG ==== #
-    def _live_log_gps_data(self, gps_data: KGPSLocWrapper, gps_error: float, kout: KStopManIIOutput, state: KStopManIIState):
+    def _live_log_gps_data(self, gps_data: KGPSLocWrapper, gps_error: float, kout: KStopManIIOutput, state: KStopManIIState, dst_trv: int):
         if str(KStopManIILog.GPS_II_LOG.value) in self._params.active_log_channels:
-            self._log_gps_data(gps_data, gps_error, kout, state)
+            self._log_gps_data(gps_data, gps_error, kout, state, dst_trv)
 
-    def _log_gps_data(self, gps_data: KGPSLocWrapper, gps_error: float, kout: KStopManIIOutput, state: KStopManIIState):
-        gps_live_data = f"[Ds]={gps_error:.{3}f}::[v]={kout.velocity}::[a]={kout.acceleration}::[st]={state}"
-        print(f"{gps_data.brief()}::{gps_live_data}")
-        self._klogger.log(gps_data.brief(), KLoggerChannel.GPS_I_LOG)
-        self._klogger.log(gps_live_data, KLoggerChannel.GPS_II_LOG)
+    def _log_gps_data(self, gps_data: KGPSLocWrapper, gps_error: float, kout: KStopManIIOutput, state: KStopManIIState, dst_trv: int):
+        gps_i_live_data = f"{gps_data.brief()}::[dtrv]={int(dst_trv)}"
+        gps_ii_live_data = f"[Ds]={gps_error:.{3}f}::[v]={kout.velocity}::[a]={kout.acceleration}::[st]={state}"
+        # print(f"{gps_data.brief()}::{gps_live_data}")
+        self._klogger.log(gps_i_live_data, KLoggerChannel.GPS_I_LOG, datetime.now())
+        self._klogger.log(gps_ii_live_data, KLoggerChannel.GPS_II_LOG, datetime.now())
 
 
