@@ -12,10 +12,26 @@ git branch -a
 git checkout kstopman-ii
 
 
+# Github cli install
+sudo apt install gh
+
+# Github login:
+gh auth login
+(select HTTPS & login via browser)
+
+
+# Commit sin verificacion:
+git commit -n -m "kstopman ii updates"
+
+
 # Push con token:
 # src: https://techglimpse.com/git-push-github-token-based-passwordless/
 git push https://[ACCESS TOKEN]@github.com/SICUEM/openpilot.git
 
+# Push con login
+git push
+(pide nombre de usuario y contraseña). La contraseña es un personal token,
+que se genera en settings/developer settings
 
 REPO OPs:
 ==========
