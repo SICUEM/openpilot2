@@ -29,7 +29,6 @@ from openpilot.selfdrive.controls.lib.alertmanager import AlertManager, set_offr
 from openpilot.selfdrive.controls.lib.vehicle_model import VehicleModel
 from openpilot.system.hardware import HARDWARE
 
-
 SOFT_DISABLE_TIME = 3  # seconds
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -55,21 +54,6 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
-# ============= CIA2000 ========================== #
-from datetime import datetime
-from kstopmanii.kstopmanii import KStopManII
-from kstopmanii.ktimers import KTimer
-from kstopmanii.kwrappersii import KGPSLocWrapper, KStopManIIOutput
-
-# Frecuencia de iteración de kstopmanii
-KLOG_FREQ = 0.5
-
-# Timer de iteración de kstopmanii
-kstopmanii_timer = KTimer(KLOG_FREQ)
-
-# kstopmanii
-kstopmanii = KStopManII()
-# ================================================= #
 
 class Controls:
   def __init__(self, CI=None):
@@ -94,15 +78,11 @@ class Controls:
     ignore = self.sensor_packets + ['testJoystick']
     if SIMULATION:
       ignore += ['driverCameraState', 'managerState']
-
-    # ============== CIA ====== #
-    # Suscripción a datos de GPS
     self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
                                    'driverMonitoringState', 'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
                                    'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters',
-                                   'testJoystick', 'gpsLocationExternal'] + self.camera_packets + self.sensor_packets,
+                                   'testJoystick'] + self.camera_packets + self.sensor_packets,
                                   ignore_alive=ignore, ignore_avg_freq=['radarState', 'testJoystick'])
-    # ========================== #
 
     if CI is None:
       # wait for one pandaState and one CAN packet
@@ -217,11 +197,6 @@ class Controls:
     # controlsd is driven by can recv, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
-
-    # ======== CIA ======== #
-    # Aceleración aplicada
-    self.k_a = None
-    # ===================== #
 
   def set_initial_state(self):
     if REPLAY:
@@ -880,31 +855,8 @@ class Controls:
       self.state_transition(CS)
       self.prof.checkpoint("State transition")
 
-    # ======== CIA ====== #
-    # Tiempo actual
-    nw = datetime.now()
-    
-    # Se actualiza el timer...
-    # Testeo de CC:
-    kstopmanii_timer.update(nw)
-    
-    if kstopmanii_timer.flag:
-      gps_data = self.sm["gpsLocationExternal"]
-      k_gps_data: KGPSLocWrapper = KGPSLocWrapper(gps_data)
-      k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data)
-      desired_v = k_stmn_output.velocity
-      if desired_v is not None:
-        self.v_cruise_helper.v_cruise_kph = desired_v
-      self.k_a = k_stmn_output.acceleration  
-    # =================== #
-
     # Compute actuators (runs PID loops and lateral MPC)
     CC, lac_log = self.state_control(CS)
-
-    # ========== CIA ========= #
-    if self.k_a is not None:
-      CC.actuators.accel = self.k_a
-    # ========================= #
 
     self.prof.checkpoint("State Control")
 
