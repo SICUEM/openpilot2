@@ -4,9 +4,9 @@ activation_dist = 50
 # desactivation state distance (mts)
 desactivation_dist = 3000
 # IN_AREA state distance (mts)
-in_area_dist = 200
+in_area_dist = 60
 # APPROACHING state distance (mts)
-approaching_dist = 100
+approaching_dist = 40
 # STOPPING state distance (mts)
 stopping_dist = 20
 # STOP state distance (mts)
@@ -16,10 +16,10 @@ in_area_speed = 20
 # APPROACHING state cruise speed (k/h)
 approaching_speed = 15
 # ADJUST SPEED  (m/s²)
-#reduce_accel = -0.00005
+#reduce_accel = -1
 reduce_accel = 0
 # STOPPING STATE (m/s²)
-stopping_accel = -0.05
+stopping_accel = -1
 # STOP TIME (s)
 stop_time = 10
 # Resume max speed (k/h)
