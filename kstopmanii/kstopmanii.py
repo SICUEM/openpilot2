@@ -9,7 +9,7 @@ from datetime import datetime
 from kstopmanii.kloggerii import KLoggerII, KLoggerMode, KLoggerChannel
 from kstopmanii.ktimers import KTimer
 from kstopmanii.kwrappersii import KGPSLocWrapper, KGPSWayPoint, KGPSPointType, KStopManIIParams, KStopManIIOutput
-
+from kstopmanii.krlogclient import KRLogClient
 
 # ==== State ==== #
 class KStopManIIState(Enum):
@@ -34,11 +34,12 @@ class KStopManIILog(Enum):
 # ===== KStopManII ==== #
 class KStopManII:
     def __init__(self):
-        self._klogger: KLoggerII = KLoggerII([KLoggerMode.IN_FILE])
+        
         self._state = None
         self._gps_points: list[KGPSWayPoint] = None
         self._next_waypoint: KGPSWayPoint = None
         self._params: KStopManIIParams = KStopManIIParams()
+        self._klogger: KLoggerII = KLoggerII([KLoggerMode.IN_FILE, KLoggerMode.IN_SOCKET])
         self._read_params()
         self._read_gps_params()
         self._set_next_waypoint()
@@ -46,8 +47,10 @@ class KStopManII:
         self._next_index = 0
         self._stop_timer: KTimer = None
         self._last_speed: float = 40.0
-        self._activation_point: KGPSWayPoint = None
-
+        self._activation_point: KGPSWayPoint = None 
+        self._klogger.krserver_ip = self._params._krserver_ip
+        self._klogger.krserver_port = self._params._krserver_port
+        
     # ==== Accesors ==== #
     @property
     def state(self):
@@ -228,10 +231,14 @@ class KStopManII:
             self._log_gps_data(gps_data, gps_error, kout, state, dst_trv)
 
     def _log_gps_data(self, gps_data: KGPSLocWrapper, gps_error: float, kout: KStopManIIOutput, state: KStopManIIState, dst_trv: int):
+        nww = datetime.now()
         gps_i_live_data = f"{gps_data.brief()}::[dtrv]={int(dst_trv)}"
         gps_ii_live_data = f"[Ds]={gps_error:.{3}f}::[v]={kout.velocity}::[a]={kout.acceleration}::[st]={state}"
+        gps_socket_data = f"[gps]::{nww.timestamp()}::{gps_data.socket_brief()}::{gps_error:.{3}f}::{kout.velocity}::{kout.acceleration}::{state.value}"
         # print(f"{gps_data.brief()}::{gps_live_data}")
-        self._klogger.log(gps_i_live_data, KLoggerChannel.GPS_I_LOG, datetime.now())
-        self._klogger.log(gps_ii_live_data, KLoggerChannel.GPS_II_LOG, datetime.now())
+        
+        self._klogger.log(gps_i_live_data, KLoggerChannel.GPS_I_LOG, nww)
+        self._klogger.log(gps_ii_live_data, KLoggerChannel.GPS_II_LOG, nww)
+        self._klogger.rlog(gps_socket_data, nww)
 
 

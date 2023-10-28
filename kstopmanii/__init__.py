@@ -10,3 +10,7 @@ KWAYPOINTS_URL = f"http://openpilot.iglesias.io/{KWAYPOINTS_FILE}"
 KWAYPOINTS_DIR = f"/tmp/kstopmanii"
 KWAYPOINTS_PATH = f"{KWAYPOINTS_DIR}/{KWAYPOINTS_FILE}"
 DEF_KWAYPOINTS_PATH = f"../../kstopmanii/{KWAYPOINTS_FILE}"
+
+
+KLOG_SERVER_URL = "localhost"
+KLOG_SERVER_PORT = 9999

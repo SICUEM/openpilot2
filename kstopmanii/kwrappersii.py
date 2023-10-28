@@ -31,6 +31,9 @@ class KStopManIIParams:
         self._resume_max_speed: int = None
         # Active log channels
         self._active_log_channels: list[int] = None
+        # KRServer IP
+        self._krserver_ip: str = None
+        self._krserver_port: str = None
 
     # ==== Accesors ===== #
     @property
@@ -137,6 +140,23 @@ class KStopManIIParams:
     def active_log_channels(self, value: list("int")):
         self._active_log_channels = value
 
+
+    @property
+    def krserver_ip(self) -> str:
+        return self._krserver_ip
+    
+    @krserver_ip.setter
+    def krserver_ip(self, value) -> None:
+        self._krserver_ip = value
+
+    @property
+    def krserver_port(self) -> str:
+        return self._krserver_port
+    
+    @krserver_ip.setter
+    def krserver_port(self, value) -> None:
+        self._krserver_port = value
+
     # ==== Load properties ==== #
     def load_properties(self):
 
@@ -190,6 +210,8 @@ class KStopManIIParams:
         self.stop_time = config.getint('Settings', 'stop_time', fallback=None)
         self.resume_max_speed = config.getint('Settings', 'resume_max_speed', fallback=None)
         self.active_log_channels = config.get('Log', 'active_log_channels', fallback="[1,1,1]")
+        self.krserver_ip = config.get('KRServer', 'rserver_ip', fallback=None)
+        self.krserver_port = config.getint('KRServer', 'rserver_port', fallback=None)
 
     # ==== Brief ===== #
     def brief_i(self):
@@ -421,6 +443,10 @@ class KGPSLocWrapper:
 
     def brief(self):
         return f'[Lt]={self.lat}::[Ln]={self.long}::[sp]={math.floor(self.speed * 3.6)}'
+
+    #lat::long::speed::
+    def socket_brief(self):
+        return f'{self.lat}::{self.long}::{math.floor(self.speed * 3.6)}'
 
 
 

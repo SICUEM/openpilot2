@@ -43,7 +43,7 @@ src: https://github.com/commaai/openpilot/blob/master/tools/README.md
 
 Añadir esto a ~/.bashrc para realizar la instalación desde una
 shell remota (error Failed to unlock the collection! en 
-/tools/ubuntu_setup.sh 
+/tools/ubuntu_setup.sh)
 
 # Linux unlock gnome keyring
 function unlock-keyring ()
