@@ -202,8 +202,8 @@ class Controls:
     self.v_cruise_helper = VCruiseHelper(self.CP)
     # ====== CIA2000 ===== #
     # Se configuró una velocidad inicial para el cruise:
-    if kcrs_v is not None:
-      self.v_cruise_helper.v_cruise_kph = kcrs_v
+    # if kcrs_v is not None:
+      # self.v_cruise_helper.v_cruise_kph = kcrs_v
     # ===================== #
     self.recalibrating_seen = False
 
