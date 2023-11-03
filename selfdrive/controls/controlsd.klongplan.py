@@ -60,7 +60,7 @@ from datetime import datetime
 from kstopmanii.kstopmanii import KStopManII
 from kstopmanii.ktimers import KTimer
 from kstopmanii.kwrappersii import KGPSLocWrapper, KStopManIIOutput
-from kstopmaniv.kstopmaniv import KSpeedMan
+from klibs.klongplan import KLongPlan
 
 # Frecuencia de iteración de kstopmanii
 KLOG_FREQ = 0.5
@@ -69,7 +69,7 @@ KLOG_FREQ = 0.5
 kstopmanii_timer = KTimer(KLOG_FREQ)
 
 # Velocidad inicial del cruise
-kcrs_v = 35
+kcrs_v = 20
 
 # kstopmanii
 kstopmanii = KStopManII()
@@ -162,11 +162,7 @@ class Controls:
     self.AM = AlertManager()
     self.events = Events()
 
-    # ====== CIA ====== #
-    self._ksp: KSpeedMan = KSpeedMan()
-    self.LoC = LongControl(self.CP, self._ksp)
-    # ================= #
-
+    self.LoC = LongControl(self.CP)
     self.VM = VehicleModel(self.CP)
 
     self.LaC: LatControl
@@ -648,8 +644,15 @@ class Controls:
       # Aquí es donde, a priorí, se controla el acelerador/freno
       # del coche.
       # El método update() calcula la aceleración deseada para el coche
-      # a partir del objeto long_plan, que contiene  
-      actuators.accel = self.LoC.update(CC.longActive, CS, long_plan, pid_accel_limits, t_since_plan)
+      # a partir del objeto long_plan, que contiene  dos arrays, uno de 
+      # velocidades y otro de aceleraciones
+      fake_speeds = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0]
+      #klong_plan: KLongPlan = KLongPlan(long_plan.speeds, long_plan.accels)
+      klong_plan: KLongPlan = KLongPlan(fake_speeds, long_plan.accels)
+      print(f"====SPEEDS:  {', '.join(f'{x:.2f}' for x in klong_plan.speeds)}")
+      print(f"====ACCELS:  {', '.join(f'{x:.2f}' for x in klong_plan.accels)}")
+
+      actuators.accel = self.LoC.update(CC.longActive, CS, klong_plan, pid_accel_limits, t_since_plan)
 
       # Steering PID loop and lateral MPC
       self.desired_curvature, self.desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
@@ -684,7 +687,7 @@ class Controls:
     if lac_log.active and not recent_steer_pressed and not self.CP.notCar:
       if self.CP.lateralTuning.which() == 'torque' and not self.joystick_mode:
         undershooting = abs(lac_log.desiredLateralAccel) / abs(1e-3 + lac_log.actualLateralAccel) > 1.2
-        turning = abs(lac_log.desiredLateralAccel) > 1.0
+        turning = abs(lac_log.desiredLateralAccel) > 2.0
         good_speed = CS.vEgo > 5
         max_torque = abs(self.last_actuators.steer) > 0.99
         if undershooting and turning and good_speed and max_torque:
@@ -760,8 +763,8 @@ class Controls:
       r_lane_change_prob = desire_prediction[Desire.laneChangeRight]
 
       lane_lines = model_v2.laneLines
-      l_lane_close = left_lane_visible and (lane_lines[1].y[0] > -(1.08 + CAMERA_OFFSET))
-      r_lane_close = right_lane_visible and (lane_lines[2].y[0] < (1.08 - CAMERA_OFFSET))
+      l_lane_close = left_lane_visible and (lane_lines[1].y[0] > -(2.08 + CAMERA_OFFSET))
+      r_lane_close = right_lane_visible and (lane_lines[2].y[0] < (2.08 - CAMERA_OFFSET))
 
       hudControl.leftLaneDepart = bool(l_lane_change_prob > LANE_DEPARTURE_THRESHOLD and l_lane_close)
       hudControl.rightLaneDepart = bool(r_lane_change_prob > LANE_DEPARTURE_THRESHOLD and r_lane_close)
@@ -905,16 +908,16 @@ class Controls:
     
     # Se actualiza el timer...
     # Testeo de CC:
-    #kstopmanii_timer.update(nw)
+    kstopmanii_timer.update(nw)
     
-    #if kstopmanii_timer.flag:
-    gps_data = self.sm["gpsLocationExternal"]
-    k_gps_data: KGPSLocWrapper = KGPSLocWrapper(gps_data)
-    k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data, self.distance_traveled)
-    desired_v = k_stmn_output.velocity
-    if desired_v is not None:
-      self.v_cruise_helper.v_cruise_kph = desired_v
-    self.k_a = k_stmn_output.acceleration  
+    if kstopmanii_timer.flag:
+      gps_data = self.sm["gpsLocationExternal"]
+      k_gps_data: KGPSLocWrapper = KGPSLocWrapper(gps_data)
+      k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data, self.distance_traveled)
+      desired_v = k_stmn_output.velocity
+      if desired_v is not None:
+        self.v_cruise_helper.v_cruise_kph = desired_v
+      self.k_a = k_stmn_output.acceleration  
     # =================== #
 
     # Compute actuators (runs PID loops and lateral MPC)
@@ -924,17 +927,6 @@ class Controls:
     if self.k_a is not None:
       CC.actuators.accel = self.k_a
     # ========================= #
-
-    # ========== CIA ======= #
-    # v_pid test
-    # if self.distance_traveled > 700:
-    #   self._ksp.v = 0.0
-    # elif self.distance_traveled > 500:
-    #   self._ksp.reset()
-    # elif self.distance_traveled > 300:
-    #   self._ksp.v = 16.0
-    # elif self.distance_traveled > 100:
-    #  self._ksp.v = 6.0
 
     self.prof.checkpoint("State Control")
 

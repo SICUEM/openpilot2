@@ -8,6 +8,11 @@ from openpilot.selfdrive.modeld.constants import ModelConstants
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
 
+
+
+from kstopmaniv.kstopmaniv import KSpeedMan
+
+
 def long_control_state_trans(CP, active, long_control_state, v_ego, v_target,
                              v_target_1sec, brake_pressed, cruise_standstill):
   # Ignore cruise standstill if car has a gas interceptor
@@ -51,7 +56,12 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target,
 
 
 class LongControl:
-  def __init__(self, CP):
+  # ====== CIA ====== #
+  # Añadí una referencia a KSpeedMan #
+  def __init__(self, CP, ksp: KSpeedMan = None):
+    # Aquí...
+    self._ksp = ksp
+    #===============#
     self.CP = CP
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
@@ -70,6 +80,10 @@ class LongControl:
     # Interp control trajectory
     speeds = long_plan.speeds
     if len(speeds) == CONTROL_N:
+      # ==== CIA ==== #
+      # print(f"====SPEEDS:  {', '.join(f'{x:.2f}' for x in speeds)}")
+      # print(f"====ACCELS:  {', '.join(f'{x:.2f}' for x in long_plan.accels)}")
+      # ================== #
       v_target_now = interp(t_since_plan, ModelConstants.T_IDXS[:CONTROL_N], speeds)
       a_target_now = interp(t_since_plan, ModelConstants.T_IDXS[:CONTROL_N], long_plan.accels)
 
@@ -88,6 +102,10 @@ class LongControl:
       v_target_now = 0.0
       v_target_1sec = 0.0
       a_target = 0.0
+
+    # ==== CIA ==== #
+    # print(f"V:{v_target:2f}\tNOW:{v_target_now:2f}\tV1sec:{v_target_1sec:2f}\tA:{a_target:2f}")
+    # ============= #
 
     self.pid.neg_limit = accel_limits[0]
     self.pid.pos_limit = accel_limits[1]
@@ -112,7 +130,10 @@ class LongControl:
       self.reset(CS.vEgo)
 
     elif self.long_control_state == LongCtrlState.pid:
-      self.v_pid = v_target_now
+      if self._ksp is None or self._ksp.v is None:
+        self.v_pid = v_target_now
+      else:
+        self.v_pid = self._ksp.v
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration

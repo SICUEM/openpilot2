@@ -60,19 +60,24 @@ from datetime import datetime
 from kstopmanii.kstopmanii import KStopManII
 from kstopmanii.ktimers import KTimer
 from kstopmanii.kwrappersii import KGPSLocWrapper, KStopManIIOutput
-from kstopmaniv.kstopmaniv import KSpeedMan
+from kstopmaniv.kstopmaniv import KSpeedMan, KStopManIV
 
 # Frecuencia de iteración de kstopmanii
-KLOG_FREQ = 0.5
+# KLOG_FREQ = 0.5
 
 # Timer de iteración de kstopmanii
-kstopmanii_timer = KTimer(KLOG_FREQ)
+# kstopmanii_timer = KTimer(KLOG_FREQ)
 
 # Velocidad inicial del cruise
-kcrs_v = 35
+kcrs_v = None
 
 # kstopmanii
-kstopmanii = KStopManII()
+# kstopmanii = KStopManII()
+
+
+kstopmaniv = KStopManIV()
+
+
 # ================================================= #
 
 class Controls:
@@ -899,31 +904,14 @@ class Controls:
       self.state_transition(CS)
       self.prof.checkpoint("State transition")
 
-    # ======== CIA ====== #
-    # Tiempo actual
-    nw = datetime.now()
-    
-    # Se actualiza el timer...
-    # Testeo de CC:
-    #kstopmanii_timer.update(nw)
-    
-    #if kstopmanii_timer.flag:
     gps_data = self.sm["gpsLocationExternal"]
-    k_gps_data: KGPSLocWrapper = KGPSLocWrapper(gps_data)
-    k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data, self.distance_traveled)
-    desired_v = k_stmn_output.velocity
-    if desired_v is not None:
-      self.v_cruise_helper.v_cruise_kph = desired_v
-    self.k_a = k_stmn_output.acceleration  
-    # =================== #
+    kstopmaniv.update(self.distance_traveled, gps_data.speed)
+    if kstopmaniv.cruise_v is not None:
+      self.v_cruise_helper.v_cruise_kph = kstopmaniv.cruise_v
 
     # Compute actuators (runs PID loops and lateral MPC)
     CC, lac_log = self.state_control(CS)
 
-    # ========== CIA ========= #
-    if self.k_a is not None:
-      CC.actuators.accel = self.k_a
-    # ========================= #
 
     # ========== CIA ======= #
     # v_pid test
@@ -934,7 +922,14 @@ class Controls:
     # elif self.distance_traveled > 300:
     #   self._ksp.v = 16.0
     # elif self.distance_traveled > 100:
-    #  self._ksp.v = 6.0
+    #   self._ksp.v = 6.0
+    # ======================= #
+
+    
+    if kstopmaniv.v is not None:
+      self._ksp.v = kstopmaniv.v
+    else:
+      self._ksp.reset()
 
     self.prof.checkpoint("State Control")
 

@@ -32,10 +32,14 @@ class KStopManIILog(Enum):
 
 
 # ===== KStopManII ==== #
+
+KLOG_FREQ = 1.0
+
 class KStopManII:
     def __init__(self):
         
         self._state = None
+        self._last_state = None
         self._gps_points: list[KGPSWayPoint] = None
         self._next_waypoint: KGPSWayPoint = None
         self._params: KStopManIIParams = KStopManIIParams()
@@ -50,7 +54,7 @@ class KStopManII:
         self._activation_point: KGPSWayPoint = None 
         self._klogger.krserver_ip = self._params._krserver_ip
         self._klogger.krserver_port = self._params._krserver_port
-        
+        self._klog_timer = KTimer(KLOG_FREQ)
     # ==== Accesors ==== #
     @property
     def state(self):
@@ -101,6 +105,8 @@ class KStopManII:
     # ==== OPS ==== #
     def update(self, gps_data: KGPSLocWrapper, dist_trv: int ):
 
+        
+
         if self._params is not None \
                 and self._gps_points is not None \
                 and self._next_waypoint is not None:
@@ -128,11 +134,15 @@ class KStopManII:
             # Gen output
             kout = KStopManIIOutput()
             kout.velocity = self._cal_v()
-            kout.acceleration = self._cal_a(kout.velocity, math.floor(gps_data.speed * 3.6))
+            if kout.velocity is not None:
+                self._last_speed = kout.velocity
+            kout.acceleration = self._cal_a(math.floor(gps_data.speed * 3.6))
             kout.v_ego = 1.0
 
             # If GPS II LOG is active, logs gps data
-            self._live_log_gps_data(gps_data, gps_error, kout, self._state, dist_trv)
+            self._klog_timer.update(datetime.now())
+            if self._klog_timer.flag:
+                self._live_log_gps_data(gps_data, gps_error, kout, self._state, dist_trv)
 
             return kout
 
@@ -140,6 +150,8 @@ class KStopManII:
             return None    # do nothing
 
     def _update_state(self, gps_error: float, speed: float):
+
+        self._last_state = self._state
         
         gps_error = gps_error * 1000
 
@@ -160,51 +172,62 @@ class KStopManII:
             if gps_error <= self._params.stopping_dist:
                 self._state = KStopManIIState.STOPPING
         elif self._state == KStopManIIState.STOPPING:
-            if speed < 5:
+            if speed <= 0:
                 self._state = KStopManIIState.STOPPED
                 self._stop_timer = KTimer(self._params.stop_time)
         elif self._state == KStopManIIState.STOPPED:
-            self._stop_timer.update()
+            self._stop_timer.update(datetime.now())
             if self._stop_timer.flag:
                 self._update_next_point()
                 self._state = KStopManIIState.RESUME
                 self._stop_timer = None
         elif self._state == KStopManIIState.RESUME:
-            self._state = KStopManIIState.DRIVING
+            if speed * 3.6 >= self._params.resume_engage_speed:
+                self._state = KStopManIIState.DRIVING
 
     # ==== OUTPUT ==== #
     def _cal_v(self):
+
         speed: float = None
 
+        init_state = self._last_state != self.state
+        
+
         if self._state == KStopManIIState.IN_AREA:
-            speed = self._params.in_area_speed
+            if init_state:
+                speed = self._params.in_area_speed
         elif self._state == KStopManIIState.APPROACHING:
-            speed = self._params.approaching_speed
+            if init_state:
+                speed = self._params.approaching_speed
         elif self._state == KStopManIIState.STOPPING:
-            speed = 1
+            if init_state:
+                speed = 5
         elif self._state == KStopManIIState.STOPPED:
-            speed = 1
+            if init_state:
+                speed = 1
         elif self._state == KStopManIIState.RESUME:
             #speed = self._last_speed
-            speed = self._params.resume_max_speed
-        elif self._state == KStopManIIState.DRIVING:
-            speed = self._params.resume_max_speed
+            if init_state:
+                speed = self._params.resume_max_speed
+        #elif self._state == KStopManIIState.DRIVING:
+            #speed = self._params.resume_max_speed
 
         return speed
 
     #  speed & d_speed in k/h
-    def _cal_a(self, speed, d_speed):
-
+    def _cal_a(self, speed):
         accel = None
         # If Stopping or stopped:
         if self._state == KStopManIIState.STOPPING:
             accel = self._params.stopping_accel
         elif self._state == KStopManIIState.STOPPED:
             accel = self._params.stopping_accel
-        # Adjust speed 
-        elif speed is not None and d_speed is not None:
-             if d_speed > speed:
-                 accel = self._params.reduce_accel
+        elif self._state == KStopManIIState.RESUME:
+            accel = self._params.resume_accel
+        elif speed is not None and self._last_speed is not None:
+            
+            if self._last_speed + self._params.reduce_margin < speed:
+                accel = self._params.reduce_accel
         
         return accel
 

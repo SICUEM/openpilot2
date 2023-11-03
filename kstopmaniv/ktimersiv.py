@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class KTimer:
+class KTimerIV:
 
     # frecuency: seconds
     def __init__(self, frecuency: float) -> None:
@@ -9,11 +9,13 @@ class KTimer:
         self._flag = False
         self._last: datetime = datetime.now()
 
-    def update(self, now: datetime = datetime.now()):
-        
+    def update(self, now: datetime = None):
+        nw = now
+        if nw is None:
+            nw = datetime.now()
 
-        if (now - self._last).total_seconds() > self._frecuency:
-            self._last = now
+        if (nw - self._last).total_seconds() > self._frecuency:
+            self._last = nw
             self._flag = True
         else:
             self._flag = False

@@ -25,10 +25,13 @@ class KStopManIIParams:
         # Areas deceleration
         self._stopping_accel: float = None
         self._reduce_accel: float = None
+        self._reduce_margin: int = None
         # Stop time
         self._stop_time: int = None
         # Resume speed
         self._resume_max_speed: int = None
+        self._resume_accel: float = None
+        self._resume_engage_speed: int = None
         # Active log channels
         self._active_log_channels: list[int] = None
         # KRServer IP
@@ -117,6 +120,14 @@ class KStopManIIParams:
         self._reduce_accel = value
 
     @property
+    def reduce_margin(self) -> float:
+        return self._reduce_margin
+
+    @reduce_margin.setter
+    def reduce_margin(self, value: float):
+        self._reduce_margin = value
+
+    @property
     def stop_time(self) -> int:
         return self._stop_time
 
@@ -131,6 +142,22 @@ class KStopManIIParams:
     @resume_max_speed.setter
     def resume_max_speed(self, value: int):
         self._resume_max_speed = value
+
+    @property
+    def resume_accel(self) -> float:
+        return self._resume_accel
+
+    @resume_accel.setter
+    def resume_accel(self, value: float):
+        self._resume_accel = value
+
+    @property
+    def resume_engage_speed(self) -> int:
+        return self._resume_engage_speed
+
+    @resume_engage_speed.setter
+    def resume_engage_speed(self, value: int):
+        self._resume_engage_speed = value
 
     @property
     def active_log_channels(self) -> list("int"):
@@ -207,8 +234,11 @@ class KStopManIIParams:
         self.approaching_speed = config.getint('Settings', 'approaching_speed', fallback=None)
         self.stopping_accel = config.getfloat('Settings', 'stopping_accel', fallback=None)
         self.reduce_accel = config.getfloat('Settings', 'reduce_accel', fallback=None)
+        self.reduce_margin = config.getint('Settings', 'reduce_margin', fallback=None)
         self.stop_time = config.getint('Settings', 'stop_time', fallback=None)
         self.resume_max_speed = config.getint('Settings', 'resume_max_speed', fallback=None)
+        self.resume_accel = config.getfloat('Settings', 'resume_accel', fallback=None)
+        self.resume_engage_speed = config.getint('Settings', 'resume_engage_speed', fallback=None)
         self.active_log_channels = config.get('Log', 'active_log_channels', fallback="[1,1,1]")
         self.krserver_ip = config.get('KRServer', 'rserver_ip', fallback=None)
         self.krserver_port = config.getint('KRServer', 'rserver_port', fallback=None)
@@ -223,8 +253,11 @@ class KStopManIIParams:
                f"::STP::[D]={self.stop_dist}m:" \
                f"[STPA]={self.stopping_accel}m/s²" \
                f"[RDA]={self.reduce_accel}m/s²" \
+               f"[RDM]={self.reduce_margin}km/h" \
                f"::STTM={self.stop_time}s" \
-               f"::RMS={self.resume_max_speed}kph"
+               f"::RMS={self.resume_max_speed}kph" \
+               f"::RAC={self.resume_accel}m/s²" \
+               f"::RES={self.resume_engage_speed}m/s²" \
 
     def socket_brief_i(self):
         return f"{self.in_area_dist}::" \
@@ -235,8 +268,11 @@ class KStopManIIParams:
                f"{self.stop_dist}::" \
                f"{self.stopping_accel}::" \
                f"{self.reduce_accel}::" \
+               f"{self.reduce_margin}::" \
                f"{self.stop_time}::" \
-               f"{self.resume_max_speed}"
+               f"{self.resume_max_speed}::" \
+               f"{self.resume_accel}::" \
+               f"{self.resume_engage_speed}" \
 
     # ==== Debug ==== #
     def to_json(self):

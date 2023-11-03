@@ -33,8 +33,10 @@ def append_to_log_async(logstr: str, path: str, tm: datetime = None) -> None:
     thread.start()
 
 def rlog_async(data: str, client: KRLogClient, tm: datetime = None) -> None:
+    
     def rLog() -> None:
         client.send(data)
+
     thread = threading.Thread(target=rLog, args=(data))
     thread.start()
     
