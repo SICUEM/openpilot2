@@ -69,7 +69,7 @@ KLOG_FREQ = 0.5
 kstopmanii_timer = KTimer(KLOG_FREQ)
 
 # Velocidad inicial del cruise
-kcrs_v = 35
+# kcrs_v = 35
 
 # kstopmanii
 kstopmanii = KStopManII()
