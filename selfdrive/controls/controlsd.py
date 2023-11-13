@@ -65,6 +65,28 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
+<<<<<<< HEAD
+=======
+# ============= CIA2000 ========================== #
+from datetime import datetime
+from kstopmanii.kstopmanii import KStopManII
+from kstopmanii.ktimers import KTimer
+from kstopmanii.kwrappersii import KGPSLocWrapper, KStopManIIOutput
+from kstopmaniv.kstopmaniv import KSpeedMan
+
+# Frecuencia de iteración de kstopmanii
+KLOG_FREQ = 0.5
+
+# Timer de iteración de kstopmanii
+kstopmanii_timer = KTimer(KLOG_FREQ)
+
+# Velocidad inicial del cruise
+# kcrs_v = 35
+
+# kstopmanii
+kstopmanii = KStopManII()
+# ================================================= #
+>>>>>>> ead0b230e45ad8fa01874b475bdccbd297df1846
 
 class Controls:
   def __init__(self, CI=None):
@@ -189,6 +211,14 @@ class Controls:
     self.desired_curvature_rate = 0.0
     self.experimental_mode = False
     self.v_cruise_helper = VCruiseHelper(self.CP)
+<<<<<<< HEAD
+=======
+    # ====== CIA2000 ===== #
+    # Se configuró una velocidad inicial para el cruise:
+    # if kcrs_v is not None:
+      # self.v_cruise_helper.v_cruise_kph = kcrs_v
+    # ===================== #
+>>>>>>> ead0b230e45ad8fa01874b475bdccbd297df1846
     self.recalibrating_seen = False
 
     # TODO: no longer necessary, aside from process replay
