@@ -54,11 +54,17 @@ class KLoggerChannel(Enum):
     CC_I_LOG = "k.cc_i.log"
     KPARAMS_LOG = "k.kparams.log"
     GPS_II_LOG = "k.gps_ii.log"
+    LAT_PLAN = "k.lat_plan.log"
 
 
 class KLoggerII:
 
-    def __init__(self, mode: list[KLoggerMode], log_dir: str = '/tmp/klog', krserver_ip: str = None, krserver_port: int = None):
+    def __init__(
+            self, 
+            mode: any, 
+            log_dir: str = '/tmp/klog', 
+            krserver_ip: str = None, 
+            krserver_port: int = None):
         self._mode = mode
         self._log_dir = log_dir
         self._rlog_client = None

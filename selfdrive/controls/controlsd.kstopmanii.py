@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-from datetime import datetime
 import os
 import math
 import time
 from typing import SupportsFloat
 
 from cereal import car, log
-from kstopmanii.kloggerii import KLoggerChannel, KLoggerMode
 from openpilot.common.numpy_fast import clip
 from openpilot.common.realtime import config_realtime_process, Priority, Ratekeeper, DT_CTRL
 from openpilot.common.profiler import Profiler
@@ -30,14 +28,6 @@ from openpilot.selfdrive.controls.lib.events import Events, ET
 from openpilot.selfdrive.controls.lib.alertmanager import AlertManager, set_offroad_alert
 from openpilot.selfdrive.controls.lib.vehicle_model import VehicleModel
 from openpilot.system.hardware import HARDWARE
-
-# === CIA === #
-from kstopmaniv.kstopmaniv import KSpeedMan
-from kstopmanv.kstopmanv import KStopManV
-from kstopmanv.ktelemetry import KTelemetry
-from kstopmanii.kstopmanii import KLoggerII, KTimer
-# ==== end ==== #
-
 
 
 SOFT_DISABLE_TIME = 3  # seconds
@@ -65,10 +55,29 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
+# ============= CIA2000 ========================== #
+from datetime import datetime
+from kstopmanii.kstopmanii import KStopManII
+from kstopmanii.ktimers import KTimer
+from kstopmanii.kwrappersii import KCarState, KGPSLocWrapper, KStopManIIOutput
+from kstopmaniv.kstopmaniv import KSpeedMan
+
+# Frecuencia de iteración de kstopmanii
+KLOG_FREQ = 0.5
+
+# Timer de iteración de kstopmanii
+kstopmanii_timer = KTimer(KLOG_FREQ)
+
+# Velocidad inicial del cruise
+kcrs_v = None
+
+# kstopmanii
+kstopmanii = KStopManII()
+# ================================================= #
 
 class Controls:
-  def __init__(self, CI=None):
 
+  def __init__(self, CI=None):
     config_realtime_process(4, Priority.CTRL_HIGH)
 
     # Ensure the current branch is cached, otherwise the first iteration of controlsd lags
@@ -90,13 +99,15 @@ class Controls:
     ignore = self.sensor_packets + ['testJoystick']
     if SIMULATION:
       ignore += ['driverCameraState', 'managerState']
-    # === CIA === #
+
+    # ============== CIA ====== #
+    # Suscripción a datos de GPS
     self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
                                    'driverMonitoringState', 'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
                                    'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters',
                                    'testJoystick', 'gpsLocationExternal'] + self.camera_packets + self.sensor_packets,
                                   ignore_alive=ignore, ignore_avg_freq=['radarState', 'testJoystick'])
-    # === end === #
+    # ========================== #
 
     if CI is None:
       # wait for one pandaState and one CAN packet
@@ -152,10 +163,11 @@ class Controls:
     self.AM = AlertManager()
     self.events = Events()
 
-    # === CIA === #
+    # ====== CIA ====== #
     self._ksp: KSpeedMan = KSpeedMan()
     self.LoC = LongControl(self.CP, self._ksp)
-    # === end === #
+    # ================= #
+
     self.VM = VehicleModel(self.CP)
 
     self.LaC: LatControl
@@ -187,8 +199,26 @@ class Controls:
     self.steer_limited = False
     self.desired_curvature = 0.0
     self.desired_curvature_rate = 0.0
+
+    # ====== CIA2000 ===== #
+    self.k_min_curv_avg = 0.0
+    self.k_max_curv_avg = 0.0
+    self.k_min_curv = 0.0
+    self.k_max_curv = 0.0
+    self.k_min_curv_rate_avg = 0.0
+    self.k_max_curv_rate_avg = 0.0
+    self.k_min_curv_rate = 0.0
+    self.k_max_curv_rate = 0.0
+    # ==================== #
+
+
     self.experimental_mode = False
     self.v_cruise_helper = VCruiseHelper(self.CP)
+    # ====== CIA2000 ===== #
+    # Se configuró una velocidad inicial para el cruise:
+    if kcrs_v is not None:
+      self.v_cruise_helper.v_cruise_kph = kcrs_v
+    # ===================== #
     self.recalibrating_seen = False
 
     # TODO: no longer necessary, aside from process replay
@@ -215,17 +245,10 @@ class Controls:
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
 
-    # === CIA === #
-    self._ksmv: KStopManV = KStopManV()
-    KLOG_FREQ = 0.5
-    KTLM_FREQ = 0.5
-    self._klog: KLoggerII = KLoggerII([KLoggerMode.IN_FILE])
-    self._klog_timer: KTimer = KTimer(KLOG_FREQ)
-    self._ktlm: KTelemetry = KTelemetry()
-    self._ktlm_timer: KTimer = KTimer(KTLM_FREQ)
-
-    self._k_a: float = None
-    # === end === #
+    # ======== CIA ======== #
+    # Aceleración aplicada
+    self.k_a = None
+    # ===================== #
 
   def set_initial_state(self):
     if REPLAY:
@@ -238,6 +261,7 @@ class Controls:
         self.state = State.enabled
 
   def update_events(self, CS):
+
     """Compute carEvents from carState"""
 
     self.events.clear()
@@ -634,6 +658,12 @@ class Controls:
       # accel PID loop
       pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_helper.v_cruise_kph * CV.KPH_TO_MS)
       t_since_plan = (self.sm.frame - self.sm.rcv_frame['longitudinalPlan']) * DT_CTRL
+      # ===== CIA ===== #
+      # No modificado.
+      # Aquí es donde, a priorí, se controla el acelerador/freno
+      # del coche.
+      # El método update() calcula la aceleración deseada para el coche
+      # a partir del objeto long_plan, que contiene  
       actuators.accel = self.LoC.update(CC.longActive, CS, long_plan, pid_accel_limits, t_since_plan)
 
       # Steering PID loop and lateral MPC
@@ -641,6 +671,38 @@ class Controls:
                                                                                        lat_plan.psis,
                                                                                        lat_plan.curvatures,
                                                                                        lat_plan.curvatureRates)
+      # ======== CIA 2000 ======== #
+
+      if self.desired_curvature > 100 / 10000:
+        self.desired_crurvatura = 100 /100
+      elif self.desired_curvature < -100 / 10000:
+        self.desired_crurvatura = -100 /10000
+
+      if self.desired_curvature < 0:
+        self.k_min_curv_avg = (self.k_min_curv_avg + self.desired_curvature) / 2
+      else:
+        self.k_max_curv_avg = (self.k_max_curv_avg + self.desired_curvature) / 2
+      
+      if self.desired_curvature > self.k_max_curv:
+        self.k_max_curv = self.desired_curvature
+      elif self.desired_curvature < self.k_min_curv:
+        self.k_min_curv = self.desired_curvature
+      
+
+      if self.desired_curvature_rate < 0:
+        self.k_min_curv_rate_avg = (self.k_min_curv_rate_avg + self.desired_curvature_rate) / 2
+      else:
+        self.k_max_curv_rate_avg = (self.k_max_curv_rate_avg + self.desired_curvature_rate) / 2
+      
+      if self.desired_curvature_rate > self.k_max_curv_rate:
+        self.k_max_curv_rate = self.desired_curvature_rate
+      
+      elif self.desired_curvature_rate < self.k_min_curv_rate:
+        self.k_min_curv_rate = self.desired_curvature_rate
+
+      # ========================== #
+
+      
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(CC.latActive, CS, self.VM, lp,
                                                                              self.last_actuators, self.steer_limited, self.desired_curvature,
                                                                              self.desired_curvature_rate, self.sm['liveLocationKalman'])
@@ -727,8 +789,7 @@ class Controls:
     hudControl.setSpeed = float(self.v_cruise_helper.v_cruise_cluster_kph * CV.KPH_TO_MS)
     hudControl.speedVisible = self.enabled
     hudControl.lanesVisible = self.enabled
-    
-
+    hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead
     hudControl.rightLaneVisible = True
     hudControl.leftLaneVisible = True
 
@@ -832,6 +893,10 @@ class Controls:
     elif lat_tuning == 'torque':
       controlsState.lateralControlState.torqueState = lac_log
 
+    controlsState.curvature = 0
+    controlsState.desiredCurvature = 0
+    controlsState.desiredCurvatureRate = 0
+
     self.pm.send('controlsState', dat)
 
     # carState
@@ -884,55 +949,68 @@ class Controls:
       self.state_transition(CS)
       self.prof.checkpoint("State transition")
 
-    # === CIA === #
+    # ======== CIA ====== #
+    nw = datetime.now()
     gps_data = self.sm["gpsLocationExternal"]
-    k_upd_params: KStopManV.UpdateParams = KStopManV.UpdateParams(gps_data, CS, self.distance_traveled)
-    self._ksmv.update(k_upd_params)
-    # Set cruise V
-    if self._ksmv.cruise_v is not None:
-      self.v_cruise_helper.v_cruise_kph = self._ksmv.cruise_v
-    self.k_a = self._ksmv.a_ms
-    # === end === #
+    k_gps_data: KGPSLocWrapper = KGPSLocWrapper(gps_data)
+    k_cs = KCarState(CS)
+    k_stmn_output: KStopManIIOutput = kstopmanii.update(k_gps_data, self.distance_traveled, k_cs, nw)
+    desired_v = k_stmn_output.velocity
+    if desired_v is not None:
+      self.v_cruise_helper.v_cruise_kph = desired_v
+    self.k_a = k_stmn_output.acceleration  
+    # =================== #
+
+
 
     # Compute actuators (runs PID loops and lateral MPC)
     CC, lac_log = self.state_control(CS)
 
-    # === CIA === #
-    # Setup velocity
-    if self._ksmv.v_ms is not None:
-      self._ksp.v = self._ksmv.v_ms
-    else:
-      self._ksp.reset()
-    # Setup acceleration
+
+
+    # ========== CIA ========= #
     if self.k_a is not None:
       CC.actuators.accel = self.k_a
-
-    # Log:
-    now = datetime.now()
-    self._klog_timer.update(now)
-    if self._klog_timer.flag:
-      msg = f"VCRU: {self._ksmv.cruise_v}\tV: {self._ksmv.v_ms}\tACC:{self._ksmv.a_ms}\tST: {self._ksmv.state}\tDTrv: {self._ksmv.d_trvl:.2f}"
-      self._klog.log(msg, KLoggerChannel.GENR_I_LOG, now)
     
-    # Telemetry
-    self._ktlm_timer.update(now)
-    if self._ktlm_timer.flag:
-      
-      msg = f"@{now.timestamp()}:" \
-      f"{self._ksmv.cruise_v}:{self._ksmv.v_ms}:{self._ksmv.v_0}:{self._ksmv.a_ms}:" \
-      f"{self._ksmv.state}:" \
-      f"{self.distance_traveled}:" \
-      f"{gps_data.latitude}:" \
-      f"{gps_data.longitude}:" \
-      f"{gps_data.altitude}:" \
-      f"{gps_data.speed}:" \
-      f"{gps_data.bearingDeg}" \
-      f"@"
+    if self.experimental_mode and CS.vEgo < 35 / 3.6 and self.distance_traveled < 100:
+      print(CS.vEgo)
+      CC.actuators.accel = 1.0
+            
+    # if self.desired_curvature * 10000 > 120:
+    #   self.desired_curvature = 120 / 10000
 
-      msg = msg.replace("None", "")
-      
-      self._ktlm.log(msg)
-    # === end === #
+    # if self.desired_curvature * 10000 < -120:
+    #   self.desired_curvature = -120 / 10000
+    
+    kstopmanii_timer.update(nw)
+
+    if kstopmanii_timer.flag:
+      kstopmanii.log_cc(CC)
+      kstopmanii.log_cs(CS)
+      kstopmanii.log_lat_plan(self.sm['lateralPlan'])
+
+    gnric = (f"{(self.desired_curvature)}"
+      f"::{(self.desired_curvature_rate)}"
+      f"::{(CS.vEgo)}"
+      f"::{(CC.actuators.accel)}"
+      f"::{(self.distance_traveled)}"
+      )
+  
+    # kstopmanii.log_generic(gnric)
+    
+    # ========================= #
+
+    # ========== CIA ======= #
+    # v_pid test
+    # if self.distance_traveled > 700:
+    #   self._ksp.v = 0.0
+    # elif self.distance_traveled > 500:
+    #   self._ksp.reset()
+    # elif self.distance_traveled > 300:
+    #   self._ksp.v = 16.0
+    # elif self.distance_traveled > 100:
+    #  self._ksp.v = 6.0
+    # ======================== #
 
     self.prof.checkpoint("State Control")
 

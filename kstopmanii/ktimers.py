@@ -10,8 +10,6 @@ class KTimer:
         self._last: datetime = datetime.now()
 
     def update(self, now: datetime = datetime.now()):
-        
-
         if (now - self._last).total_seconds() > self._frecuency:
             self._last = now
             self._flag = True

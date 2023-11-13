@@ -482,6 +482,9 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
     painter.drawPolygon(scene.road_edge_vertices[i]);
   }
 
+  // ====== CIA 2000 ==== #
+  // QColor: https://doc.qt.io/qt-6/qcolor.html
+
   // paint path
   QLinearGradient bg(0, height(), 0, 0);
   if (sm["controlsState"].getControlsState().getExperimentalMode()) {
@@ -512,9 +515,15 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
     }
 
   } else {
-    bg.setColorAt(0.0, QColor::fromHslF(148 / 360., 0.94, 0.51, 0.4));
-    bg.setColorAt(0.5, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.35));
-    bg.setColorAt(1.0, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.0));
+    // ================ CIA 2000 ================= #
+    // ** Change path color for simulator** //
+    // bg.setColorAt(0.0, QColor::fromHslF(148 / 360., 0.94, 0.51, 0.4));
+    // bg.setColorAt(0.5, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.35));
+    // bg.setColorAt(1.0, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.0));
+
+    bg.setColorAt(0.0, QColor(255,255,255,5));
+    bg.setColorAt(0.5, QColor(255,255,255,5));
+    bg.setColorAt(1.0, QColor(255,255,255,5));
   }
 
   painter.setBrush(bg);

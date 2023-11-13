@@ -8,7 +8,7 @@ from datetime import datetime
 
 from kstopmanii.kloggerii import KLoggerII, KLoggerMode, KLoggerChannel
 from kstopmanii.ktimers import KTimer
-from kstopmanii.kwrappersii import KGPSLocWrapper, KGPSWayPoint, KGPSPointType, KStopManIIParams, KStopManIIOutput
+from kstopmanii.kwrappersii import KCarControl, KGPSLocWrapper, KGPSWayPoint, KGPSPointType, KStopManIIParams, KStopManIIOutput, KLateralPlan, KCarState
 from kstopmanii.krlogclient import KRLogClient
 
 # ==== State ==== #
@@ -29,6 +29,7 @@ class KStopManIILog(Enum):
     CC_I_LOG = 2
     KPARAMS_LOG = 3
     GPS_II_LOG = 4
+    LAT_PLAN = 5
 
 
 # ===== KStopManII ==== #
@@ -55,6 +56,7 @@ class KStopManII:
         self._klogger.krserver_ip = self._params._krserver_ip
         self._klogger.krserver_port = self._params._krserver_port
         self._klog_timer = KTimer(KLOG_FREQ)
+        self._nw = None
     # ==== Accesors ==== #
     @property
     def state(self):
@@ -97,15 +99,10 @@ class KStopManII:
         except FileNotFoundError:
             print("... No waypoints found")
 
-    def _log_gps_points(self):
-        gps_points = f"GPS POINTS=\n{KGPSWayPoint.path_waypoints_brief(self._gps_points)}"
-        print(f"{gps_points}\n")
-        self._klogger.log(gps_points, KLoggerChannel.KPARAMS_LOG)
-
     # ==== OPS ==== #
-    def update(self, gps_data: KGPSLocWrapper, dist_trv: int ):
+    def update(self, gps_data: KGPSLocWrapper, dist_trv: int, k_cs: KCarState, nw: datetime = datetime.now() ):
 
-        
+        self._nw = nw
 
         if self._params is not None \
                 and self._gps_points is not None \
@@ -125,11 +122,11 @@ class KStopManII:
             # Mocking speed for STOPPING state test
             spd = gps_data.speed
             if self._state == KStopManIIState.STOPPING and gps_error <= 0.005:
-                spd = 0.0
+                # spd = 0.0
                 pass
 
             # Update state
-            self._update_state(gps_error, spd)
+            self._update_state(gps_error, spd, k_cs)
 
             # Gen output
             kout = KStopManIIOutput()
@@ -140,7 +137,7 @@ class KStopManII:
             kout.v_ego = 1.0
 
             # If GPS II LOG is active, logs gps data
-            self._klog_timer.update(datetime.now())
+            self._klog_timer.update(self._nw)
             if self._klog_timer.flag:
                 self._live_log_gps_data(gps_data, gps_error, kout, self._state, dist_trv)
 
@@ -149,7 +146,7 @@ class KStopManII:
         else:
             return None    # do nothing
 
-    def _update_state(self, gps_error: float, speed: float):
+    def _update_state(self, gps_error: float, speed: float, kcs: KCarState):
 
         self._last_state = self._state
         
@@ -172,7 +169,7 @@ class KStopManII:
             if gps_error <= self._params.stopping_dist:
                 self._state = KStopManIIState.STOPPING
         elif self._state == KStopManIIState.STOPPING:
-            if speed <= 0:
+            if kcs.stopped:
                 self._state = KStopManIIState.STOPPED
                 self._stop_timer = KTimer(self._params.stop_time)
         elif self._state == KStopManIIState.STOPPED:
@@ -254,14 +251,34 @@ class KStopManII:
             self._log_gps_data(gps_data, gps_error, kout, state, dst_trv)
 
     def _log_gps_data(self, gps_data: KGPSLocWrapper, gps_error: float, kout: KStopManIIOutput, state: KStopManIIState, dst_trv: int):
-        nww = datetime.now()
+        
         gps_i_live_data = f"{gps_data.brief()}::[dtrv]={int(dst_trv)}"
         gps_ii_live_data = f"[Ds]={gps_error:.{3}f}::[v]={kout.velocity}::[a]={kout.acceleration}::[st]={state}"
-        gps_socket_data = f"[gps]::{nww.timestamp()}::{gps_data.socket_brief()}::{gps_error:.{3}f}::{kout.velocity}::{kout.acceleration}::{state.value}"
+        gps_socket_data = f"[gps]::{self._nw.timestamp()}::{gps_data.socket_brief()}::{gps_error:.{3}f}::{kout.velocity}::{kout.acceleration}::{state.value}"
         # print(f"{gps_data.brief()}::{gps_live_data}")
         
-        self._klogger.log(gps_i_live_data, KLoggerChannel.GPS_I_LOG, nww)
-        self._klogger.log(gps_ii_live_data, KLoggerChannel.GPS_II_LOG, nww)
-        self._klogger.rlog(gps_socket_data, nww)
+        self._klogger.log(gps_i_live_data, KLoggerChannel.GPS_I_LOG, self._nw)
+        self._klogger.log(gps_ii_live_data, KLoggerChannel.GPS_II_LOG, self._nw)
+        self._klogger.rlog(gps_socket_data, self._nw)
 
+    def _log_gps_points(self):
+        gps_points = f"GPS POINTS=\n{KGPSWayPoint.path_waypoints_brief(self._gps_points)}"
+        print(f"{gps_points}\n")
+        self._klogger.log(gps_points, KLoggerChannel.KPARAMS_LOG)
 
+    def log_cc(self, cc: any):
+        kcc: KCarControl = KCarControl(cc)
+        kcc_live_data = kcc.brief
+        self._klogger.log(kcc_live_data, KLoggerChannel.CC_I_LOG, self._nw)
+    
+    def log_cs(self, cs: any):
+        kcs: KCarState = KCarState(cs)
+        kcs_live_data = kcs.brief
+        self._klogger.log(kcs_live_data, KLoggerChannel.CS_I_LOG, self._nw)
+
+    def log_lat_plan(self, lat_plan: any):
+        klat_plan_live = KLateralPlan(lat_plan)
+        self._klogger.log(klat_plan_live.brief, KLoggerChannel.LAT_PLAN, self._nw)
+
+    def log_generic(self, data: str):
+        self._klogger.log(data, KLoggerChannel.GENR_I_LOG)

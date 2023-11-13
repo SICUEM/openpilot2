@@ -153,10 +153,12 @@ class NoEntryAlert(Alert):
 
 
 class SoftDisableAlert(Alert):
+  # ======== CIA ======== #
+  # Hide TAKE CONTROL alert
   def __init__(self, alert_text_2: str):
     super().__init__("TAKE CONTROL IMMEDIATELY", alert_text_2,
-                     AlertStatus.userPrompt, AlertSize.small,
-                     Priority.MID, VisualAlert.steerRequired,
+                     AlertStatus.userPrompt, AlertSize.none,
+                     Priority.MID, VisualAlert.none,
                      AudibleAlert.warningSoft, 2.),
 
 

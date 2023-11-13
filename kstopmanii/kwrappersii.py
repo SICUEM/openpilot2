@@ -484,5 +484,473 @@ class KGPSLocWrapper:
     def socket_brief(self):
         return f'{self.lat}::{self.long}::{math.floor(self.speed * 3.6)}'
 
+# ==== CAR CONTROL ==== #
+# ==== Enums === #
+class KLongControlState(Enum):
+    OFF = 0
+    PID = 1
+    STOPPING = 2
+    STARTING = 3
 
+class KAudibleAlert(Enum):
+    NONE = 0
+    ENGAGE = 1
+    DISENGAGE = 2
+    REFUSE = 3
+    WARNING_SOFT = 4
+    WARNING_IMMEDIATE = 5
+    PROMPT = 6
+    PROMPT_REPEAT = 7
+    USER_REQUESTED = 8
+    DRIVER_DISTRACTED = 9
+
+class KVisualAlert(Enum):
+    NONE = 0
+    FCW = 1
+    STEER_REQUIRED = 2
+    BRAKE_PRESSED = 3
+    WRONG_GEAR = 4
+    SEATBELT_UNBUCKLED = 5
+    SPEED_TOO_HIGH = 6
+    LDW = 7
+
+
+# === Actuators === #
+class KActuators:
+    def __init__(self, actuators: any):
+        self._actuators = actuators
+        # self.gas = 0.0
+        # self.brake = 0.0
+        # self.steer = 0.0
+        # self.steerRate = 0.0
+        # self.curvature = 0.0
+        # self.speed = 0.0
+        # self.accel = 0.0
+        # self.longControlState = KLongControlState.OFF
+
+    @property
+    def gas(self):
+        return self._actuators.gas
+
+    @property
+    def brake(self):
+        return self._actuators.brake
+
+    @property
+    def steer(self):
+        return self._actuators.steer
+
+    @property
+    def curvature(self):
+        return self._actuators.curvature
+
+    @property
+    def speed(self):
+        return self._actuators.speed
+
+    @property
+    def accel(self):
+        return self._actuators.accel
+
+    @property
+    def longControlState(self):
+        return self._actuators.longControlState
+    
+    # === Brief === #
+    @property
+    def brief(self):
+        msg = (
+            f"[GAS]={self.gas}::"
+            f"[BRA]={self.brake}::"
+            f"[STE]={self.steer:.4f}::"
+            f"[CUR]={(self.curvature * 100):.4f}::"
+            f"[SPE]={self.speed}::"
+            f"[ACC]={self.accel:.5f}::"
+            f"[LCS]={self.longControlState}"
+        )
+        return msg
+
+    @property
+    def active_brief(self):
+        msg = (
+            f"[STE]={self.steer:.4f}::"
+            f"[CUR]={(self.curvature * 100):.4f}::"
+            f"[ACC]={self.accel:.5f}::"
+        )
+        return msg
+    
+# ==== Cruise ==== #
+class KCruiseControl:
+    def __init__(self, cruiseControl: any):
+        self._cruise_ctrl = cruiseControl
+        # self.cancel = False
+        # self.resume = False
+        # self.override = False
+
+    # === Accesors === #
+    @property
+    def cancel(self):
+        return self._cruise_ctrl.cancel
+
+    @property
+    def resume(self):
+        return self._cruise_ctrl.resume
+
+    @property
+    def override(self):
+        return self._cruise_ctrl.override
+
+    # === Brief === #
+    @property
+    def brief(self):
+        msg = f"[CAN]={self.cancel}::[RES]{self.resume}::[OVER]{self.override}"
+        return msg
+
+
+class KHudControl:
+    def __init__(self, hudControl: any):
+        self._hud_ctrl = hudControl
+        # self.speedVisible = False
+        # self.speed = 0.0
+        # self.lanesVisible = False
+        # self.leadVisible = False
+        # self.rightLaneVisible = False
+        # self.leftLaneVisible = False
+        # self.rightLaneDepart = False
+        # self.leftLaneDepart = False
+    
+    @property
+    def speedVisible(self):
+        return self._hud_ctrl.speedVisible
+
+    @property
+    def setSpeed(self):
+        return self._hud_ctrl.setSpeed
+
+    @property
+    def lanesVisible(self):
+        return self._hud_ctrl.lanesVisible
+
+    @property
+    def leadVisible(self):
+        return self._hud_ctrl.leadVisible
+
+    @property
+    def rightLaneVisible(self):
+        return self._hud_ctrl.rightLaneVisible
+
+    @property
+    def leftLaneVisible(self):
+        return self._hud_ctrl.leftLaneVisible
+
+    @property
+    def rightLaneDepart(self):
+        return self._hud_ctrl.rightLaneDepart
+
+    @property
+    def leftLaneDepart(self):
+        return self._hud_ctrl.leftLaneDepart
+    
+    # === Brief === #
+    @property
+    def brief(self):
+        msg = (
+            f"[SPE]={self.speedVisible}::"
+            f"[SET]={self.setSpeed}::"
+            f"[LAN]={self.lanesVisible}::"
+            f"[LEA]={self.leadVisible}::"
+            f"[RIG]={self.rightLaneVisible}::"
+            f"[LEF]={self.leftLaneVisible}::"
+            f"[RDE]={self.rightLaneDepart}::"
+            f"[LDE]={self.leftLaneDepart}"
+        )
+        return msg
+
+
+# === KCarControl ===== #
+class KCarControl:
+    def __init__(self, cc: any = None):
+        self._cc = cc
+        self._actuators = KActuators(cc.actuators)
+        self._actuators_output = KActuators(cc.actuatorsOutput)
+        self._cruise_ctrl = KCruiseControl(cc.cruiseControl)
+        self._hud_ctrl = KHudControl(cc.hudControl)
+
+    # === Access to CC properties
+    @property
+    def enabled(self):
+        return self._cc.enabled
+
+    # Planner
+    @property
+    def latActive(self):
+        return self._cc.latActive
+
+    @property
+    def longActive(self):
+        return self._cc.longActive
+
+    # Blinker
+    @property
+    def leftBlinker(self):
+        return self._cc.leftBlinker
+
+    @property
+    def rightBlinker(self):
+        return self._cc.rightBlinker
+
+    # Orientation
+    @property
+    def orientationNED(self):
+        return self._cc.orientationNED
+
+    # Angular V
+    @property
+    def angularVelocity(self):
+
+        return self._cc.angularVelocity
+    
+    # Actuators...
+    @property
+    def actuators(self):
+        return self._actuators
+
+    @property
+    def actuatorsOutput(self):
+        return self._actuators_output
+    
+    @property
+    def cruiseControl(self):
+        return self._cruise_ctrl
+    
+    @property
+    def hudControl(self):
+        return self._hud_ctrl
+
+    # === Brief === #
+    @property
+    def brief(self):
+        msg = (
+            f"[ENA]={self.enabled}::"
+            f"[LAT]={self.latActive}::"
+            f"[LON]={self.longActive}::"
+            f"[LEB]={self.leftBlinker}::"
+            f"[RIB]={self.rightBlinker}::"
+            f"[ORN]={self.orientationNED}::"
+            f"[ANG]={self.angularVelocity}::\n"
+            f"[ACT]=>{self.actuators.brief}::\n"
+            f"[ACO]=>{self.actuatorsOutput.brief}::\n"
+            f"[CRU]=>{self.cruiseControl.brief}::\n"
+            f"[HUD]=>{self.hudControl.brief}"
+        )
+        return msg
+    
+    # === Brief === #
+    @property
+    def active_brief(self):
+        msg = (
+            f"[ENA]={self.enabled}::"
+            f"[LEB]={self.leftBlinker}::"
+            f"[RIB]={self.rightBlinker}::"
+            f"[ACT]=>{self.actuators.active_brief}"
+        )
+        return msg
+    
+    
+
+# ==== LATERAL PLAN ==== #
+class KSolverState:
+    def __init__(self, x, u):
+        self._x = x
+        self._u = u
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def u(self):
+        return self._u
+
+    # === Brief === #
+    def brief(self):
+        # This assumes that 'x' and 'u' can be represented as strings. If they are lists or more complex objects,
+        # you would need to convert them to strings in a meaningful way.
+        msg = f"[X]={self.x}::[U]={self.u}"
+        return msg
+
+
+class KLateralPlan:
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def model_mono_time(self):
+        return self._data.modelMonoTime
+
+    # Add additional properties for other fields
+    # ...
+
+    @property
+    def psis(self):
+        return self._data.psis
+
+    @property
+    def curvatures(self):
+        return self._data.curvatures
+
+    @property
+    def curvature_rates(self):
+        return self._data.curvatureRates
+
+    @property
+    def solver_execution_time(self):
+        return self._data.solverExecutionTime
+
+    @property
+    def solver_cost(self):
+        return self._data.solverCost
+
+    @property
+    def solver_state(self):
+        # Assuming self._data.solverState returns an object that has x and u attributes
+        return KSolverState(self._data.solverState.x, self._data.solverState.u)
+
+    # Enums can be represented as properties or static class variables
+    Desire = {
+        'none': 0,
+        'turnLeft': 1,
+        'turnRight': 2,
+        'laneChangeLeft': 3,
+        'laneChangeRight': 4,
+        'keepLeft': 5,
+        'keepRight': 6
+    }
+
+    LaneChangeState = {
+        'off': 0,
+        'preLaneChange': 1,
+        'laneChangeStarting': 2,
+        'laneChangeFinishing': 3
+    }
+
+    LaneChangeDirection = {
+        'none': 0,
+        'left': 1,
+        'right': 2
+    }
+
+    @property
+    def desire(self):
+        return self._data.desire
+
+    @property
+    def lane_change_state(self):
+        return self._data.laneChangeState
+
+    @property
+    def lane_change_direction(self):
+        return self._data.laneChangeDirection
+
+    @property
+    def brief(self):
+        return (f"[MOD]={self.model_mono_time}::"
+                f"[DES]={self.desire}::"
+                f"[LCS]={self.lane_change_state}::"
+                f"[LCD]={self.lane_change_direction}::"
+                f"[PSI]={self.psis}::"
+                f"[CUR]={self.curvatures}::"
+                f"[CRA]={self.curvature_rates}::"
+                f"[SET]={self.solver_execution_time}::"
+                f"[SCO]={self.solver_cost}")
+
+
+# ===== CAR STATE ===== #
+class KWheelV:
+
+    def __init__(self, wheel_speed: any):
+        self._whv = wheel_speed
+    
+    @property
+    def wheel_v(self):
+        return self._whv
+    
+    @property
+    def stopped(self) -> bool:
+        return self._whv.fl == 0 and self._whv.fr == 0 and self._whv.rl == 0 and self._whv.rr == 0
+        
+
+class KCarState:
+
+    def __init__(self, cs: any) -> None:
+        self._cs = cs
+        self._wheels_v = KWheelV(cs.wheelSpeeds)
+    
+    @property
+    def v_ego(self) -> float:
+        return self._cs.vEgo
+    
+    @property
+    def a_Ego(self) -> float:
+        return self._cs.aEgo
+    
+    @property
+    def gas(self) -> float:
+        return self._cs.gas
+
+    @property
+    def gas_pressed(self) -> bool:
+        return self._cs.gasPressed
+    
+    @property
+    def brake(self) -> float:
+        return self._cs.brake
+    
+    @property
+    def brake_pressed(self) -> bool:
+        return self._cs.brakePressed
+    
+    @property
+    def steering_angle_deg(self) -> float:
+        return self._cs.steeringAngleDeg
+    
+    @property
+    def left_blinker(self) -> bool:
+        return self._cs.leftBlinker
+    
+    @property
+    def right_blinker(self) -> bool:
+        return self._cs.rightBlinker
+    
+    @property
+    def left_blindspot(self) -> bool:
+        return self._cs.leftBlindspot
+    
+    @property
+    def right_blindspot(self) -> bool:
+        return self._cs.rightBlindspot
+    
+    @property
+    def engine_rpm(self):
+        return self._cs.engineRpm
+
+    @property
+    def stopped(self):
+        return self._wheels_v.stopped
+
+    @property
+    def brief(self):
+        return (f"[V]={self.v_ego}::"
+                f"[A]={self.a_Ego}::"
+                f"[GS]={self.gas}::"
+                f"[GSP]={self.gas_pressed}::"
+                f"[BRK]={self.brake}::"
+                f"[BRKP]={self.brake_pressed}::"
+                f"[SAD]={self.steering_angle_deg}::"
+                f"[LB]={self.left_blinker}::"
+                f"[RB]={self.right_blinker}::"
+                f"[LBL]={self.left_blindspot}::"
+                f"[RBL]={self.right_blindspot}::"
+                f"[RPM]={self.engine_rpm}::"
+                f"[STP]={self.stopped}")
 
