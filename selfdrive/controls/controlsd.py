@@ -66,7 +66,7 @@ ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
 # <<<<<<< HEAD
-=======
+
 # ============= CIA2000 ========================== #
 from datetime import datetime
 from kstopmanii.kstopmanii import KStopManII
