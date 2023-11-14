@@ -4,7 +4,7 @@ CRUISE_V_MIN = 30   # Velocidad mínima de cruise (m)
 
 IN_AREA_D = 50     # Radio de estado IN_AREA (m)
 APPROACHING_D = 35 # Radio de estao APPROACHING (m)
-STOPPING_D = 20     # Radio de estado STOPPING (m)
+STOPPING_D = 35     # Radio de estado STOPPING (m)
 STOP_T = 10         # Tiempo de estado STOP (s)
 RESUME_D = 1       # Longitud estado RESUME (m)
 
