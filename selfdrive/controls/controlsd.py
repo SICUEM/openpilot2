@@ -211,14 +211,14 @@ class Controls:
     self.desired_curvature_rate = 0.0
     self.experimental_mode = False
     self.v_cruise_helper = VCruiseHelper(self.CP)
-## <<<<<<< HEAD
-## =======
+# <<<<<<< HEAD
+# =======
     # ====== CIA2000 ===== #
     # Se configuró una velocidad inicial para el cruise:
     # if kcrs_v is not None:
       # self.v_cruise_helper.v_cruise_kph = kcrs_v
     # ===================== #
-## >>>>>>> ead0b230e45ad8fa01874b475bdccbd297df1846
+# >>>>>>> ead0b230e45ad8fa01874b475bdccbd297df1846
     self.recalibrating_seen = False
 
     # TODO: no longer necessary, aside from process replay
