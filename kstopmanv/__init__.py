@@ -6,7 +6,7 @@ IN_AREA_D = 50     # Radio de estado IN_AREA (m)
 APPROACHING_D = 35 # Radio de estao APPROACHING (m)
 STOPPING_D = 20     # Radio de estado STOPPING (m)
 STOP_T = 10         # Tiempo de estado STOP (s)
-RESUME_D = 30       # Longitud estado RESUME (m)
+RESUME_D = 1       # Longitud estado RESUME (m)
 
 IN_AREA_V = 20      # Velocidad de estado IN_AREA (k/h)
 APPROACHING_V = 10  # Velocidad de estado APPROACHING (k/h)
@@ -17,7 +17,7 @@ RESUME_A = 0.5      # Aceleración aplicada en el
             
 STOP_V_THRES = 2    # Umbral de velocidad a 0 (k/h)
 
-STOP_POINTS = [100,200,300]    # Distancia a los puntos 
+STOP_POINTS = [80,150,250]    # Distancia a los puntos 
                                 # de parada
                             
 CRUISE_CONTROL = False       # Control de CRUISE activado
