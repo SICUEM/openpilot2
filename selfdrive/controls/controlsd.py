@@ -65,7 +65,7 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
 =======
 # ============= CIA2000 ========================== #
 from datetime import datetime
@@ -86,7 +86,7 @@ kstopmanii_timer = KTimer(KLOG_FREQ)
 # kstopmanii
 kstopmanii = KStopManII()
 # ================================================= #
->>>>>>> ead0b230e45ad8fa01874b475bdccbd297df1846
+# >>>>>>> ead0b230e45ad8fa01874b475bdccbd297df1846
 
 class Controls:
   def __init__(self, CI=None):
