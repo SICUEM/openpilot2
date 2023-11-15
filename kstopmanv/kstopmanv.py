@@ -356,14 +356,10 @@ class KStopManV:
         elif self._state == self.State.STOPPED:
             self._v_out = 0
         elif self._state == self.State.RESUME:
-            self._st_traveled_d = params.d_traveled_m - self._st_ini_d
-            v_out = calc_v(
-                self._st_traveled_d,
-                0,
-                self._params.cruise_v_limit,
-                RESUME_D
-            )
-            self._v_out = v_out
+            # self._st_traveled_d = params.d_traveled_m - self._st_ini_d
+            # v_out = calc_v(self._st_traveled_d,0,self._params.cruise_v_limit,RESUME_D)
+            # self._v_out = v_out
+            pass
 
         if self._v_out is not None:
             # kph to m/s
@@ -378,6 +374,8 @@ class KStopManV:
                 self._a_out = -1.0
         elif self._state == self.State.STOPPED:
             self._a_out = -1.0
+        elif self._state == self.State.RESUME:
+            self._a_out = self._params.resume_a
         
 
     # == To string == #
