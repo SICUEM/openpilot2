@@ -6,7 +6,7 @@ IN_AREA_D = 60     # Radio de estado IN_AREA (m)
 APPROACHING_D = 30 # Radio de estao APPROACHING (m)
 STOPPING_D = 20     # Radio de estado STOPPING (m)
 STOP_T = 10         # Tiempo de estado STOP (s)
-RESUME_D = 70       # Longitud estado RESUME (m)
+RESUME_D = 10       # Longitud estado RESUME (m)
 
 IN_AREA_V = 20      # Velocidad de estado IN_AREA (k/h)
 APPROACHING_V = 10  # Velocidad de estado APPROACHING (k/h)
@@ -24,6 +24,6 @@ CRUISE_CONTROL = False       # Control de CRUISE activado
 
 TELEM_SRV_IP = "192.168.1.15"    # IP del servidor de telemetría
 TELEM_SRV_PORT ="9099"       # Puerto del servidor de telemetria
-TELEM_ACTIVE = True         # Esta la telemetría activa ??
+TELEM_ACTIVE = False         # Esta la telemetría activa ??
 TELEM_CONN_DELAY = 5        # Delay de reconexión de socket ??
 TELEM_FREQ = 2            # Con que frecuencia se actualiza la telemetria ??
