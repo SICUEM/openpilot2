@@ -1,6 +1,6 @@
 ACTIVATION_D = 10   # Distancia del punto de activación (m)
 
-CRUISE_V_MIN = 31   # Velocidad mínima de cruise (m)
+CRUISE_V_MIN = 30   # Velocidad mínima de cruise (m)
 
 IN_AREA_D = 60     # Radio de estado IN_AREA (m)
 APPROACHING_D = 50 # Radio de estao APPROACHING (m)
