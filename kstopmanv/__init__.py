@@ -3,10 +3,10 @@ ACTIVATION_D = 10   # Distancia del punto de activación (m)
 CRUISE_V_MIN = 31   # Velocidad mínima de cruise (m)
 
 IN_AREA_D = 60     # Radio de estado IN_AREA (m)
-APPROACHING_D = 30 # Radio de estao APPROACHING (m)
-STOPPING_D = 20     # Radio de estado STOPPING (m)
+APPROACHING_D = 50 # Radio de estao APPROACHING (m)
+STOPPING_D = 25     # Radio de estado STOPPING (m)
 STOP_T = 10         # Tiempo de estado STOP (s)
-RESUME_D = 30       # Longitud estado RESUME (m)
+RESUME_D = 50       # Longitud estado RESUME (m)
 
 IN_AREA_V = 20      # Velocidad de estado IN_AREA (k/h)
 APPROACHING_V = 10  # Velocidad de estado APPROACHING (k/h)
@@ -15,7 +15,7 @@ RESUME_V = 30       # Velocidad que se ha de
 RESUME_A = 1      # Aceleración aplicada en el 
                     # estado RESUME (m) (no se usa)
             
-STOP_V_THRES = 2    # Umbral de velocidad a 0 (k/h)
+STOP_V_THRES = 1    # Umbral de velocidad a 0 (k/h)
 
 STOP_POINTS = [100,400]    # Distancia a los puntos 
                                 # de parada
