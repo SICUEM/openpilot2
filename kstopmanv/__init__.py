@@ -12,7 +12,7 @@ IN_AREA_V = 20      # Velocidad de estado IN_AREA (k/h)
 APPROACHING_V = 10  # Velocidad de estado APPROACHING (k/h)
 RESUME_V = 30       # Velocidad que se ha de 
                     # alcanzar en estado RESUME
-RESUME_A = 0.5      # Aceleración aplicada en el 
+RESUME_A = 0.8      # Aceleración aplicada en el 
                     # estado RESUME (m) (no se usa)
             
 STOP_V_THRES = 1    # Umbral de velocidad a 0 (k/h)
