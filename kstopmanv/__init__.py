@@ -10,7 +10,7 @@ RESUME_D = 50       # Longitud estado RESUME (m)
 
 IN_AREA_V = 20      # Velocidad de estado IN_AREA (k/h)
 APPROACHING_V = 10  # Velocidad de estado APPROACHING (k/h)
-RESUME_V = 30       # Velocidad que se ha de 
+RESUME_V = 50       # Velocidad que se ha de 
                     # alcanzar en estado RESUME
 RESUME_A = 1      # Aceleración aplicada en el 
                     # estado RESUME (m) (no se usa)
