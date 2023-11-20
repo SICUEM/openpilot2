@@ -854,6 +854,8 @@ class Controls:
     self.is_metric = self.params.get_bool("IsMetric")
     self.experimental_mode = self.params.get_bool("ExperimentalMode") and self.CP.openpilotLongitudinalControl
 
+    self.reverse_acc_change = self.params.get_bool("ReverseAccChange")
+    
     # Sample data from sockets and get a carState
     CS = self.data_sample()
     cloudlog.timestamp("Data sampled")
