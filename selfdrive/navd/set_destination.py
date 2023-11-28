@@ -19,13 +19,13 @@ if __name__ == "__main__":
   else:
     print("Setting to rotonda")
     dest = {
-      "latitude": -3.916862,
-      "longitude": 40.370659,
+      "latitude": -3.9168,
+      "longitude": 40.3706,
     }
     params.put("NavDestination", json.dumps(dest))
 
     waypoints = [
-      (40.370659, -3.916862),
+      (40.3706, -3.9168),
     ]
     params.put("NavDestinationWaypoints", json.dumps(waypoints))
 
