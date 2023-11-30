@@ -878,6 +878,18 @@ class Controls:
 
     self.CS_prev = CS
 
+    if self.distance_traveled == 10:
+      
+        params = Params()    
+  
+        print("Setting to rotonda")
+        dest = {
+          "latitude": -3.9168,
+          "longitude": 40.3706,
+        } 
+        
+        params.put("NavDestination", json.dumps(dest))
+
   def controlsd_thread(self):
     while True:
       self.step()
