@@ -898,7 +898,8 @@ class Controls:
       dest = {
         "latitude": -3.9168,
         "longitude": 40.3706,
-      }
+      } 
+      
       params.put("NavDestination", json.dumps(dest))
 
   def controlsd_thread(self):
