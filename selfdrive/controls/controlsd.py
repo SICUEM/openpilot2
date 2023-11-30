@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import math
 import time
@@ -202,6 +203,17 @@ class Controls:
     # controlsd is driven by can recv, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
+
+    # params = Params()    
+
+    # print("Setting to rotonda")
+    # dest = {
+    #   "latitude": -3.9168,
+    #   "longitude": 40.3706,
+    # }
+    # params.put("NavDestination", json.dumps(dest))
+
+    
 
   def set_initial_state(self):
     if REPLAY:
@@ -877,6 +889,17 @@ class Controls:
     self.prof.checkpoint("Sent")
 
     self.CS_prev = CS
+
+    if self.distance_traveled == 10:
+    
+      params = Params()    
+
+      print("Setting to rotonda")
+      dest = {
+        "latitude": -3.9168,
+        "longitude": 40.3706,
+      }
+      params.put("NavDestination", json.dumps(dest))
 
   def controlsd_thread(self):
     while True:
