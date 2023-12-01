@@ -209,6 +209,12 @@ class Controls:
     params = Params()    
 
     print("Setting to rotonda")
+   # rotonda UEM
+   # dest = {
+   #      "latitude": 40.3706,
+   #      "longitude": -3.9168,
+   # }
+   # prueba
     dest = {
          "latitude": -3.9168,
          "longitude": 40.3706,
