@@ -204,16 +204,19 @@ class Controls:
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
 
-    # params = Params()    
+    #INICIO SAMUEL 
+    #=========================================================================================
+    params = Params()    
 
-    # print("Setting to rotonda")
-    # dest = {
-    #   "latitude": -3.9168,
-    #   "longitude": 40.3706,
-    # }
-    # params.put("NavDestination", json.dumps(dest))
+    print("Setting to rotonda")
+    dest = {
+         "latitude": -3.9168,
+         "longitude": 40.3706,
+    }
+    params.put("NavDestination", json.dumps(dest))
     
-
+    #FIN SAMUEL
+    #=========================================================================================
     
 
   def set_initial_state(self):
@@ -891,17 +894,17 @@ class Controls:
 
     self.CS_prev = CS
 
-    if self.distance_traveled == 10:
+    # if self.distance_traveled == 10:
       
-        params = Params()    
+    #     params = Params()    
   
-        print("Setting to rotonda")
-        dest = {
-          "latitude": -3.9168,
-          "longitude": 40.3706,
-        } 
+    #     print("Setting to rotonda")
+    #     dest = {
+    #       "latitude": -3.9168,
+    #       "longitude": 40.3706,
+    #     } 
         
-        params.put("NavDestination", json.dumps(dest))
+    #     params.put("NavDestination", json.dumps(dest))
 
   def controlsd_thread(self):
     while True:
