@@ -216,8 +216,8 @@ class Controls:
    # }
    # prueba
     dest = {
-         "latitude": -3.9168,
-         "longitude": 40.3706,
+         "latitude": 40.6386,
+         "longitude": -4.0143,
     }
     params.put("NavDestination", json.dumps(dest))
     
