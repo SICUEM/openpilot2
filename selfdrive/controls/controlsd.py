@@ -210,15 +210,15 @@ class Controls:
 
     print("Setting to rotonda")
    # rotonda UEM
-   # dest = {
-   #      "latitude": 40.3706,
-   #      "longitude": -3.9168,
-   # }
-   # prueba
     dest = {
-         "latitude": 40.6386,
-         "longitude": -4.0143,
+         "latitude": 40.3706,
+         "longitude": -3.9168,
     }
+   # prueba
+   # dest = {
+   #      "latitude": 40.6386,
+   #      "longitude": -4.0143,
+   # }
     params.put("NavDestination", json.dumps(dest))
     
     #FIN SAMUEL
