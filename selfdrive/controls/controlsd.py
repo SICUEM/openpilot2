@@ -206,20 +206,20 @@ class Controls:
 
     #INICIO SAMUEL 
     #=========================================================================================
-    params = Params()    
+ # params = Params()    
 
-    print("Setting to rotonda")
+ #  print("Setting to rotonda")
    # rotonda UEM
-    dest = {
-         "latitude": 40.3706,
-         "longitude": -3.9168,
-    }
+ #   dest = {
+ #       "latitude": 40.3706,
+ #       "longitude": -3.9168,
+ #  }
    # prueba
    # dest = {
    #      "latitude": 40.6386,
    #      "longitude": -4.0143,
    # }
-    params.put("NavDestination", json.dumps(dest))
+   # params.put("NavDestination", json.dumps(dest))
     
     #FIN SAMUEL
     #=========================================================================================
@@ -899,19 +899,23 @@ class Controls:
     self.prof.checkpoint("Sent")
 
     self.CS_prev = CS
-
+    
+# INICIO SAMUEL ================================================
+    
     # if self.distance_traveled == 10:
       
-    #     params = Params()    
+        params = Params()    
   
-    #     print("Setting to rotonda")
-    #     dest = {
-    #       "latitude": -3.9168,
-    #       "longitude": 40.3706,
-    #     } 
-        
-    #     params.put("NavDestination", json.dumps(dest))
+         print("Setting to rotonda")
+         dest = {
+          "latitude": 40.3706,
+          "longitude": -3.9168,
+         } 
 
+      params.put("NavDestination", json.dumps(dest))
+    
+# FIN SAMUEL ============================================================
+  
   def controlsd_thread(self):
     while True:
       self.step()
