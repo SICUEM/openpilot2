@@ -916,7 +916,7 @@ class Controls:
 # INICIO 2ª PARTE SAMUEL ================================================
 
     
-    if self.distance_traveled < 10
+    if self.distance_traveled < 10:
       flag_primera_parada = True
       flag_segunda_parada = False
       
