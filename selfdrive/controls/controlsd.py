@@ -66,6 +66,8 @@ punto1=[40.638772,-4.015896] #posicion 0 latitud,posicion 1 longitud
 punto2=[40.638743,-4.012463]
 
 coordenadas = [punto1,punto2]
+flag_primera_parada = True
+flag_segunda_parada = False
 
 #FINAL 1ª PARTE SAMUEL ================================================
 
@@ -915,8 +917,8 @@ class Controls:
     
 # INICIO 2ª PARTE SAMUEL ================================================
     
-    flag_primera_parada = True
-    flag_segunda_parada = False
+    # flag_primera_parada = True
+    # flag_segunda_parada = False
 
     if self.distance_traveled < 20 and flag_primera_parada:     
 
@@ -927,12 +929,12 @@ class Controls:
           "longitude": punto1[1],
         } 
       params.put("NavDestination", json.dumps(dest))
-      flag_primera_parada=False
+      flag_primera_parada = False
       flag_segunda_parada = True
         
     if self.distance_traveled > 180 and flag_segunda_parada:  
 
-      print("PRIMERA PARADA")
+      print("SEGUNDA PARADA")
 
       dest = {
           "latitude": punto2[0],
