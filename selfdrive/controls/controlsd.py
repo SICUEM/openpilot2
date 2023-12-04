@@ -916,12 +916,10 @@ class Controls:
 # INICIO 2ª PARTE SAMUEL ================================================
 
     
-    if self.distance_traveled < 10:
-      flag_primera_parada = True
-      flag_segunda_parada = False
-      
-
-    if self.distance_traveled > 20 and flag_primera_parada:     
+    flag_primera_parada = True
+    flag_segunda_parada = False
+    
+    if self.distance_traveled < 20 and flag_primera_parada:     
 
       print("PRIMERA PARADA")
 
