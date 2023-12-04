@@ -57,11 +57,15 @@ ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
 #INICIO 1ª PARTE SAMUEL ================================================
 params = Params()    
-punto1=[40.3721134,-3.9173561] #posicion 0 latitud,posicion 1 longitud
-punto2=[40.37065,-3.916834]
+# Coordenadas UEM
+# punto1=[40.3721134,-3.9173561] #posicion 0 latitud,posicion 1 longitud
+# punto2=[40.37065,-3.916834]
+
+# Coordenadas Prueba
+punto1=[40.638772,-4.015896] #posicion 0 latitud,posicion 1 longitud
+punto2=[40.638743,-4.012463]
 
 coordenadas = [punto1,punto2]
-
 
 #FINAL 1ª PARTE SAMUEL ================================================
 
@@ -914,7 +918,6 @@ class Controls:
     flag_primera_parada = True
     flag_segunda_parada = False
 
-    
     if self.distance_traveled < 20 and flag_primera_parada:     
 
       print("PRIMERA PARADA")
