@@ -55,6 +55,15 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
+#INICIO 1ª PARTE SAMUEL ================================================
+params = Params()    
+punto1=[40.3721134,-3.9173561] #posicion 0 latitud,posicion 1 longitud
+punto2=[40.37065,-3.916834]
+
+coordenadas = [punto1,punto2]
+
+
+#FINAL 1ª PARTE SAMUEL ================================================
 
 class Controls:
   def __init__(self, CI=None):
@@ -900,18 +909,37 @@ class Controls:
 
     self.CS_prev = CS
     
-# INICIO SAMUEL ================================================
+# INICIO 2ª PARTE SAMUEL ================================================
     
-    if self.distance_traveled > 50 and self.distance_traveled < 70:     
-      params = Params()    
-      print("Setting to rotonda")
+    flag_primera_parada = True
+    flag_segunda_parada = False
+
+    
+    if self.distance_traveled < 20 and flag_primera_parada:     
+
+      print("PRIMERA PARADA")
+
       dest = {
-          "latitude": 40.3706,
-          "longitude": -3.9168,
-         } 
+          "latitude": punto1[0],
+          "longitude": punto1[1],
+        } 
       params.put("NavDestination", json.dumps(dest))
+      flag_primera_parada=False
+      flag_segunda_parada = True
+        
+    if self.distance_traveled > 180 and flag_segunda_parada:  
+
+      print("PRIMERA PARADA")
+
+      dest = {
+          "latitude": punto2[0],
+          "longitude": punto2[1],
+        } 
+      params.put("NavDestination", json.dumps(dest))
+      flag_segunda_parada = False
+
     
-# FIN SAMUEL ============================================================
+# FIN 2ªPARTE SAMUEL ============================================================
   
   def controlsd_thread(self):
     while True:
