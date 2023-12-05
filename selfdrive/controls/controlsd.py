@@ -930,7 +930,7 @@ class Controls:
       # flag_segunda_parada = True
         
     # if self.distance_traveled > 180 and flag_segunda_parada:  
-    if self.distance_traveled > 190 and self.distance_traveled < 200:    
+    if self.distance_traveled > 198 and self.distance_traveled < 200:    
       # print("SEGUNDA PARADA")
       dest = {
           "latitude": punto2[0],
