@@ -915,33 +915,29 @@ class Controls:
     
 # INICIO 2ª PARTE SAMUEL ================================================
 
+    # flag_primera_parada = True
+    # flag_segunda_parada = False
     
-    flag_primera_parada = True
-    flag_segunda_parada = False
-    
-    if self.distance_traveled < 20 and flag_primera_parada:     
-
-      print("PRIMERA PARADA")
-
+    # if self.distance_traveled < 20 and flag_primera_parada:     
+    if self.distance_traveled < 10:     
+      # print("PRIMERA PARADA")
       dest = {
           "latitude": punto1[0],
           "longitude": punto1[1],
         } 
       params.put("NavDestination", json.dumps(dest))
-      flag_primera_parada = False
-      flag_segunda_parada = True
+      # flag_primera_parada = False
+      # flag_segunda_parada = True
         
-    if self.distance_traveled > 180 and flag_segunda_parada:  
-
-      print("SEGUNDA PARADA")
-
+    # if self.distance_traveled > 180 and flag_segunda_parada:  
+    if self.distance_traveled > 190 and self.distance_traveled < 200:    
+      # print("SEGUNDA PARADA")
       dest = {
           "latitude": punto2[0],
           "longitude": punto2[1],
         } 
       params.put("NavDestination", json.dumps(dest))
-      flag_segunda_parada = False
-
+      # flag_segunda_parada = False
     
 # FIN 2ªPARTE SAMUEL ============================================================
   
