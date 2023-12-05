@@ -942,7 +942,7 @@ class Controls:
       params.put("NavDestination", json.dumps(dest))
       # flag_segunda_parada = False
      
-   if self.distance_traveled > 449 and self.distance_traveled < 450:    
+    if self.distance_traveled > 449 and self.distance_traveled < 450:    
       # print("TERCERA PARADA")
       dest = {
           "latitude": punto3[0],
