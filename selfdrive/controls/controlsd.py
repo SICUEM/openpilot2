@@ -58,14 +58,17 @@ ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 #INICIO 1ª PARTE SAMUEL ================================================
 params = Params()    
 # Coordenadas UEM
-# punto1=[40.3721134,-3.9173561] #posicion 0 latitud,posicion 1 longitud
-# punto2=[40.37065,-3.916834]
+# punto1=[40.371704,-3.916577] #posicion 0 latitud,posicion 1 longitud
+# punto2=[40.372266,-3.917543]
+# punto3=[40.373224,-3.917760]
+
 
 # Coordenadas Prueba
 punto1=[40.638772,-4.015896] #posicion 0 latitud,posicion 1 longitud
 punto2=[40.638743,-4.012463]
+punto3=[40.640537,-4.010876]
 
-coordenadas = [punto1,punto2]
+coordenadas = [punto1,punto2,punto3]
 
 #FINAL 1ª PARTE SAMUEL ================================================
 
@@ -919,7 +922,7 @@ class Controls:
     # flag_segunda_parada = False
     
     # if self.distance_traveled < 20 and flag_primera_parada:     
-    if self.distance_traveled < 10:     
+    if self.distance_traveled < 2:     
       # print("PRIMERA PARADA")
       dest = {
           "latitude": punto1[0],
@@ -930,7 +933,7 @@ class Controls:
       # flag_segunda_parada = True
         
     # if self.distance_traveled > 180 and flag_segunda_parada:  
-    if self.distance_traveled > 198 and self.distance_traveled < 200:    
+    if self.distance_traveled > 199 and self.distance_traveled < 200:    
       # print("SEGUNDA PARADA")
       dest = {
           "latitude": punto2[0],
@@ -938,7 +941,15 @@ class Controls:
         } 
       params.put("NavDestination", json.dumps(dest))
       # flag_segunda_parada = False
-    
+     
+   if self.distance_traveled > 449 and self.distance_traveled < 450:    
+      # print("TERCERA PARADA")
+      dest = {
+          "latitude": punto3[0],
+          "longitude": punto3[1],
+        } 
+      params.put("NavDestination", json.dumps(dest))
+      
 # FIN 2ªPARTE SAMUEL ============================================================
   
   def controlsd_thread(self):
