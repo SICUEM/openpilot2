@@ -3,7 +3,8 @@ import json
 import math
 import os
 import threading
-
+from datetime import datetime
+import time
 import requests
 
 import cereal.messaging as messaging
@@ -51,6 +52,11 @@ class RouteEngine:
     if "MAPBOX_TOKEN" in os.environ:
       self.mapbox_token = os.environ["MAPBOX_TOKEN"]
       self.mapbox_host = "https://api.mapbox.com"
+      #---------------------------------------------------------Adrian
+      my_date = datetime.fromtimestamp(time.time())
+      self.doc = open("mapBoxDATA_"+my_date.strftime("%Y%m%d_%H%M")+".txt", 'a')
+      #---------------------------------------------------------Adrian
+
     else:
       try:
         self.mapbox_token = Api(self.params.get("DongleId", encoding='utf8')).get_token(expiry_hours=4 * 7 * 24)
@@ -154,6 +160,19 @@ class RouteEngine:
       resp.raise_for_status()
 
       r = resp.json()
+      #---------------------------------------------------------Adrian
+      self.doc.write("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+      self.doc.write("URL a MAPBOX_________________________________________________________________________\n")
+      self.doc.write(url)
+      self.doc.write("\nPARAMS a MAPBOX_________________________________________________________________________\n")
+      self.doc.write(str(params))
+      self.doc.write("\nRespuesta JSON de mapbox_________________________________________________________________________\n")
+      my_date = datetime.fromtimestamp(time.time())
+      self.doc.write(my_date.strftime("%Y%m%d_%H%M"))
+      self.doc.write(str(r))
+      self.doc.write("______________________________________________________________________________")
+      self.doc.write("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+      #---------------------------------------------------------Adrian
       if len(r['routes']):
         self.route = r['routes'][0]['legs'][0]['steps']
         self.route_geometry = []
