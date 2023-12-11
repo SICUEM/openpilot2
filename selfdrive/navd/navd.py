@@ -135,6 +135,19 @@ class RouteEngine:
       'alternatives': 'false',
       'language': lang,
     }
+    #---------------------------------------------------------Adrian
+
+    params2 = {
+      'access_token': self.mapbox_token,
+      'annotations': 'maxspeed,distance,duration',
+      'geometries': 'geojson',
+      'overview': 'full',
+      'steps': 'true',
+      'banner_instructions': 'true',
+      'alternatives': 'false',
+      'language': lang,
+    }
+    #---------------------------------------------------------Adrian
 
     # TODO: move waypoints into NavDestination param?
     waypoints = self.params.get('NavDestinationWaypoints', encoding='utf8')
@@ -155,6 +168,8 @@ class RouteEngine:
     url = self.mapbox_host + '/directions/v5/mapbox/driving-traffic/' + coords_str
     try:
       resp = requests.get(url, params=params, timeout=10)
+      #resp = requests.get(url, params=params2, timeout=10)
+
       if resp.status_code != 200:
         cloudlog.event("API request failed", status_code=resp.status_code, text=resp.text, error=True)
       resp.raise_for_status()
