@@ -187,7 +187,9 @@ class RouteEngine:
       self.doc.write(str(r))
       self.doc.write("______________________________________________________________________________")
       self.doc.write("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+      #self.doc.close()
       #---------------------------------------------------------Adrian
+      
       if len(r['routes']):
         self.route = r['routes'][0]['legs'][0]['steps']
         self.route_geometry = []
