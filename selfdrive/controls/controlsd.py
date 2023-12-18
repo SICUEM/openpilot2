@@ -479,7 +479,7 @@ class Controls:
   def state_transition(self, CS):
     """Compute conditional state transitions and execute actions on state transitions"""
 
-    self.v_cruise_helper.update_v_cruise(CS, self.enabled, self.is_metric, self.reverse_acc_change)
+    self.v_cruise_helper.update_v_cruise(CS, self.enabled, self.is_metric)
 
     # decrement the soft disable timer at every step, as it's reset on
     # entrance in SOFT_DISABLING state
