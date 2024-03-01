@@ -336,8 +336,8 @@ class Controls:
     if (CS.gasPressed and not self.CS_prev.gasPressed and self.disengage_on_accelerator):
       self.events.add(EventName.pedalPressed)
     
-    if CS.brakePressed and CS.standstill:
-      self.events.add(EventName.preEnableStandstill)
+    #if CS.brakePressed and CS.standstill:
+     # self.events.add(EventName.preEnableStandstill)
 
 
 # FIN =======Javier: MODIFICACION DEL PEDAL DEL FRENO =========================================== #
