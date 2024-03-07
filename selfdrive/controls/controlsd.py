@@ -478,27 +478,27 @@ Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos 
 
   '''
   # Cola
-  info_tlmtry_q = queue.Queue()
+    info_tlmtry_q = queue.Queue()
   
   # Colocar mensaje en la cola antes de iniciar el productor
-  info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
-  info_tlmtry_q.put({"accelerador": "0.4"})
-  info_tlmtry_q.put({"freno": "0.0"})
-  info_tlmtry_q.put({"proximo destino": "a 10km"})
-  info_tlmtry_q.put({"volante": "30 grados"})
+    info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
+    info_tlmtry_q.put({"accelerador": "0.4"})
+    info_tlmtry_q.put({"freno": "0.0"})
+    info_tlmtry_q.put({"proximo destino": "a 10km"})
+    info_tlmtry_q.put({"volante": "30 grados"})
   
   # Imprimir el tamaño de la cola antes de crear el productor
   ##print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
   
   # Crear publisher y enviar mensaje de prueba
-  publisher = KtlmtryPub(
+    publisher = KtlmtryPub(
       q=info_tlmtry_q,
       topic='teleme',
       kfk_server='195.235.211.197:9092'
-    )
-  url = 'http://195.235.211.197:3080/telemetry'
-  valor = info_tlmtry_q[0]
-  response = requests.post(url, data={'clave': valor})
+      )
+    url = 'http://195.235.211.197:3080/telemetry'
+    valor = info_tlmtry_q[0]
+    response = requests.post(url, data={'clave': valor})
 
   #if response.status_code == 200:
    # print('Valor enviado correctamente!')
