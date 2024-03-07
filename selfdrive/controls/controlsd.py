@@ -505,7 +505,7 @@ if response.status_code == 200:
 else:
     print('Error al enviar el valor. Código de estado:', response.status_code)
 
-  def data_sample(self):
+def data_sample(self):
     """Receive data from sockets and update carState"""
 
     # Update carState from CAN
