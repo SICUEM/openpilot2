@@ -458,7 +458,8 @@ class Controls:
 
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
-
+        
+  #=====Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos sobre Kafka =========
   # Cola
     info_tlmtry_q = queue.Queue()
   
@@ -470,7 +471,7 @@ class Controls:
     info_tlmtry_q.put({"volante": "30 grados"})
   
   # Imprimir el tamaño de la cola antes de crear el productor
-  ##print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
+    print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
   
   # Crear publisher y enviar mensaje de prueba
     publisher = KtlmtryPub(
