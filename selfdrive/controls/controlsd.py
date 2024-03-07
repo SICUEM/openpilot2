@@ -488,24 +488,24 @@ Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos 
   info_tlmtry_q.put({"volante": "30 grados"})
   
   # Imprimir el tamaño de la cola antes de crear el productor
-  print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
+  ##print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
   
   # Crear publisher y enviar mensaje de prueba
   publisher = KtlmtryPub(
       q=info_tlmtry_q,
       topic='teleme',
       kfk_server='195.235.211.197:9092'
-  )
-url = 'http://195.235.211.197:3080/telemetry'
-valor = info_tlmtry_q[0]
-response = requests.post(url, data={'clave': valor})
+    )
+  url = 'http://195.235.211.197:3080/telemetry'
+  valor = info_tlmtry_q[0]
+  response = requests.post(url, data={'clave': valor})
 
-if response.status_code == 200:
-    print('Valor enviado correctamente!')
-else:
-    print('Error al enviar el valor. Código de estado:', response.status_code)
+  #if response.status_code == 200:
+   # print('Valor enviado correctamente!')
+  #else:
+  #  print('Error al enviar el valor. Código de estado:', response.status_code)
 
-def data_sample(self):
+  def data_sample(self):
     """Receive data from sockets and update carState"""
 
     # Update carState from CAN
