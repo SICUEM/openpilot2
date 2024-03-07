@@ -7,7 +7,8 @@ import threading
 from typing import SupportsFloat
 import json
 import queue
-from kafkalib.kafka.producer import KafkaProducer
+#Nueva linea para Kafka
+from openpilot.kafkalib.kafka.producer import KafkaProducer
 
 from cereal import car, log
 from openpilot.common.numpy_fast import clip
@@ -489,7 +490,7 @@ class Controls:
   publisher = KtlmtryPub(
       q=info_tlmtry_q,
       topic='teleme',
-      kfk_server='localhost:9092'
+      kfk_server='195.235.211.197:9092'
   )
 
 
