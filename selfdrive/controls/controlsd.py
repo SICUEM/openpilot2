@@ -3,12 +3,14 @@ import os
 import math
 import time
 import threading
+import requests
+
 
 from typing import SupportsFloat
 import json
 import queue
 #Nueva linea para Kafka
-from openpilot.kafkalib.kafka.producer import KafkaProducer
+#from openpilot.kafkalib.kafka.producer import KafkaProducer
 
 from cereal import car, log
 from openpilot.common.numpy_fast import clip
@@ -470,6 +472,8 @@ class Controls:
 \___ \ / _ \ | |\/| | | | |  _| | |     / /  | | | | | |_) | |  _|  _|
  ___) / ___ \| |  | | |_| | |___| |___ / / |_| | |_| |  _ <| |_| | |___
 |____/_/   \_\_|  |_|\___/|_____|_____/_/ \___/ \___/|_| \_\\____|_____|
+
+Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos sobre Kafka
  =====================================================================
 
   '''
@@ -477,7 +481,7 @@ class Controls:
   info_tlmtry_q = queue.Queue()
   
   # Colocar mensaje en la cola antes de iniciar el productor
-  info_tlmtry_q.put({"velocidad": CS.vEgo + " km/h"})
+  info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
   info_tlmtry_q.put({"accelerador": "0.4"})
   info_tlmtry_q.put({"freno": "0.0"})
   info_tlmtry_q.put({"proximo destino": "a 10km"})
@@ -492,7 +496,14 @@ class Controls:
       topic='teleme',
       kfk_server='195.235.211.197:9092'
   )
+url = 'http://195.235.211.197:3080/telemetry'
+valor = info_tlmtry_q[0]
+response = requests.post(url, data={'clave': valor})
 
+if response.status_code == 200:
+    print('Valor enviado correctamente!')
+else:
+    print('Error al enviar el valor. Código de estado:', response.status_code)
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
