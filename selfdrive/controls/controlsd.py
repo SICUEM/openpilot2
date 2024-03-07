@@ -495,15 +495,15 @@ Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos 
       q=info_tlmtry_q,
       topic='teleme',
       kfk_server='195.235.211.197:9092'
-      )
+    )
     url = 'http://195.235.211.197:3080/telemetry'
     valor = info_tlmtry_q[0]
     response = requests.post(url, data={'clave': valor})
 
-  #if response.status_code == 200:
-   # print('Valor enviado correctamente!')
-  #else:
-  #  print('Error al enviar el valor. Código de estado:', response.status_code)
+    if response.status_code == 200:
+      print('Valor enviado correctamente!')
+    else:
+      print('Error al enviar el valor. Código de estado:', response.status_code)
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
