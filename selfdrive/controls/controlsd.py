@@ -71,28 +71,28 @@ class KtlmtryPub:
             bootstrap_servers=[kfk_server],
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
-        print(f"Conectado a Kafka en {kfk_server}")
+        # print(f"Conectado a Kafka en {kfk_server}")
 
         # Imprimir el tamaño de la cola
-        print(f"Tamaño de la cola antes de enviar mensajes: {self._q.qsize()}")
+        # print(f"Tamaño de la cola antes de enviar mensajes: {self._q.qsize()}")
 
         # Enviar mensajes
         while not q.empty():
             try:
                 msg = self._q.get_nowait()
-                print(f'Enviando mensaje: {msg}')
+                # print(f'Enviando mensaje: {msg}')
                 # Enviar el mensaje al topic
                 self._producer.send(self._topic, value=msg)
                 self._producer.flush()
             except Exception as e:
-                print(f"Error al enviar mensaje: {e}")
+                # print(f"Error al enviar mensaje: {e}")
             except queue.Empty:
                 break
 
         # Imprimir el tamaño de la cola después de enviar mensajes
-        print(f"Tamaño de la cola después de enviar mensajes: {self._q.qsize()}")
+        # print(f"Tamaño de la cola después de enviar mensajes: {self._q.qsize()}")
 
-        print("Todos los mensajes han sido enviados.")
+        # print("Todos los mensajes han sido enviados.")
         self._producer.close()
 
 
@@ -471,7 +471,7 @@ class Controls:
     info_tlmtry_q.put({"volante": "30 grados"})
   
   # Imprimir el tamaño de la cola antes de crear el productor
-    print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
+    # print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
   
   # Crear publisher y enviar mensaje de prueba
     publisher = KtlmtryPub(
@@ -483,10 +483,10 @@ class Controls:
     valor = info_tlmtry_q[0]
     response = requests.post(url, data={'clave': valor})
 
-    if response.status_code == 200:
-      print('Valor enviado correctamente!')
-    else:
-      print('Error al enviar el valor. Código de estado:', response.status_code)
+    # if response.status_code == 200:
+      # print('Valor enviado correctamente!')
+    # else:
+      # print('Error al enviar el valor. Código de estado:', response.status_code)
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
