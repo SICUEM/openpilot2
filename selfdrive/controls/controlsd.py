@@ -31,7 +31,7 @@ from openpilot.selfdrive.controls.lib.latcontrol_pid import LatControlPID
 from openpilot.selfdrive.controls.lib.latcontrol_angle import LatControlAngle, STEER_ANGLE_SATURATION_THRESHOLD
 from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.events import Events, ET
-from openpilot.selfdrive.controls.lib.alertmanager import AlertManager, set_offroad_alert, set_alert
+from openpilot.selfdrive.controls.lib.alertmanager import AlertManager, set_offroad_alert
 from openpilot.selfdrive.controls.lib.vehicle_model import VehicleModel
 from openpilot.system.hardware import HARDWARE
 
@@ -491,7 +491,7 @@ class Controls:
         # print('Error al enviar el valor. Código de estado:', response.status_code)
   except Exception as e:
     mensg = "Se ha producido una excepción: " +  e
-    set_alert(mensg)
+    set_offroad_alert(mensg)
   def data_sample(self):
     """Receive data from sockets and update carState"""
 
