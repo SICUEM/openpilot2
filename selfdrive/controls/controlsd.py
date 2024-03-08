@@ -85,7 +85,7 @@ class KtlmtryPub:
                 self._producer.send(self._topic, value=msg)
                 self._producer.flush()
             except Exception as e:
-                print(f"Error al enviar mensaje: {e}")
+                print("Error al enviar mensaje: {e}")
             except queue.Empty:
                 break
 
