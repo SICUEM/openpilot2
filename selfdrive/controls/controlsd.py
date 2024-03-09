@@ -492,7 +492,8 @@ class Controls:
         # print('Error al enviar el valor. Código de estado:', response.status_code)
   except Exception as e:
     mensg = "Se ha producido una excepción: " +  str(e)
-    set_offroad_alert(mensg)
+    #set_offroad_alert(mensg)
+    print(mensg)
   def data_sample(self):
     """Receive data from sockets and update carState"""
 
