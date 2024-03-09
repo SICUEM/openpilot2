@@ -466,7 +466,8 @@ class Controls:
       info_tlmtry_q = queue.Queue()
     
     # Colocar mensaje en la cola antes de iniciar el productor
-      info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
+    # info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
+      info_tlmtry_q.put({"velocidad": "20 km/h"})  
       info_tlmtry_q.put({"accelerador": "0.4"})
       info_tlmtry_q.put({"freno": "0.0"})
       info_tlmtry_q.put({"proximo destino": "a 10km"})
