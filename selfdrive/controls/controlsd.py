@@ -459,14 +459,14 @@ class Controls:
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
         
-  
+  velo = self.sm['gpsLocationExternal']
   #=====Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos sobre Kafka =========
   try:
     # Cola
       info_tlmtry_q = queue.Queue()
     
     # Colocar mensaje en la cola antes de iniciar el productor
-    # info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
+      info_tlmtry_q.put({"velocidad": str(velo) + " km/h"})
       info_tlmtry_q.put({"velocidad": "20 km/h"})  
       info_tlmtry_q.put({"accelerador": "0.4"})
       info_tlmtry_q.put({"freno": "0.0"})
