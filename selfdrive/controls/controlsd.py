@@ -459,14 +459,14 @@ class Controls:
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
         
-  long_plan = self.sm['longitudinalPlan']
+  
   #=====Cambios agregados: V2 de telemetria. Cambios para request TCP de envio de datos sobre Kafka =========
   try:
     # Cola
       info_tlmtry_q = queue.Queue()
-     
+    
     # Colocar mensaje en la cola antes de iniciar el productor
-      info_tlmtry_q.put({"velocidad": str(long_plan) + " km/h"})
+    # info_tlmtry_q.put({"velocidad": str(CS.vEgo) + " km/h"})
       info_tlmtry_q.put({"velocidad": "20 km/h"})  
       info_tlmtry_q.put({"accelerador": "0.4"})
       info_tlmtry_q.put({"freno": "0.0"})
@@ -657,7 +657,7 @@ class Controls:
         self.LaC.update_live_torque_params(torque_params.latAccelFactorFiltered, torque_params.latAccelOffsetFiltered,
                                            torque_params.frictionCoefficientFiltered)
 
-    
+    long_plan = self.sm['longitudinalPlan']
     model_v2 = self.sm['modelV2']
 
     CC = car.CarControl.new_message()
