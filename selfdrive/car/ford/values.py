@@ -86,7 +86,7 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
 class CAR(Platforms):
   BRONCO_SPORT_MK1 = FordPlatformConfig(
     "FORD BRONCO SPORT 1ST GEN",
-    FordCarInfo("Ford Bronco Sport 2021-22"),
+    [FordCarInfo("Ford Bronco Sport 2021-23")],
     CarSpecs(mass=1625, wheelbase=2.67, steerRatio=17.7),
   )
   ESCAPE_MK4 = FordPlatformConfig(
@@ -114,14 +114,14 @@ class CAR(Platforms):
   F_150_MK14 = FordCANFDPlatformConfig(
     "FORD F-150 14TH GEN",
     [
-      FordCarInfo("Ford F-150 2023", "Co-Pilot360 Active 2.0"),
-      FordCarInfo("Ford F-150 Hybrid 2023", "Co-Pilot360 Active 2.0"),
+      FordCarInfo("Ford F-150 2022-23", "Co-Pilot360 Active 2.0"),
+      FordCarInfo("Ford F-150 Hybrid 2022-23", "Co-Pilot360 Active 2.0"),
     ],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
   F_150_LIGHTNING_MK1 = FordCANFDPlatformConfig(
     "FORD F-150 LIGHTNING 1ST GEN",
-    FordCarInfo("Ford F-150 Lightning 2021-23", "Co-Pilot360 Active 2.0"),
+    [FordCarInfo("Ford F-150 Lightning 2021-23", "Co-Pilot360 Active 2.0")],
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
   FOCUS_MK4 = FordPlatformConfig(
@@ -137,14 +137,14 @@ class CAR(Platforms):
     [
       FordCarInfo("Ford Maverick 2022", "LARIAT Luxury"),
       FordCarInfo("Ford Maverick Hybrid 2022", "LARIAT Luxury"),
-      FordCarInfo("Ford Maverick 2023", "Co-Pilot360 Assist"),
-      FordCarInfo("Ford Maverick Hybrid 2023", "Co-Pilot360 Assist"),
+      FordCarInfo("Ford Maverick 2023-24", "Co-Pilot360 Assist"),
+      FordCarInfo("Ford Maverick Hybrid 2023-24", "Co-Pilot360 Assist"),
     ],
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
     "FORD MUSTANG MACH-E 1ST GEN",
-    FordCarInfo("Ford Mustang Mach-E 2021-23", "Co-Pilot360 Active 2.0"),
+    [FordCarInfo("Ford Mustang Mach-E 2021-23", "Co-Pilot360 Active 2.0")],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
 
