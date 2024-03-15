@@ -957,19 +957,27 @@ class Controls:
       if self.CP.notCar:
         self.joystick_mode = self.params.get_bool("JoystickDebugMode")
       time.sleep(0.1)
-
+#==================================MODIFICADA LA FUNCION PARA MANDAR DATOS AL SERVIDOR ====== ADRI + JORGE + SAMU======================================
   def controlsd_thread(self):
+readMessagge= ReadMessagefromSub()
+    readMessagge.setCanalControlsd(self.sm)
+ 
     e = threading.Event()
     t = threading.Thread(target=self.params_thread, args=(e, ))
     try:
       t.start()
       while True:
+        readMessagge.enviarAArchivo()
+        #readMessagge.escribirEnTxt()
+        #self.writeInLogs()
         self.step()
         self.rk.monitor_time()
+        self.prof.display()
+ 
     except SystemExit:
       e.set()
       t.join()
-
+#==========================================================0=======END====================================================================
 
 def main():
   controls = Controls()
