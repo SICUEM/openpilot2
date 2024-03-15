@@ -467,7 +467,7 @@ class Controls:
     # Colocar mensaje en la cola antes de iniciar el productor
 
   #========================== Implementación de Velo directamente en la variable "velocidad" ======= Jorge + Samuel ===========================================================================================
-      info_tlmtry_q.put({"velocidad": str(round(random.uniform(0, 1), 3)))})
+      info_tlmtry_q.put({"velocidad": str(round(random.uniform(0, 1), 3))})
       info_tlmtry_q.put({"velocidad": "20 km/h"})  
       info_tlmtry_q.put({"accelerador": "0.4"})
       info_tlmtry_q.put({"freno": "0.0"})
