@@ -465,18 +465,16 @@ class Controls:
       info_tlmtry_q = queue.Queue()
     
     # Colocar mensaje en la cola antes de iniciar el productor
-  """
-  ========================== Implementación de Velo directamente en la variable "velocidad" ======= Jorge + Samuel ===========================================================================================
-  """
+
+  #========================== Implementación de Velo directamente en la variable "velocidad" ======= Jorge + Samuel ===========================================================================================
       info_tlmtry_q.put({"velocidad": str(self.sm['gpsLocationExternal'])})
       info_tlmtry_q.put({"velocidad": "20 km/h"})  
       info_tlmtry_q.put({"accelerador": "0.4"})
       info_tlmtry_q.put({"freno": "0.0"})
       info_tlmtry_q.put({"proximo destino": "a 10km"})
       info_tlmtry_q.put({"volante": "30 grados"})
-  """
-  ================================================================================================= END UPDATE ===========================================================================================
-  """    
+  # ================================================================================================= END UPDATE ===========================================================================================
+  
     # Imprimir el tamaño de la cola antes de crear el productor
       # print(f"Tamaño de la cola antes de crear el productor: {info_tlmtry_q.qsize()}")
     
