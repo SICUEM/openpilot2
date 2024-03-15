@@ -959,7 +959,7 @@ class Controls:
       time.sleep(0.1)
 #==================================MODIFICADA LA FUNCION PARA MANDAR DATOS AL SERVIDOR ====== ADRI + JORGE + SAMU======================================
   def controlsd_thread(self):
-readMessagge= ReadMessagefromSub()
+    readMessagge= ReadMessagefromSub()
     readMessagge.setCanalControlsd(self.sm)
  
     e = threading.Event()
