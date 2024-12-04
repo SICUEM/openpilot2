@@ -1,0 +1,7 @@
+iniciamos instalacion
+Hay conexión a Internet.
+La biblioteca paho-mqtt no está instalada. Instalando...
+/home/mixi/PycharmProjects/openpilot-master/sicuem/sic_install.sh: line 24: /usr/local/pyenv/versions/3.11.4/bin/python3: No such file or directory
+iniciamos instalacion
+Hay conexión a Internet.
+La biblioteca paho-mqtt ya está instalada.

@@ -1,0 +1,13 @@
+{
+  "config": {
+    "speed": {
+      "value": "2.0"
+    },
+    "send": {
+      "value": "1"
+    },
+    "IpServer": {
+      "value": "195.235.211.197"
+    }
+  }
+}
