@@ -30,7 +30,8 @@ Last updated: July 29, 2024
 #include <cmath>
 #include <QMouseEvent>
 #include <QPainterPath>
-
+#include <string>
+#include <cstdlib>
 #include "common/swaglog.h"
 #include "selfdrive/ui/qt/onroad/buttons.h"
 #include "selfdrive/ui/qt/util.h"
@@ -532,11 +533,17 @@ void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
   if (!reversing) {
     // ####### 1 ROW #######
     QRect bar_rect1(rect().left(), rect().bottom() - 60, rect().width(), 61);
+        QRect bar_rect2(rect().left()+450, rect().bottom() - 120, rect().width(), 61);
+
     if (!splitPanelVisible && devUiInfo == 2) {
       p.setPen(Qt::NoPen);
       p.setBrush(QColor(0, 0, 0, 100));
       p.drawRect(bar_rect1);
+    p.drawRect(bar_rect2);
       drawNewDevUi2(p, bar_rect1.left(), bar_rect1.center().y());
+
+      drawNewDevUi3(p, bar_rect2.left()+450, bar_rect1.center().y()-60);
+
     }
 
     // ####### 1 COLUMN ########
@@ -827,6 +834,38 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
 
   return 430;
 }
+
+
+//Adri
+void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
+  if (true) {  // Si hay alerta
+    int rw = 550;
+
+
+// Obtener las distancias desde Params
+    std::string roundabout_str = Params().get("roundabout_distance");
+    std::string intersection_str = Params().get("intersection_distance");
+    std::string merge_str = Params().get("merge_distance");
+
+    // Convertir las cadenas a flotantes
+    float roundabout_distance = roundabout_str.empty() ? -1.0f : std::atof(roundabout_str.c_str());
+    float intersection_distance = intersection_str.empty() ? -1.0f : std::atof(intersection_str.c_str());
+    float merge_distance = merge_str.empty() ? -1.0f : std::atof(merge_str.c_str());
+
+
+    // Distancias hacia las maniobras
+    UiElement roundaboutDistance = DeveloperUi::getRoundaboutDistance(roundabout_distance);
+    rw += drawNewDevUi(p, rw, y, roundaboutDistance.value, roundaboutDistance.label, roundaboutDistance.units, roundaboutDistance.color);
+
+    UiElement intersectionDistance = DeveloperUi::getIntersectionDistance(intersection_distance);
+    rw += drawNewDevUi(p, rw, y, intersectionDistance.value, intersectionDistance.label, intersectionDistance.units, intersectionDistance.color);
+
+    UiElement mergeDistance = DeveloperUi::getMergeDistance(merge_distance);
+    rw += drawNewDevUi(p, rw, y, mergeDistance.value, mergeDistance.label, mergeDistance.units, mergeDistance.color);
+  }
+}
+
+//Adri fin
 
 void AnnotatedCameraWidgetSP::drawNewDevUi2(QPainter &p, int x, int y) {
   int rw = 90;

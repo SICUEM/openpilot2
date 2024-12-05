@@ -485,6 +485,11 @@ class SicMqttHilo2:
           intersection_distance = closest_maneuvers["intersection"]["distance"]
           merge_distance = closest_maneuvers["merge"]["distance"]
 
+          # Convertir los valores flotantes a cadenas antes de almacenarlos
+          self.params.put("roundabout_distance", str(roundabout_distance))
+          self.params.put("intersection_distance", str(intersection_distance))
+          self.params.put("merge_distance", str(merge_distance))
+
           # Procesar distancias, reemplazando valores no válidos con -1
           distances = {
             "roundabout": roundabout_distance if roundabout_distance != float('inf') else -1,
@@ -510,9 +515,13 @@ class SicMqttHilo2:
           print(f"Distancias enviadas: {distances}")
           self.mqttc.publish("telemetry_mqtt/mapbox_status", contenido, qos=0)
 
+
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
     else:
+      self.params.put("roundabout_distance", "-1")
+      self.params.put("intersection_distance", "-1")
+      self.params.put("merge_distance", "-1")
       print("Archivo Mapbox no encontrado. Todas las distancias configuradas a -1.")
 
   def calculate_distance(self, lat1, lon1, lat2, lon2):

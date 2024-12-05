@@ -43,4 +43,13 @@ public:
   static UiElement getSteeringTorqueEps(float steering_torque_eps);
   static UiElement getBearingDeg(float bearing_accuracy_deg, float bearing_deg);
   static UiElement getAltitude(float gps_accuracy, float altitude);
+
+  // Adri
+static UiElement getVEgo(float v_ego, bool is_metric, const QString &speed_unit);
+static UiElement getLatitude(float latitude);
+static UiElement getLongitude(float longitude);
+static UiElement getRoundaboutDistance(float distance);  // Distancia hacia rotonda
+static UiElement getIntersectionDistance(float distance);  // Distancia hacia intersección
+static UiElement getMergeDistance(float distance);  // Distancia hacia merge
+
 };

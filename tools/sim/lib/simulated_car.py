@@ -52,8 +52,8 @@ class SimulatedCar:
       "INTERCEPTOR_GAS": simulator_state.user_gas * 2**12,
       "INTERCEPTOR_GAS2": simulator_state.user_gas * 2**12,
     }
-    checksum = crc8_pedal(self.packer.make_can_msg("GAS_SENSOR", 0, values)[2][:-1])
-    values["CHECKSUM_PEDAL"] = checksum
+    #checksum = crc8_pedal(self.packer.make_can_msg("GAS_SENSOR", 0, values)[2][:-1])
+    #values["CHECKSUM_PEDAL"] = checksum
     msg.append(self.packer.make_can_msg("GAS_SENSOR", 0, values))
 
     msg.append(self.packer.make_can_msg("GEARBOX", 0, {"GEAR": 4, "GEAR_SHIFTER": 8}))

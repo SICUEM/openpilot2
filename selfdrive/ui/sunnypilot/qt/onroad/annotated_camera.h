@@ -49,6 +49,7 @@ public:
   OnroadSettingsButton *onroad_settings_btn;
 
 private:
+
   void drawText(QPainter &p, int x, int y, const QString &text, int alpha = 255);
   void drawCenteredText(QPainter &p, int x, int y, const QString &text, QColor color);
   void drawVisionTurnControllerUI(QPainter &p, int x, int y, int size, const QColor &color, const QString &speed,
@@ -67,6 +68,8 @@ private:
   int drawDevUiRight(QPainter &p, int x, int y, const QString &value, const QString &label, const QString &units, QColor &color);
   int drawNewDevUi(QPainter &p, int x, int y, const QString &value, const QString &label, const QString &units, QColor &color);
   void drawNewDevUi2(QPainter &p, int x, int y);
+  void drawNewDevUi3(QPainter &p, int x, int y);//Adrian Cañadas gallardo
+
   void drawCenteredLeftText(QPainter &p, int x, int y, const QString &text1, QColor color1, const QString &text2, const QString &text3, QColor color2);
 
   // ############################## DEV UI END ##############################
@@ -126,6 +129,8 @@ private:
   bool standStill;
   float standstillElapsedTime;
 
+
+
   bool showVTC = false;
   QString vtcSpeed;
   QColor vtcColor;
@@ -168,6 +173,8 @@ private:
   float gpsAccuracy;
   float altitude;
   float vEgo;
+  float latitude;//Adri
+  float longitude;//Adri
   float aEgo;
   float steeringTorqueEps;
   float bearingAccuracyDeg;
