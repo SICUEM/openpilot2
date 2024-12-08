@@ -173,8 +173,7 @@ class SicMqttHilo2:
     if self.lista_suscripciones:
       try:
         self.sm = messaging.SubMaster(
-          ['carState', 'controlsState', 'liveCalibration', 'carControl', 'gpsLocationExternal', 'gpsLocation',
-           'navInstruction', 'radarState', 'drivingModelData'])
+          ['carControl', 'gpsLocationExternal'])
       except Exception:
         self.sm = None
 
@@ -190,32 +189,18 @@ class SicMqttHilo2:
 
   def verificar_toggle_canales(self, data_canales):
     """
-    Verifica dinámicamente si los canales deben estar habilitados o deshabilitados.
-    - Consulta un parámetro (`{canal}_toggle`) para determinar el estado de cada canal.
-    - Si el estado actual del canal (`enable`) no coincide con el parámetro, se actualiza.
+    Activa todos los canales sin importar el estado de los toggles.
+    - Fuerza el atributo `enable` de cada canal a 1.
+    - Imprime un mensaje para cada canal activado.
     """
-    params = Params()  # Objeto para obtener valores de parámetros del sistema
-
     for item in data_canales['canales']:
-        toggle_param_name = f"{item['canal']}_toggle"  # Nombre del parámetro asociado al canal
-        try:
-            # Obtener el valor del parámetro (True/False)
-            toggle_value = params.get_bool(toggle_param_name)
-
-            # Determinar el nuevo estado del canal
-            if toggle_value is not None:
-                nuevo_estado = 1 if toggle_value else 0
-
-                # Si el estado actual no coincide, actualizarlo
-                if item['enable'] != nuevo_estado:
-                    self.cambiar_enable_canal(item['canal'], nuevo_estado)
-
-                    # Imprimir mensaje si el canal se habilita
-                    if nuevo_estado == 1:
-                        print(f"Canal habilitado: {item['canal']}")
-        except Exception as e:
-            print(f"Error al verificar el toggle para {item['canal']}: {e}")
-
+      try:
+        # Forzar el estado del canal a habilitado (enable = 1)
+        if item['enable'] != 1:  # Solo actualiza si no está ya habilitado
+          self.cambiar_enable_canal(item['canal'], 1)
+          print(f"Canal habilitado: {item['canal']}")
+      except Exception as e:
+        print(f"Error al habilitar el canal {item['canal']}: {e}")
 
   def setup_mqtt_connection(self):
     """Configura la conexión MQTT y maneja los errores sin bloquear el programa."""
@@ -249,45 +234,47 @@ class SicMqttHilo2:
     """
     self.conexion()  # Verifica la conexión a Internet en segundo plano
 
-    while not self.stop_event.is_set():
-        if self.params.get_bool("telemetria_uem"):
-            self.loop_principal()
-        else:
-            print("Telemetría deshabilitada, esperando...")
+    # Hilo para publicar pings periódicos
+    hilo_ping = Thread(target=self.loopPing, daemon=True)
+    hilo_ping.start()
 
-        time.sleep(0.5)  # Pausa breve antes de volver a verificar
+    while True:
+      # Verificar el estado de telemetria_uem
+      #if self.params.get_bool("telemetria_uem"):
+        #print("Telemetría habilitada, ejecutando operaciones.")
+      self.loop_principal()
+      #else:
+        #print("Telemetría deshabilitada, esperando...")
 
+      time.sleep(0.5)  # Pausa breve antes de volver a verificar
 
   def loop_principal(self):
     """
     Ejecuta las operaciones principales de telemetría:
     - Carga dinámicamente los canales habilitados.
-    - Envía datos importantes a través de MQTT si el toggle está activado.
+    - Envía datos importantes a través de MQTT.
+    - Publica periódicamente el estado del archivo mapbox.
     """
     self.pause_event.wait()  # Pausa las operaciones si está desactivada la telemetría
     self.cargar_canales()  # Carga los canales habilitados dinámicamente
 
     if len(self.enabled_items) > 0 and self.sm:
-        for canal_actual in self.enabled_items:
-            canal_nombre = canal_actual['canal']
-            toggle_param_name = f"{canal_nombre}_toggle"  # Toggle específico del canal
-
-            if self.params.get_bool(toggle_param_name):  # Solo procesa si el toggle está activado
-                if canal_nombre in self.sm.data:
-                    try:
-                        self.sm.update()
-                        # Convierte los datos de SubMaster a un diccionario
-                        datos_canal = self.sm[canal_nombre].to_dict()
-                        # Envía solo los datos importantes
-                        datos_importantes = self.enviar_datos_importantes(canal_nombre, datos_canal)
-                        self.mqttc.publish(
-                            str(canal_actual['topic']).format(self.DongleID),
-                            json.dumps(datos_importantes),
-                            qos=0
-                        )
-                    except KeyError:
-                        continue
-
+      for canal_actual in self.enabled_items:
+        canal_nombre = canal_actual['canal']
+        if canal_nombre in self.sm.data:
+          try:
+            self.sm.update()
+            # Convierte los datos de SubMaster a un diccionario
+            datos_canal = self.sm[canal_nombre].to_dict()
+            # Envía solo los datos importantes
+            datos_importantes = self.enviar_datos_importantes(canal_nombre, datos_canal)
+            self.mqttc.publish(
+              str(canal_actual['topic']).format(self.DongleID),
+              json.dumps(datos_importantes),
+              qos=0
+            )
+          except KeyError:
+            continue
 
     # Publicar estado del archivo mapbox
     self.enviar_estado_archivo_mapbox()
@@ -455,12 +442,6 @@ class SicMqttHilo2:
     }
 
   def enviar_estado_archivo_mapbox(self):
-
-    if not self.params.get_bool("mapbox_toggle"):
-      print("Mapbox desactivado, no se publicará el estado.")
-      return
-
-
     # Obtener la posición GPS actual desde el canal 'gpsLocationExternal'
     gps_data = self.obtener_gps_location()
     current_lat = gps_data.get('latitude')
@@ -558,7 +539,6 @@ class SicMqttHilo2:
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     R = 6371000  # Radio de la Tierra en metros
     return R * c
-
 
 
 
