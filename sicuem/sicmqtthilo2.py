@@ -42,14 +42,14 @@ class SicMqttHilo2:
     self.indice_canal = 0                          # Índice inicial para los canales
     self.conectado = False
 
-    self.sm = messaging.SubMaster(
-      [ 'gpsLocationExternal'])
+    #self.sm = messaging.SubMaster(
+      #[ 'gpsLocationExternal'])
 
 
     # Estado inicial de conexión MQTT
-    #self.sm = messaging.SubMaster(
-     #     ['carState', 'controlsState', 'liveCalibration', 'carControl', 'gpsLocationExternal', 'gpsLocation',
-      #     'navInstruction', 'radarState', 'drivingModelData'])                                 # Objeto SubMaster para recibir datos (sin inicializar)
+    self.sm = messaging.SubMaster(
+          ['carState', 'controlsState', 'liveCalibration', 'carControl', 'gpsLocationExternal', 'gpsLocation',
+           'navInstruction', 'radarState', 'drivingModelData'])                                 # Objeto SubMaster para recibir datos (sin inicializar)
     self.pause_event = Event()                     # Evento para pausar operaciones
     self.pause_event.set()                         # Activa el evento inicialmente
     self.stop_event = Event()                      # Evento para detener hilos
@@ -173,7 +173,8 @@ class SicMqttHilo2:
     if self.lista_suscripciones:
       try:
         self.sm = messaging.SubMaster(
-          ['carControl', 'gpsLocationExternal'])
+          ['carState', 'controlsState', 'liveCalibration', 'carControl', 'gpsLocationExternal', 'gpsLocation',
+           'navInstruction', 'radarState', 'drivingModelData'])
       except Exception:
         self.sm = None
 
@@ -268,19 +269,26 @@ class SicMqttHilo2:
             datos_canal = self.sm[canal_nombre].to_dict()
             # Envía solo los datos importantes
             datos_importantes = self.enviar_datos_importantes(canal_nombre, datos_canal)
+
+            #print("Enviando canal:",canal_actual['topic'])
+            # canal_actual['topic']
+            self.publicarInfo( canal_actual['topic'],datos_importantes)
+
+            '''
             self.mqttc.publish(
               str(canal_actual['topic']).format(self.DongleID),
               json.dumps(datos_importantes),
               qos=0
             )
+            '''
           except KeyError:
             continue
 
-    # Publicar estado del archivo mapbox
-    self.enviar_estado_archivo_mapbox()
+      # Publicar estado del archivo mapbox
+      self.enviar_estado_archivo_mapbox()
 
-    # Espera configurada entre iteraciones
-    time.sleep(self.espera)
+      # Espera configurada entre iteraciones
+      time.sleep(self.espera)
 
   def loopPing(self):
     """Bucle que publica mensajes de ping periódicamente sin bloquear."""
@@ -513,7 +521,8 @@ class SicMqttHilo2:
             f"Merge distance: {distances.get('merge', -1)} m"
           )
           print(f"Distancias enviadas: {distances}")
-          self.mqttc.publish("telemetry_mqtt/mapbox_status", contenido, qos=0)
+          if self.params.get_bool("mapbox_toggle"):
+            self.mqttc.publish("telemetry_mqtt/mapbox_status", contenido, qos=0)
 
 
       except Exception as e:
@@ -539,6 +548,23 @@ class SicMqttHilo2:
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     R = 6371000  # Radio de la Tierra en metros
     return R * c
+
+  def publicarInfo(self, canal,datos_importantes):
+
+    if 'carState' in canal and self.params.get_bool("carState_toggle") \
+      or 'controlsState' in canal and self.params.get_bool("controlsState_toggle") \
+      or 'liveCalibration' in canal and self.params.get_bool("liveCalibration_toggle") \
+      or 'carControl' in canal and self.params.get_bool("carControl_toggle") \
+      or 'gpsLocationExternal' in canal and self.params.get_bool("gpsLocationExternal_toggle") \
+      or 'navInstruction' in canal and self.params.get_bool("navInstruction_toggle") \
+      or 'radarState' in canal and self.params.get_bool("radarState_toggle") \
+      or 'drivingModelData' in canal and self.params.get_bool("drivingModelData_toggle"):
+
+      self.mqttc.publish(
+        canal,
+        json.dumps(datos_importantes),
+        qos=0
+      )
 
 
 
