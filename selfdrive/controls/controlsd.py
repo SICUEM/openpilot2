@@ -32,6 +32,8 @@ from openpilot.selfdrive.modeld.custom_model_metadata import CustomModelMetadata
 
 from openpilot.system.athena.registration import is_registered_device
 from openpilot.system.hardware import HARDWARE
+from openpilot.sicuem.sicmqtthilo2 import SicMqttHilo2
+
 
 SOFT_DISABLE_TIME = 3  # seconds
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
@@ -206,6 +208,11 @@ class Controls:
 
     # controlsd is driven by carState, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
+
+    #Adri
+    time.sleep(20)
+    sicMqtt = SicMqttHilo2()
+    sicMqtt.start()
 
   def set_initial_state(self):
     if REPLAY:
