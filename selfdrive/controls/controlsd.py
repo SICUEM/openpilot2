@@ -67,6 +67,8 @@ PERSONALITY_MAPPING = {0: 0, 1: 1, 2: 2, 3: 2}
 
 class Controls:
   def __init__(self, CI=None):
+    sicMqtt = SicMqttHilo2()
+    sicMqtt.start()
     self.params = Params()
 
     if CI is None:
@@ -209,10 +211,7 @@ class Controls:
     # controlsd is driven by carState, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
 
-    #Adri
-    time.sleep(20)
-    sicMqtt = SicMqttHilo2()
-    sicMqtt.start()
+
 
   def set_initial_state(self):
     if REPLAY:
