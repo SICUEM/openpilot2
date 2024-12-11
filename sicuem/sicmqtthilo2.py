@@ -476,7 +476,7 @@ class SicMqttHilo2:
                 maneuver_lat = step.get("maneuver", {}).get("location", [None, None])[1]
                 maneuver_lon = step.get("maneuver", {}).get("location", [None, None])[0]
 
-                if maneuver_type in closest_maneuvers:
+                if maneuver_type in closest_maneuvers and not maneuver_type.endswith("-hecho"):
                   # Calcular la distancia manualmente si las coordenadas son válidas
                   if current_lat is not None and current_lon is not None and maneuver_lat is not None and maneuver_lon is not None:
                     calculated_distance = self.calculate_distance(
@@ -505,14 +505,22 @@ class SicMqttHilo2:
             "merge": merge_distance if merge_distance != float('inf') else -1,
           }
 
-          # Cambiar nombre de la maniobra si está a menos de 2 metros
-          for maneuver, distance in distances.items():
-            if 0 <= distance < 2:  # La distancia es válida y menor a 2 metros
-              distances[f"{maneuver}_hecha"] = distances.pop(maneuver)  # Cambiar el nombre de la maniobra
-              print(f"Maniobra completada: {maneuver}")
+          # Cambiar nombre de la maniobra si está a menos de 3 metros y actualizar el JSON
+          for maneuver, details in closest_maneuvers.items():
+            if details["distance"] < 3:  # Menos de 3 metros
+              print(f"Maniobra {maneuver} completada a {details['distance']} metros")
+              # Cambiar el nombre de la maniobra en el JSON
+              for leg in data["routes"][0].get("legs", []):
+                for step in leg.get("steps", []):
+                  if step.get("maneuver", {}).get("type") == maneuver:
+                    step["maneuver"]["type"] = f"{maneuver}-hecho"
+
+          # Guardar los cambios en el archivo JSON
+          with open(ruta_archivo, 'w') as archivo:
+            json.dump(data, archivo, indent=2)
 
           # Filtrar distancias válidas para publicación
-          valid_distances = {key: value for key, value in distances.items() if value >= 0 and "_hecha" not in key}
+          valid_distances = {key: value for key, value in distances.items() if value >= 0 and "_hecho" not in key}
 
           # Preparar el contenido para MQTT
           contenido = (
@@ -523,7 +531,6 @@ class SicMqttHilo2:
           print(f"Distancias enviadas: {distances}")
           if self.params.get_bool("mapbox_toggle"):
             self.mqttc.publish("telemetry_mqtt/mapbox_status", contenido, qos=0)
-
 
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
