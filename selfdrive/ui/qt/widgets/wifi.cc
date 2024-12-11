@@ -14,6 +14,9 @@ WiFiPromptWidget::WiFiPromptWidget(QWidget *parent) : QFrame(parent) {
   setup_layout->setContentsMargins(56, 40, 56, 40);
   setup_layout->setSpacing(20);
   {
+    // Imagen independiente: UEM Logo
+
+
     QHBoxLayout *title_layout = new QHBoxLayout;
     title_layout->setSpacing(32);
     {
@@ -51,6 +54,19 @@ WiFiPromptWidget::WiFiPromptWidget(QWidget *parent) : QFrame(parent) {
     setup_layout->addWidget(settings_btn);
   }
   stack->addWidget(setup);
+
+  QLabel *uem_logo = new QLabel(setup);
+QPixmap uemPixmap("../assets/navigation/uem_logo_completo.svg");
+if (!uemPixmap.isNull()) {
+  uem_logo->setPixmap(uemPixmap.scaledToWidth(620, Qt::SmoothTransformation));
+  uem_logo->setAlignment(Qt::AlignCenter);
+} else {
+  qDebug() << "Error: No se pudo cargar uem_logo desde ../assets/navigation/uem_logo_completo.svg";
+}
+
+// Añadir un espaciado superior antes de la imagen
+setup_layout->addSpacing(100); // Ajusta el valor según la cantidad de separación deseada
+setup_layout->addWidget(uem_logo, 0, Qt::AlignCenter); // Añadir imagen al layout principal
 
   // Uploading data
   QWidget *uploading = new QWidget;

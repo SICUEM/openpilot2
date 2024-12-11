@@ -8,6 +8,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QPainter>
 
 #include <QrCode.hpp>
 
@@ -61,11 +62,27 @@ void PairingQRWidget::updateQrCode(const QString &text) {
 
 void PairingQRWidget::paintEvent(QPaintEvent *e) {
   QPainter p(this);
+
+  // Establecer un fondo blanco
   p.fillRect(rect(), Qt::white);
 
-  QSize s = (size() - img.size()) / 2;
-  p.drawPixmap(s.width(), s.height(), img);
+  // Ruta al archivo de imagen
+  QString imagePath = "uem_logo.png"; // Asegúrate de que el archivo está en la misma carpeta que el ejecutable
+  QPixmap logoPixmap(imagePath); // Renombramos la variable local a logoPixmap para evitar conflicto
+
+  // Verificar si la imagen se cargó correctamente
+  if (!logoPixmap.isNull()) {
+    // Centrar la imagen en el widget
+    QSize s = (size() - logoPixmap.size()) / 2;
+    QRect targetRect(s.width(), s.height(), logoPixmap.width(), logoPixmap.height());
+    p.drawPixmap(targetRect, logoPixmap);
+
+    qDebug() << "Imagen dibujada correctamente en" << targetRect;
+  } else {
+    qDebug() << "Error: No se pudo cargar la imagen desde" << imagePath;
+  }
 }
+
 
 
 PairingPopup::PairingPopup(QWidget *parent) : DialogBase(parent) {
@@ -133,29 +150,50 @@ PrimeUserWidget::PrimeUserWidget(QWidget *parent) : QFrame(parent) {
 }
 
 
+#include <QPainter>
+
 PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
   QVBoxLayout *main_layout = new QVBoxLayout(this);
   main_layout->setContentsMargins(80, 90, 80, 60);
   main_layout->setSpacing(0);
 
-  QLabel *upgrade = new QLabel(tr("Upgrade Now"));
-  upgrade->setStyleSheet("font-size: 75px; font-weight: bold;");
-  main_layout->addWidget(upgrade, 0, Qt::AlignTop);
+  // Crear un layout horizontal para SICUEM y la imagen
+  QHBoxLayout *sicuem_layout = new QHBoxLayout();
+
+  // Crear QLabel para el texto "SICUEM"
+  QLabel *upgrade = new QLabel(tr("SICUEM"));
+  upgrade->setStyleSheet("font-size: 75px; font-weight: bold; color: red;");
+  sicuem_layout->addWidget(upgrade, 0, Qt::AlignLeft);
+
+  // Crear QLabel para la imagen del logo
+  QLabel *icon = new QLabel;
+  QPixmap pixmap("../assets/offroad/icon_wifi_strength_full.sv"); // Ruta a la imagen
+  if (!pixmap.isNull()) {
+    icon->setPixmap(pixmap.scaledToWidth(100, Qt::SmoothTransformation)); // Ajustar el tamaño de la imagen
+  } else {
+    qDebug() << "Error: No se pudo cargar la imagen desde ../assets/images/sicuem_logo.png";
+  }
+  sicuem_layout->addWidget(icon, 0, Qt::AlignRight);
+
+  // Añadir el layout horizontal al layout principal
+  main_layout->addLayout(sicuem_layout, 0);
   main_layout->addSpacing(50);
 
-  QLabel *description = new QLabel(tr("Become a comma prime member at connect.comma.ai"));
+  // Descripción
+  QLabel *description = new QLabel(tr("Grupo de investigacion de la Universidad Europea"));
   description->setStyleSheet("font-size: 56px; font-weight: light; color: white;");
   description->setWordWrap(true);
   main_layout->addWidget(description, 0, Qt::AlignTop);
 
   main_layout->addStretch();
 
-  QLabel *features = new QLabel(tr("PRIME FEATURES:"));
+  // Características
+  QLabel *features = new QLabel(tr("Integrantes del grupo:"));
   features->setStyleSheet("font-size: 41px; font-weight: bold; color: #E5E5E5;");
   main_layout->addWidget(features, 0, Qt::AlignBottom);
   main_layout->addSpacing(30);
 
-  QVector<QString> bullets = {tr("Remote access"), tr("24/7 LTE connectivity"), tr("1 year of drive storage"), tr("Turn-by-turn navigation")};
+  QVector<QString> bullets = {tr("Adrian Cañadas"), tr("Javier F."), tr("Nourdine A."), tr("Sergio B.")};
   for (auto &b : bullets) {
     const QString check = "<b><font color='#465BEA'>✓</font></b> ";
     QLabel *l = new QLabel(check + b);
@@ -171,6 +209,9 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
     }
   )");
 }
+
+
+
 
 
 SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {

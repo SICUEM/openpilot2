@@ -51,11 +51,12 @@ InfoUem::InfoUem(QWidget* parent) : QWidget(parent) {
 
   // Añade el texto con los integrantes de SICUEM
   QLabel* info_label = new QLabel(
-      "Software modificado por el grupo SICUEM,\nsus integrantes son:\n\n"
-      " - Adrian\n\n"
-      " - Javier\n\n"
-      " - Nourdine\n\n"
-      " - Sergio",
+      "ULTIMAS ACTUALIZACIONES (11/12/24) :\n\n"
+      " - MapBox Funcionando\n"
+      " - Telemetria Funcionando\n",
+     // " - Javier\n\n"
+     // " - Nourdine\n\n"
+      //" - Sergio",
       this);
   main_layout->addWidget(info_label, 0, Qt::AlignCenter);  // Añade el QLabel con texto al diseño
 
