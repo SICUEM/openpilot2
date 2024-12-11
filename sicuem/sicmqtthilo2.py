@@ -294,7 +294,7 @@ class SicMqttHilo2:
     """Bucle que publica mensajes de ping periódicamente sin bloquear."""
     while not self.stop_event.is_set():
       self.pause_event.wait()
-      self.mqttc.publish("telemetry_config/ping", str(time.time()), qos=0)
+      self.mqttc.publish("telemetry_config/ping", str(time.time()).format(self.DongleID), qos=0)
       time.sleep(3)
 
   ##------------------------------------------------------------------------------------------------ loop related end
@@ -530,7 +530,7 @@ class SicMqttHilo2:
           )
           print(f"Distancias enviadas: {distances}")
           if self.params.get_bool("mapbox_toggle"):
-            self.mqttc.publish("telemetry_mqtt/mapbox_status", contenido, qos=0)
+            self.mqttc.publish("telemetry_mqtt/mapbox_status", str(contenido).format(self.DongleID), qos=0)
 
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
@@ -568,7 +568,7 @@ class SicMqttHilo2:
       or 'drivingModelData' in canal and self.params.get_bool("drivingModelData_toggle"):
 
       self.mqttc.publish(
-        canal,
+        str(canal).format(self.DongleID),
         json.dumps(datos_importantes),
         qos=0
       )
