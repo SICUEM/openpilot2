@@ -52,6 +52,7 @@ InfoUem::InfoUem(QWidget* parent) : QWidget(parent) {
   // Añade el texto con los integrantes de SICUEM
   QLabel* info_label = new QLabel(
       "ULTIMAS ACTUALIZACIONES (11/12/24) :\n\n"
+      " - Logos peligro maniobras\n"
       " - Una vez pasada Maniobra, busca la siguiente\n"
       " - ID del COMMA\n"
       " - MapBox Funcionando\n"

@@ -836,34 +836,38 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
 }
 
 
-//Adri
 void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
-  if (true) {  // Si hay alerta
-    int rw = 550;
+  const int base_rw = 550;
+  const int icon_size = 75;
+  const int icon_offset_x = 220;
+  const int icon_offset_y = -40;
+  const QSize pixmap_size(100, 100); // Tamaño del SVG ajustado
+  int rw = base_rw;
 
+  // Función auxiliar para procesar y dibujar cada elemento
+  auto drawElement = [&](const std::string &distance_str, const QString &icon_path,
+                         const std::function<UiElement(float)> &getUiElement) {
+    float distance = distance_str.empty() ? -1.0f : std::atof(distance_str.c_str());
+    if (distance != -1.0f) {
+      QPixmap img = loadPixmap(icon_path, pixmap_size);
+      QRect imgRect(rw + icon_offset_x, y + icon_offset_y, icon_size, icon_size);
+      p.drawPixmap(imgRect, img);
+    }
+    UiElement element = getUiElement(distance);
+    rw += drawNewDevUi(p, rw, y, element.value, element.label, element.units, element.color);
+  };
 
-// Obtener las distancias desde Params
-    std::string roundabout_str = Params().get("roundabout_distance");
-    std::string intersection_str = Params().get("intersection_distance");
-    std::string merge_str = Params().get("merge_distance");
+  // Obtener las distancias desde Params
+  std::string roundabout_str = Params().get("roundabout_distance");
+  std::string intersection_str = Params().get("intersection_distance");
+  std::string merge_str = Params().get("merge_distance");
 
-    // Convertir las cadenas a flotantes
-    float roundabout_distance = roundabout_str.empty() ? -1.0f : std::atof(roundabout_str.c_str());
-    float intersection_distance = intersection_str.empty() ? -1.0f : std::atof(intersection_str.c_str());
-    float merge_distance = merge_str.empty() ? -1.0f : std::atof(merge_str.c_str());
-
-
-    // Distancias hacia las maniobras
-    UiElement roundaboutDistance = DeveloperUi::getRoundaboutDistance(roundabout_distance);
-    rw += drawNewDevUi(p, rw, y, roundaboutDistance.value, roundaboutDistance.label, roundaboutDistance.units, roundaboutDistance.color);
-
-    UiElement intersectionDistance = DeveloperUi::getIntersectionDistance(intersection_distance);
-    rw += drawNewDevUi(p, rw, y, intersectionDistance.value, intersectionDistance.label, intersectionDistance.units, intersectionDistance.color);
-
-    UiElement mergeDistance = DeveloperUi::getMergeDistance(merge_distance);
-    rw += drawNewDevUi(p, rw, y, mergeDistance.value, mergeDistance.label, mergeDistance.units, mergeDistance.color);
-  }
+  // Dibujar elementos
+  drawElement(roundabout_str, "../assets/navigation/roundabout.svg", DeveloperUi::getRoundaboutDistance);
+  drawElement(intersection_str, "../assets/navigation/instersection.svg", DeveloperUi::getIntersectionDistance);
+  drawElement(merge_str, "../assets/navigation/merge.svg", DeveloperUi::getMergeDistance);
 }
+
 
 //Adri fin
 
