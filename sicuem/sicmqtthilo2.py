@@ -531,6 +531,11 @@ class SicMqttHilo2:
           print(f"Distancias enviadas: {distances}")
           if self.params.get_bool("mapbox_toggle"):
             self.mqttc.publish("telemetry_mqtt/mapbox_status", str(contenido).format(self.DongleID), qos=0)
+            #critico
+            self.mqttc.publish("telemetry_mqtt/mapbox_archivo", str(data).format(self.DongleID), qos=0)
+
+
+
 
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
