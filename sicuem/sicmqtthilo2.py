@@ -490,8 +490,8 @@ class SicMqttHilo2:
                       }
 
           roundabout_distance = closest_maneuvers["roundabout"]["distance"]
-          intersection_distance = closest_maneuvers["turn"]["distance"]
-          merge_distance = closest_maneuvers["off ramp"]["distance"]
+          intersection_distance = closest_maneuvers["intersection"]["distance"]
+          merge_distance = closest_maneuvers["merge"]["distance"]
 
           # Convertir los valores flotantes a cadenas antes de almacenarlos
           self.params.put("roundabout_distance", str(roundabout_distance))
@@ -531,11 +531,6 @@ class SicMqttHilo2:
           print(f"Distancias enviadas: {distances}")
           if self.params.get_bool("mapbox_toggle"):
             self.mqttc.publish("telemetry_mqtt/mapbox_status", str(contenido).format(self.DongleID), qos=0)
-            #critico
-            self.mqttc.publish("telemetry_mqtt/mapbox_archivo", str(data).format(self.DongleID), qos=0)
-
-
-
 
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
@@ -577,7 +572,6 @@ class SicMqttHilo2:
         json.dumps(datos_importantes),
         qos=0
       )
-
 
 
 
