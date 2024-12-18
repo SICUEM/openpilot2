@@ -20,7 +20,6 @@ REROUTE_DISTANCE = 25
 MANEUVER_TRANSITION_THRESHOLD = 10
 REROUTE_COUNTER_MIN = 3
 MAPBOX_RESPONSE_FILE = "mapbox_response.json"  # Adrian Cañadas Gallardo - Nuevo archivo para guardar la respuesta de la API
-MAPBOX_RESPONSE_FILE_COMPLETE = "mapbox_response_completo.json"  # Adrian Cañadas Gallardo - Nuevo archivo para guardar la respuesta de la API
 
 
 class RouteEngine:
@@ -186,34 +185,6 @@ class RouteEngine:
         print(f"Mapbox response saved to {MAPBOX_RESPONSE_FILE}")  # Adrian Cañadas Gallardo
 
         cloudlog.info(f"Mapbox response saved to {MAPBOX_RESPONSE_FILE}")  # Adrian Cañadas Gallardo
-
-      #GUARDAR Y QUE SE SOBRESCRIBA
-
-      nuevos_datos=r
-      if os.path.exists(MAPBOX_RESPONSE_FILE_COMPLETE) and os.path.getsize(MAPBOX_RESPONSE_FILE_COMPLETE) > 0:
-        with open(MAPBOX_RESPONSE_FILE_COMPLETE, 'r') as json_file:
-          try:
-            datos_existentes = json.load(json_file)
-          except json.JSONDecodeError:
-            datos_existentes = {}
-      else:
-        datos_existentes = {}
-
-      # Combinar los datos existentes con los nuevos
-      if isinstance(datos_existentes, dict) and isinstance(nuevos_datos, dict):
-        datos_combinados = {**datos_existentes, **nuevos_datos}
-      else:
-        datos_combinados = [datos_existentes, nuevos_datos] if datos_existentes else nuevos_datos
-
-      # Guardar los datos combinados en el archivo completo
-      with open(MAPBOX_RESPONSE_FILE_COMPLETE, 'w') as json_file:
-        json.dump(datos_combinados, json_file, indent=2)  # Guardar el JSON con formato legible
-        print(f"Mapbox response saved to {MAPBOX_RESPONSE_FILE_COMPLETE}")
-
-        cloudlog.info(f"Mapbox response saved to {MAPBOX_RESPONSE_FILE_COMPLETE}")
-
-
-
 
       if len(r['routes']):
         self.route = r['routes'][0]['legs'][0]['steps']
