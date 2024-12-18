@@ -490,8 +490,8 @@ class SicMqttHilo2:
                       }
 
           roundabout_distance = closest_maneuvers["roundabout"]["distance"]
-          intersection_distance = closest_maneuvers["turn"]["distance"]
-          merge_distance = closest_maneuvers["off ramp"]["distance"]
+          intersection_distance = closest_maneuvers["intersection"]["distance"]
+          merge_distance = closest_maneuvers["merge"]["distance"]
 
           # Convertir los valores flotantes a cadenas antes de almacenarlos
           self.params.put("roundabout_distance", str(roundabout_distance))
