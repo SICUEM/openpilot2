@@ -476,6 +476,10 @@ class SicMqttHilo2:
                 maneuver_lat = step.get("maneuver", {}).get("location", [None, None])[1]
                 maneuver_lon = step.get("maneuver", {}).get("location", [None, None])[0]
 
+                # Aceptar "turn" como un alias de "intersection"
+                if maneuver_type == "turn":
+                  maneuver_type = "intersection"
+
                 if maneuver_type in closest_maneuvers and not maneuver_type.endswith("-hecho"):
                   # Calcular la distancia manualmente si las coordenadas son válidas
                   if current_lat is not None and current_lon is not None and maneuver_lat is not None and maneuver_lon is not None:
