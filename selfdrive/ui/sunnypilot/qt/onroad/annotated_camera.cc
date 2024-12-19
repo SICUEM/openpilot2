@@ -859,8 +859,8 @@ void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
 
   // Obtener las distancias desde Params
   std::string roundabout_str = Params().get("roundabout_distance");
-  std::string intersection_str = Params().get("intersection_distance");
-  std::string merge_str = Params().get("merge_distance");
+  std::string intersection_str = Params().get("turn_distance");
+  std::string merge_str = Params().get("off_ramp_distance");
 
   // Dibujar elementos
   drawElement(roundabout_str, "../assets/navigation/roundabout.svg", DeveloperUi::getRoundaboutDistance);

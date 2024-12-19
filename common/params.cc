@@ -158,6 +158,10 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"roundabout_distance", PERSISTENT}, // Adrian Cañadas Gallardo
     {"intersection_distance", PERSISTENT}, // Adrian Cañadas Gallardo
     {"merge_distance", PERSISTENT}, // Adrian Cañadas Gallardo
+    {"turn_distance", PERSISTENT}, // Adrian Cañadas Gallardo
+    {"off_ramp_distance", PERSISTENT}, // Adrian Cañadas Gallardo
+    {"on_ramp_distance", PERSISTENT}, // Adrian Cañadas Gallardo
+
     {"IsOffroad", CLEAR_ON_MANAGER_START},
     {"IsOnroad", PERSISTENT},
     {"IsRhdDetected", PERSISTENT},

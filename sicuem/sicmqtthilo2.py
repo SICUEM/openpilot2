@@ -464,8 +464,8 @@ class SicMqttHilo2:
           data = json.load(archivo)
           closest_maneuvers = {
             "roundabout": {"distance": float('inf'), "latitude": None, "longitude": None},
-            "intersection": {"distance": float('inf'), "latitude": None, "longitude": None},
-            "merge": {"distance": float('inf'), "latitude": None, "longitude": None}
+            "turn": {"distance": float('inf'), "latitude": None, "longitude": None},  # Usar "turn"
+            "off ramp": {"distance": float('inf'), "latitude": None, "longitude": None}  # Usar "off ramp"
           }
 
           # Analizar las rutas y encontrar maniobras específicas
@@ -475,10 +475,6 @@ class SicMqttHilo2:
                 maneuver_type = step.get("maneuver", {}).get("type", "")
                 maneuver_lat = step.get("maneuver", {}).get("location", [None, None])[1]
                 maneuver_lon = step.get("maneuver", {}).get("location", [None, None])[0]
-
-                # Aceptar "turn" como un alias de "intersection"
-                if maneuver_type == "turn":
-                  maneuver_type = "intersection"
 
                 if maneuver_type in closest_maneuvers and not maneuver_type.endswith("-hecho"):
                   # Calcular la distancia manualmente si las coordenadas son válidas
@@ -494,26 +490,25 @@ class SicMqttHilo2:
                       }
 
           roundabout_distance = closest_maneuvers["roundabout"]["distance"]
-          intersection_distance = closest_maneuvers["intersection"]["distance"]
-          merge_distance = closest_maneuvers["merge"]["distance"]
+          turn_distance = closest_maneuvers["turn"]["distance"]
+          off_ramp_distance = closest_maneuvers["off ramp"]["distance"]
 
-          # Convertir los valores flotantes a cadenas antes de almacenarlos
+          # Guardar las distancias en los parámetros
           self.params.put("roundabout_distance", str(roundabout_distance))
-          self.params.put("intersection_distance", str(intersection_distance))
-          self.params.put("merge_distance", str(merge_distance))
+          self.params.put("turn_distance", str(turn_distance))
+          self.params.put("off_ramp_distance", str(off_ramp_distance))
 
           # Procesar distancias, reemplazando valores no válidos con -1
           distances = {
             "roundabout": roundabout_distance if roundabout_distance != float('inf') else -1,
-            "intersection": intersection_distance if intersection_distance != float('inf') else -1,
-            "merge": merge_distance if merge_distance != float('inf') else -1,
+            "turn": turn_distance if turn_distance != float('inf') else -1,
+            "off ramp": off_ramp_distance if off_ramp_distance != float('inf') else -1,
           }
 
           # Cambiar nombre de la maniobra si está a menos de 3 metros y actualizar el JSON
           for maneuver, details in closest_maneuvers.items():
             if details["distance"] < 3:  # Menos de 3 metros
               print(f"Maniobra {maneuver} completada a {details['distance']} metros")
-              # Cambiar el nombre de la maniobra en el JSON
               for leg in data["routes"][0].get("legs", []):
                 for step in leg.get("steps", []):
                   if step.get("maneuver", {}).get("type") == maneuver:
@@ -523,14 +518,11 @@ class SicMqttHilo2:
           with open(ruta_archivo, 'w') as archivo:
             json.dump(data, archivo, indent=2)
 
-          # Filtrar distancias válidas para publicación
-          valid_distances = {key: value for key, value in distances.items() if value >= 0 and "_hecho" not in key}
-
           # Preparar el contenido para MQTT
           contenido = (
             f"Roundabout distance: {distances.get('roundabout', -1)} m\n"
-            f"Intersection distance: {distances.get('intersection', -1)} m\n"
-            f"Merge distance: {distances.get('merge', -1)} m"
+            f"Turn distance: {distances.get('turn', -1)} m\n"
+            f"Off ramp distance: {distances.get('off ramp', -1)} m"
           )
           print(f"Distancias enviadas: {distances}")
           if self.params.get_bool("mapbox_toggle"):
@@ -540,8 +532,8 @@ class SicMqttHilo2:
         print(f"Error al procesar el archivo Mapbox: {e}")
     else:
       self.params.put("roundabout_distance", "-1")
-      self.params.put("intersection_distance", "-1")
-      self.params.put("merge_distance", "-1")
+      self.params.put("turn_distance", "-1")
+      self.params.put("off_ramp_distance", "-1")
       print("Archivo Mapbox no encontrado. Todas las distancias configuradas a -1.")
 
   def calculate_distance(self, lat1, lon1, lat2, lon2):
