@@ -837,22 +837,26 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
 
 
 void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
-  const int base_rw = 550;
+
+  const int base_rw = 550;/*
   const int icon_size = 75;
   const int icon_offset_x = 220;
   const int icon_offset_y = -40;
   const QSize pixmap_size(100, 100); // Tamaño del SVG ajustado
+  */
   int rw = base_rw;
 
   // Función auxiliar para procesar y dibujar cada elemento
   auto drawElement = [&](const std::string &distance_str, const QString &icon_path,
                          const std::function<UiElement(float)> &getUiElement) {
     float distance = distance_str.empty() ? -1.0f : std::atof(distance_str.c_str());
+
+    /*
     if (distance != -1.0f) {
       QPixmap img = loadPixmap(icon_path, pixmap_size);
       QRect imgRect(rw + icon_offset_x, y + icon_offset_y, icon_size, icon_size);
       p.drawPixmap(imgRect, img);
-    }
+    }*/
     UiElement element = getUiElement(distance);
     rw += drawNewDevUi(p, rw, y, element.value, element.label, element.units, element.color);
   };
@@ -860,12 +864,21 @@ void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
   // Obtener las distancias desde Params
   std::string roundabout_str = Params().get("roundabout_distance");
   std::string intersection_str = Params().get("turn_distance");
-  std::string merge_str = Params().get("off_ramp_distance");
+  std::string on_road_str = Params().get("on_road_distance"); // Nueva maniobra "on road"
+  std::string off_road_str = Params().get("off_road_distance"); // Nueva maniobra "off road"
 
-  // Dibujar elementos
-  drawElement(roundabout_str, "../assets/navigation/roundabout.svg", DeveloperUi::getRoundaboutDistance);
-  drawElement(intersection_str, "../assets/navigation/instersection.svg", DeveloperUi::getIntersectionDistance);
-  drawElement(merge_str, "../assets/navigation/merge.svg", DeveloperUi::getMergeDistance);
+  // Dibujar en el orden especificado
+  drawElement(roundabout_str, "../assets/navigation/roundabout.svg",
+              [](float distance) { return DeveloperUi::getRoundaboutDistance(distance, true); });
+
+  drawElement(intersection_str, "../assets/navigation/intersection.svg",
+              [](float distance) { return DeveloperUi::getIntersectionDistance(distance, true); });
+
+  drawElement(on_road_str, "../assets/navigation/onroad.svg", // Ruta del ícono "on road"
+              [](float distance) { return DeveloperUi::getOnRoadDistance(distance, true); });
+
+  drawElement(off_road_str, "../assets/navigation/offroad.svg", // Ruta del ícono "off road"
+              [](float distance) { return DeveloperUi::getOffRoadDistance(distance, true); });
 }
 
 

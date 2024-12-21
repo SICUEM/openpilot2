@@ -464,17 +464,19 @@ class SicMqttHilo2:
           data = json.load(archivo)
           closest_maneuvers = {
             "roundabout": {"distance": float('inf'), "latitude": None, "longitude": None},
-            "turn": {"distance": float('inf'), "latitude": None, "longitude": None},  # Usar "turn"
-            "off ramp": {"distance": float('inf'), "latitude": None, "longitude": None}  # Usar "off ramp"
+            "turn": {"distance": float('inf'), "latitude": None, "longitude": None},
+            "off road": {"distance": float('inf'), "latitude": None, "longitude": None},  # Cambiado a "off road"
+            "on road": {"distance": float('inf'), "latitude": None, "longitude": None}  # Cambiado a "on road"
           }
 
           # Analizar las rutas y encontrar maniobras específicas
           if "routes" in data and len(data["routes"]) > 0:
             for leg in data["routes"][0].get("legs", []):
               for step in leg.get("steps", []):
-                maneuver_type = step.get("maneuver", {}).get("type", "")
-                maneuver_lat = step.get("maneuver", {}).get("location", [None, None])[1]
-                maneuver_lon = step.get("maneuver", {}).get("location", [None, None])[0]
+                maneuver = step.get("maneuver", {})
+                maneuver_type = maneuver.get("type", "").strip().lower()  # Asegurar consistencia
+                maneuver_lat = maneuver.get("location", [None, None])[1]
+                maneuver_lon = maneuver.get("location", [None, None])[0]
 
                 if maneuver_type in closest_maneuvers and not maneuver_type.endswith("-hecho"):
                   # Calcular la distancia manualmente si las coordenadas son válidas
@@ -489,42 +491,26 @@ class SicMqttHilo2:
                         "longitude": maneuver_lon
                       }
 
+          # Obtener distancias
           roundabout_distance = closest_maneuvers["roundabout"]["distance"]
           turn_distance = closest_maneuvers["turn"]["distance"]
-          off_ramp_distance = closest_maneuvers["off ramp"]["distance"]
+          off_road_distance = closest_maneuvers["off road"]["distance"]  # Cambiado a "off road"
+          on_road_distance = closest_maneuvers["on road"]["distance"]  # Cambiado a "on road"
 
           # Guardar las distancias en los parámetros
           self.params.put("roundabout_distance", str(roundabout_distance))
           self.params.put("turn_distance", str(turn_distance))
-          self.params.put("off_ramp_distance", str(off_ramp_distance))
-
-          # Procesar distancias, reemplazando valores no válidos con -1
-          distances = {
-            "roundabout": roundabout_distance if roundabout_distance != float('inf') else -1,
-            "turn": turn_distance if turn_distance != float('inf') else -1,
-            "off ramp": off_ramp_distance if off_ramp_distance != float('inf') else -1,
-          }
-
-          # Cambiar nombre de la maniobra si está a menos de 3 metros y actualizar el JSON
-          for maneuver, details in closest_maneuvers.items():
-            if details["distance"] < 3:  # Menos de 3 metros
-              print(f"Maniobra {maneuver} completada a {details['distance']} metros")
-              for leg in data["routes"][0].get("legs", []):
-                for step in leg.get("steps", []):
-                  if step.get("maneuver", {}).get("type") == maneuver:
-                    step["maneuver"]["type"] = f"{maneuver}-hecho"
-
-          # Guardar los cambios en el archivo JSON
-          with open(ruta_archivo, 'w') as archivo:
-            json.dump(data, archivo, indent=2)
+          self.params.put("on_road_distance", str(on_road_distance))  # Cambiado a "on road"
+          self.params.put("off_road_distance", str(off_road_distance))  # Cambiado a "off road"
 
           # Preparar el contenido para MQTT
           contenido = (
-            f"Roundabout distance: {distances.get('roundabout', -1)} m\n"
-            f"Turn distance: {distances.get('turn', -1)} m\n"
-            f"Off ramp distance: {distances.get('off ramp', -1)} m"
+            f"Roundabout distance: {roundabout_distance if roundabout_distance != float('inf') else -1} m\n"
+            f"Turn distance: {turn_distance if turn_distance != float('inf') else -1} m\n"
+            f"Off road distance: {off_road_distance if off_road_distance != float('inf') else -1} m\n"
+            f"On road distance: {on_road_distance if on_road_distance != float('inf') else -1} m"
           )
-          print(f"Distancias enviadas: {distances}")
+          print(f"Distancias enviadas: {contenido}")
           if self.params.get_bool("mapbox_toggle"):
             self.mqttc.publish("telemetry_mqtt/mapbox_status", str(contenido).format(self.DongleID), qos=0)
 
@@ -533,7 +519,8 @@ class SicMqttHilo2:
     else:
       self.params.put("roundabout_distance", "-1")
       self.params.put("turn_distance", "-1")
-      self.params.put("off_ramp_distance", "-1")
+      self.params.put("off_road_distance", "-1")
+      self.params.put("on_road_distance", "-1")
       print("Archivo Mapbox no encontrado. Todas las distancias configuradas a -1.")
 
   def calculate_distance(self, lat1, lon1, lat2, lon2):

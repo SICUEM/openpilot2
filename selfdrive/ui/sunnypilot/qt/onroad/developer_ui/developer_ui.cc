@@ -180,26 +180,45 @@ UiElement DeveloperUi::getLongitude ( float longitude) {
   return UiElement("LON:"+value, "", "", color);
 }
 
-UiElement DeveloperUi::getRoundaboutDistance(float distance) {
-  QString value = distance >= 0 ? QString::number(distance, 'f', 1) + " m" : "N/A";
-  QColor color = distance >= 0 ? QColor(0, 255, 0, 255) : QColor(255, 0, 0, 255);
+UiElement DeveloperUi::getManeuverDistance(const QString &icon, float distance, bool isDecreasing) {
+  QString value = (distance >= 0) ? QString::number(static_cast<int>(distance)) : "N/A";
+  QColor color;
 
-  return UiElement("Rot.", value, "", color);
+  if (distance >= 0) {
+    // Set color based on distance change
+    color = isDecreasing ? QColor(0, 255, 0, 255) : QColor(255, 0, 0, 255);
+  } else {
+    color = QColor(255, 255, 255, 255);  // Default white
+  }
+
+  // Format: Icon followed by distance
+  QString displayText = QString("%1 %2").arg(icon).arg(value);
+  return UiElement(displayText, "", "", color);
 }
 
-UiElement DeveloperUi::getIntersectionDistance(float distance) {
-  QString value = distance >= 0 ? QString::number(distance, 'f', 1) + " m" : "N/A";
-  QColor color = distance >= 0 ? QColor(0, 255, 0, 255) : QColor(255, 0, 0, 255);
-
-  return UiElement("Cruce.", value, "", color);
+// Usage for each maneuver type
+UiElement DeveloperUi::getRoundaboutDistance(float distance, bool isDecreasing) {
+  return getManeuverDistance("🔄", distance, isDecreasing);
 }
 
-UiElement DeveloperUi::getMergeDistance(float distance) {
-  QString value = distance >= 0 ? QString::number(distance, 'f', 1) + " m" : "N/A";
-  QColor color = distance >= 0 ? QColor(0, 255, 0, 255) : QColor(255, 0, 0, 255);
-
-  return UiElement("Incorp.", value, "", color);
+UiElement DeveloperUi::getIntersectionDistance(float distance, bool isDecreasing) {
+  return getManeuverDistance("🚦", distance, isDecreasing);
 }
+
+UiElement DeveloperUi::getOnRoadDistance(float distance, bool isDecreasing) {
+  return getManeuverDistance("🛣️", distance, isDecreasing);
+}
+
+UiElement DeveloperUi::getOffRoadDistance(float distance, bool isDecreasing) {
+  return getManeuverDistance("🚧", distance, isDecreasing);}
+
+UiElement DeveloperUi::getMergeDistance(float distance, bool isDecreasing) {
+  return getManeuverDistance("🔀", distance, isDecreasing);  // Usa un icono adecuado, por ejemplo, 🔀 para "merge"
+}
+
+
+
+
 
 
 

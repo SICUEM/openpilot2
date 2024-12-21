@@ -30,6 +30,7 @@ Last updated: July 29, 2024
 
 class DeveloperUi {
 public:
+  // Existing methods
   static UiElement getDRel(bool lead_status, float lead_d_rel);
   static UiElement getVRel(bool lead_status, float lead_v_rel, bool is_metric, const QString &speed_unit);
   static UiElement getSteeringAngleDeg(float angle_steers, bool mads_enabled, bool lat_active);
@@ -44,12 +45,20 @@ public:
   static UiElement getBearingDeg(float bearing_accuracy_deg, float bearing_deg);
   static UiElement getAltitude(float gps_accuracy, float altitude);
 
-  // Adri
-static UiElement getVEgo(float v_ego, bool is_metric, const QString &speed_unit);
-static UiElement getLatitude(float latitude);
-static UiElement getLongitude(float longitude);
-static UiElement getRoundaboutDistance(float distance);  // Distancia hacia rotonda
-static UiElement getIntersectionDistance(float distance);  // Distancia hacia intersección
-static UiElement getMergeDistance(float distance);  // Distancia hacia merge
+  // Adri's additions
+  static UiElement getVEgo(float v_ego, bool is_metric, const QString &speed_unit);
+  static UiElement getLatitude(float latitude);
+  static UiElement getLongitude(float longitude);
 
+  // Maneuver distances
+  static UiElement getRoundaboutDistance(float distance, bool isDecreasing);  // Rotonda
+  static UiElement getIntersectionDistance(float distance, bool isDecreasing);  // Cruce
+  static UiElement getOnRoadDistance(float distance, bool isDecreasing);  // On road
+  static UiElement getOffRoadDistance(float distance, bool isDecreasing);  // Off road
+  static UiElement getMergeDistance(float distance, bool isDecreasing);  // Distancia hacia un merge
+
+
+
+private:
+  static UiElement getManeuverDistance(const QString &icon, float distance, bool isDecreasing);  // Helper for maneuver distances
 };
