@@ -181,20 +181,25 @@ UiElement DeveloperUi::getLongitude ( float longitude) {
 }
 
 UiElement DeveloperUi::getManeuverDistance(const QString &icon, float distance, bool isDecreasing) {
-  QString value = (distance >= 0) ? QString::number(static_cast<int>(distance)) : "N/A";
+  QString value;
   QColor color;
 
-  if (distance >= 0) {
-    // Set color based on distance change
-    color = isDecreasing ? QColor(0, 255, 0, 255) : QColor(255, 0, 0, 255);
+  if (distance < 0) {
+    value = "N/A";  // No hay destino
+    color = QColor(255, 255, 255, 255);  // Blanco
+  } else if (distance == std::numeric_limits<float>::infinity()) {
+    value = "inf";  // Maniobra no presente
+    color = QColor(200, 200, 200, 255);  // Gris claro
   } else {
-    color = QColor(255, 255, 255, 255);  // Default white
+    value = QString::number(static_cast<int>(distance));  // Valor real
+    color = isDecreasing ? QColor(0, 255, 0, 255) : QColor(255, 0, 0, 255);  // Verde si decrece, rojo si crece
   }
 
-  // Format: Icon followed by distance
+  // Formatear texto con ícono y valor
   QString displayText = QString("%1 %2").arg(icon).arg(value);
   return UiElement(displayText, "", "", color);
 }
+
 
 // Usage for each maneuver type
 UiElement DeveloperUi::getRoundaboutDistance(float distance, bool isDecreasing) {

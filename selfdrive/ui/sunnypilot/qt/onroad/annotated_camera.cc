@@ -837,48 +837,76 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
 
 
 void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
-
-  const int base_rw = 550;/*
+  const int base_rw = 550;
   const int icon_size = 75;
-  const int icon_offset_x = 220;
-  const int icon_offset_y = -40;
-  const QSize pixmap_size(100, 100); // Tamaño del SVG ajustado
-  */
+  const int icon_offset_x = -icon_size - 10;  // Imagen a la izquierda del texto
+  const int icon_offset_y = -10;
+  const QSize pixmap_size(icon_size, icon_size);  // Tamaño del SVG ajustado
+
   int rw = base_rw;
 
   // Función auxiliar para procesar y dibujar cada elemento
   auto drawElement = [&](const std::string &distance_str, const QString &icon_path,
-                         const std::function<UiElement(float)> &getUiElement) {
+                         const std::function<UiElement(float, bool)> &getUiElement,
+                         float &previous_distance) {
     float distance = distance_str.empty() ? -1.0f : std::atof(distance_str.c_str());
 
-    /*
-    if (distance != -1.0f) {
-      QPixmap img = loadPixmap(icon_path, pixmap_size);
-      QRect imgRect(rw + icon_offset_x, y + icon_offset_y, icon_size, icon_size);
+    // Determinar si la distancia decrece o crece
+    bool isDecreasing = (previous_distance < 0 || distance < 0) ? false : (distance < previous_distance);
+    previous_distance = distance;
+
+    UiElement element = getUiElement(distance, isDecreasing);
+
+    // Intentar cargar la imagen
+    QPixmap img(icon_path);
+    bool hasImage = !img.isNull();
+
+    if (hasImage) {
+      // Dibujar imagen sólo si se carga correctamente
+      QRect imgRect(rw + icon_offset_x, y + icon_offset_y, pixmap_size.width(), pixmap_size.height());
       p.drawPixmap(imgRect, img);
-    }*/
-    UiElement element = getUiElement(distance);
+    }
+
+    // Dibujar texto de distancia
     rw += drawNewDevUi(p, rw, y, element.value, element.label, element.units, element.color);
   };
 
   // Obtener las distancias desde Params
   std::string roundabout_str = Params().get("roundabout_distance");
   std::string intersection_str = Params().get("turn_distance");
-  std::string on_road_str = Params().get("on_road_distance"); // Nueva maniobra "on road"
-  std::string off_road_str = Params().get("off_road_distance"); // Nueva maniobra "off road"
+  std::string on_road_str = Params().get("on_road_distance");  // Nueva maniobra "on road"
+  std::string off_road_str = Params().get("off_road_distance");  // Nueva maniobra "off road"
 
-  // Dibujar en el orden especificado
-  drawElement(roundabout_str, "../assets/navigation/roundabout.svg",
-              [](float distance) { return DeveloperUi::getRoundaboutDistance(distance, true); });
+  // Variables para almacenar distancias anteriores
+  float prev_roundabout = -1.0f;
+  float prev_intersection = -1.0f;
+  float prev_on_road = -1.0f;
+  float prev_off_road = -1.0f;
 
-  drawElement(intersection_str, "../assets/navigation/intersection.svg",
-              [](float distance) { return DeveloperUi::getIntersectionDistance(distance, true); });
+  // Dibujar elementos en el orden especificado
+  drawElement(roundabout_str, "R",
+              [](float distance, bool isDecreasing) {
+                return DeveloperUi::getRoundaboutDistance(distance, isDecreasing);
+              },
+              prev_roundabout);
 
-  drawElement(on_road_str, "../assets/navigation/onroad.svg", // Ruta del ícono "on road"
-              [](float distance) { return DeveloperUi::getOnRoadDistance(distance, true); });
+  drawElement(intersection_str, "Int",
+              [](float distance, bool isDecreasing) {
+                return DeveloperUi::getIntersectionDistance(distance, isDecreasing);
+              },
+              prev_intersection);
 
-  drawElement(off_road_str, "../assets/navigation/offroad.svg", // Ruta del ícono "off road"
-              [](float distance) { return DeveloperUi::getOffRoadDistance(distance, true); });
+  drawElement(on_road_str, "onr",
+              [](float distance, bool isDecreasing) {
+                return DeveloperUi::getOnRoadDistance(distance, isDecreasing);
+              },
+              prev_on_road);
+
+  drawElement(off_road_str, "offr",
+              [](float distance, bool isDecreasing) {
+                return DeveloperUi::getOffRoadDistance(distance, isDecreasing);
+              },
+              prev_off_road);
 }
 
 
