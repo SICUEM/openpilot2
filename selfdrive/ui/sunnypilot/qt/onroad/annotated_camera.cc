@@ -60,6 +60,9 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
   pm = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"uiDebug"});
   e2e_state = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"e2eLongStateSP"});
 
+
+
+
   main_layout = new QVBoxLayout(this);
   main_layout->setMargin(UI_BORDER_SIZE);
   main_layout->setSpacing(0);
@@ -837,80 +840,56 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
 
 //color de si acerca o no
 void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
+  // Variables estáticas para almacenar las distancias previas
+  static float prev_roundabout_distance = -1;
+  static float prev_intersection_distance = -1;
+  static float prev_onroad_distance = -1;
+  static float prev_offroad_distance = -1;
+
+  QPixmap roundabout_img = loadPixmap("../assets/navigation/roundabout.svg", {75, 75});
+  QPixmap intersection_img = loadPixmap("../assets/navigation/instersection.svg", {75, 75});
+  QPixmap onroad_img = loadPixmap("../assets/navigation/merge.svg", {75, 75});
+  QPixmap offroad_img = loadPixmap("../assets/navigation/merge.svg", {75, 75});
+
   const int base_rw = 550;
   const int icon_size = 75;
-  const int icon_offset_x = -icon_size - 5;  // Imagen más cerca del texto
-  const int icon_offset_y = -10;
+  const int icon_offset_x = -icon_size - 5;  // Imagen cerca del texto
+  const int icon_offset_y = -50;
   const QSize pixmap_size(icon_size, icon_size);  // Tamaño del SVG ajustado
-  const int element_spacing = -185;  // Espaciado negativo para reducir distancia entre elementos
+  const int element_spacing = -100;  // Espaciado negativo para reducir distancia entre elementos
 
   int rw = base_rw;
 
   // Función auxiliar para procesar y dibujar cada elemento
-  auto drawElement = [&](const std::string &distance_str, const QString &icon_path,
-                         const std::function<UiElement(float, bool)> &getUiElement,
-                         float &previous_distance) {
-    float distance = distance_str.empty() ? -1.0f : std::atof(distance_str.c_str());
-
-    // Determinar si la distancia decrece o crece
-    bool isDecreasing = (previous_distance < 0 || distance < 0) ? false : (distance < previous_distance);
-    previous_distance = distance;
+  auto drawElement = [&](const QPixmap &icon, const std::function<UiElement(float, bool)> &getUiElement,
+                         float &prev_distance, float distance) {
+    bool isDecreasing = (distance > 0 && distance < prev_distance); // Compara la distancia actual con la previa
+    prev_distance = distance;  // Actualiza la distancia previa con la actual
 
     UiElement element = getUiElement(distance, isDecreasing);
 
-    // Intentar cargar la imagen
-    QPixmap img(icon_path);
-    bool hasImage = !img.isNull();
+    // Dibujar la imagen
+    QRect imgRect(rw + icon_offset_x, y + icon_offset_y, pixmap_size.width(), pixmap_size.height());
+    p.drawPixmap(imgRect, icon);
 
-    if (hasImage) {
-      // Dibujar imagen sólo si se carga correctamente
-      QRect imgRect(rw + icon_offset_x, y + icon_offset_y, pixmap_size.width(), pixmap_size.height());
-      p.drawPixmap(imgRect, img);
-    }
-
-    // Dibujar texto de distancia
+    // Dibujar el texto de distancia
     rw += drawNewDevUi(p, rw, y, element.value, element.label, element.units, element.color);
 
     // Reducir el espaciado entre los elementos
-    rw += element_spacing;  // Ajustar espaciado entre elementos
+    rw += element_spacing;
   };
 
-  // Obtener las distancias desde Params
-  std::string roundabout_str = Params().get("roundabout_distance");
-  std::string intersection_str = Params().get("turn_distance");
-  std::string on_road_str = Params().get("on_road_distance");  // Nueva maniobra "on road"
-  std::string off_road_str = Params().get("off_road_distance");  // Nueva maniobra "off road"
-
-  // Variables para almacenar distancias anteriores
-  float prev_roundabout = -1.0f;
-  float prev_intersection = -1.0f;
-  float prev_on_road = -1.0f;
-  float prev_off_road = -1.0f;
+  // Obtener las distancias actuales
+  float roundabout_distance = std::stof(Params().get("roundabout_distance", "-1"));
+  float intersection_distance = std::stof(Params().get("turn_distance", "-1"));
+  float onroad_distance = std::stof(Params().get("on_road_distance", "-1"));
+  float offroad_distance = std::stof(Params().get("off_road_distance", "-1"));
 
   // Dibujar elementos en el orden especificado
-  drawElement(roundabout_str, "R",
-              [](float distance, bool isDecreasing) {
-                return DeveloperUi::getRoundaboutDistance(distance, isDecreasing);
-              },
-              prev_roundabout);
-
-  drawElement(intersection_str, "Int",
-              [](float distance, bool isDecreasing) {
-                return DeveloperUi::getIntersectionDistance(distance, isDecreasing);
-              },
-              prev_intersection);
-
-  drawElement(on_road_str, "onr",
-              [](float distance, bool isDecreasing) {
-                return DeveloperUi::getOnRoadDistance(distance, isDecreasing);
-              },
-              prev_on_road);
-
-  drawElement(off_road_str, "offr",
-              [](float distance, bool isDecreasing) {
-                return DeveloperUi::getOffRoadDistance(distance, isDecreasing);
-              },
-              prev_off_road);
+  drawElement(roundabout_img, DeveloperUi::getRoundaboutDistance, prev_roundabout_distance, roundabout_distance);
+  drawElement(intersection_img, DeveloperUi::getIntersectionDistance, prev_intersection_distance, intersection_distance);
+  drawElement(onroad_img, DeveloperUi::getOnRoadDistance, prev_onroad_distance, onroad_distance);
+  drawElement(offroad_img, DeveloperUi::getOffRoadDistance, prev_offroad_distance, offroad_distance);
 }
 
 
