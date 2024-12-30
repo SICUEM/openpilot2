@@ -835,13 +835,14 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
   return 430;
 }
 
-
+//color de si acerca o no
 void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
   const int base_rw = 550;
   const int icon_size = 75;
-  const int icon_offset_x = -icon_size - 10;  // Imagen a la izquierda del texto
+  const int icon_offset_x = -icon_size - 5;  // Imagen más cerca del texto
   const int icon_offset_y = -10;
   const QSize pixmap_size(icon_size, icon_size);  // Tamaño del SVG ajustado
+  const int element_spacing = -185;  // Espaciado negativo para reducir distancia entre elementos
 
   int rw = base_rw;
 
@@ -869,6 +870,9 @@ void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
 
     // Dibujar texto de distancia
     rw += drawNewDevUi(p, rw, y, element.value, element.label, element.units, element.color);
+
+    // Reducir el espaciado entre los elementos
+    rw += element_spacing;  // Ajustar espaciado entre elementos
   };
 
   // Obtener las distancias desde Params
