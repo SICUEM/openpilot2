@@ -478,7 +478,7 @@ class SicMqttHilo2:
                 maneuver_lat = maneuver.get("location", [None, None])[1]
                 maneuver_lon = maneuver.get("location", [None, None])[0]
 
-                if maneuver_type in closest_maneuvers and not maneuver_type.endswith("-hecho"):
+                if maneuver_type in closest_maneuvers and not maneuver.get("hecho", False):
                   # Calcular la distancia manualmente si las coordenadas son válidas
                   if current_lat is not None and current_lon is not None and maneuver_lat is not None and maneuver_lon is not None:
                     calculated_distance = self.calculate_distance(
@@ -490,6 +490,14 @@ class SicMqttHilo2:
                         "latitude": maneuver_lat,
                         "longitude": maneuver_lon
                       }
+
+                    # Marcar la maniobra como hecha si la distancia es menor a 2 metros
+                    if calculated_distance < 2:
+                      step["maneuver"]["hecho"] = True
+
+          # Actualizar el archivo JSON con las maniobras marcadas como hechas
+          with open(ruta_archivo, 'w') as archivo:
+            json.dump(data, archivo, indent=2)
 
           # Obtener distancias
           roundabout_distance = closest_maneuvers["roundabout"]["distance"]

@@ -840,12 +840,6 @@ int AnnotatedCameraWidgetSP::drawNewDevUi(QPainter &p, int x, int y, const QStri
 
 //color de si acerca o no
 void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
-  // Variables estáticas para almacenar las distancias previas
-  static float prev_roundabout_distance = -1;
-  static float prev_intersection_distance = -1;
-  static float prev_onroad_distance = -1;
-  static float prev_offroad_distance = -1;
-
   QPixmap roundabout_img = loadPixmap("../assets/navigation/roundabout.svg", {75, 75});
   QPixmap intersection_img = loadPixmap("../assets/navigation/instersection.svg", {75, 75});
   QPixmap onroad_img = loadPixmap("../assets/navigation/merge.svg", {75, 75});
@@ -862,11 +856,9 @@ void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
 
   // Función auxiliar para procesar y dibujar cada elemento
   auto drawElement = [&](const QPixmap &icon, const std::function<UiElement(float, bool)> &getUiElement,
-                         float &prev_distance, float distance) {
-    bool isDecreasing = (distance > 0 && distance < prev_distance); // Compara la distancia actual con la previa
-    prev_distance = distance;  // Actualiza la distancia previa con la actual
-
-    UiElement element = getUiElement(distance, isDecreasing);
+                         float distance) {
+    UiElement element = getUiElement(distance, true); // El color será siempre blanco
+    element.color = QColor(255, 255, 255, 255); // Blanco
 
     // Dibujar la imagen
     QRect imgRect(rw + icon_offset_x, y + icon_offset_y, pixmap_size.width(), pixmap_size.height());
@@ -886,10 +878,10 @@ void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
   float offroad_distance = std::stof(Params().get("off_road_distance", "-1"));
 
   // Dibujar elementos en el orden especificado
-  drawElement(roundabout_img, DeveloperUi::getRoundaboutDistance, prev_roundabout_distance, roundabout_distance);
-  drawElement(intersection_img, DeveloperUi::getIntersectionDistance, prev_intersection_distance, intersection_distance);
-  drawElement(onroad_img, DeveloperUi::getOnRoadDistance, prev_onroad_distance, onroad_distance);
-  drawElement(offroad_img, DeveloperUi::getOffRoadDistance, prev_offroad_distance, offroad_distance);
+  drawElement(roundabout_img, DeveloperUi::getRoundaboutDistance, roundabout_distance);
+  drawElement(intersection_img, DeveloperUi::getIntersectionDistance, intersection_distance);
+  drawElement(onroad_img, DeveloperUi::getOnRoadDistance, onroad_distance);
+  drawElement(offroad_img, DeveloperUi::getOffRoadDistance, offroad_distance);
 }
 
 
