@@ -465,8 +465,8 @@ class SicMqttHilo2:
           closest_maneuvers = {
             "roundabout": {"distance": float('inf'), "latitude": None, "longitude": None},
             "turn": {"distance": float('inf'), "latitude": None, "longitude": None},
-            "off road": {"distance": float('inf'), "latitude": None, "longitude": None},  # Cambiado a "off road"
-            "on road": {"distance": float('inf'), "latitude": None, "longitude": None}  # Cambiado a "on road"
+            "off ramp": {"distance": float('inf'), "latitude": None, "longitude": None},  # Cambiado a "off road"
+            "on ramp": {"distance": float('inf'), "latitude": None, "longitude": None}  # Cambiado a "on road"
           }
 
           # Analizar las rutas y encontrar maniobras específicas
@@ -502,8 +502,8 @@ class SicMqttHilo2:
           # Obtener distancias
           roundabout_distance = closest_maneuvers["roundabout"]["distance"]
           turn_distance = closest_maneuvers["turn"]["distance"]
-          off_road_distance = closest_maneuvers["off road"]["distance"]  # Cambiado a "off road"
-          on_road_distance = closest_maneuvers["on road"]["distance"]  # Cambiado a "on road"
+          off_road_distance = closest_maneuvers["off ramp"]["distance"]  # Cambiado a "off road"
+          on_road_distance = closest_maneuvers["on ramp"]["distance"]  # Cambiado a "on road"
 
           # Guardar las distancias en los parámetros
           self.params.put("roundabout_distance", str(roundabout_distance))
