@@ -629,6 +629,12 @@ class Controls:
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state
 
+    '''
+    #CONTROL lateral
+    if not self.joystick_mode:
+      # Añadir aquí el código para forzar el giro a la derecha
+      self.desired_curvature = +0.01  # Ajusta este valor para el giro deseado hacia la derecha (+) o izq (-)
+    '''
     # Enable blinkers while lane changing
     if blinker_svs.laneChangeState != LaneChangeState.off:
       CC.leftBlinker = blinker_svs.laneChangeDirection == LaneChangeDirection.left
@@ -843,7 +849,11 @@ class Controls:
 
     controlsState.longitudinalPlanMonoTime = self.sm.logMonoTime['longitudinalPlan']
     controlsState.lateralPlanMonoTime = self.sm.logMonoTime[lp_mono_time_svs]
+    #original
     controlsState.enabled = not (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and (self.enabled or CS.cruiseState.enabled) and CS.gearShifter not in [GearShifter.park, GearShifter.reverse]
+    #adri
+    #controlsState.enabled = not (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and (self.enabled or CS.cruiseState.enabled)
+
     controlsState.active = not (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and (self.active or CS.cruiseState.enabled)
     controlsState.curvature = curvature
     controlsState.desiredCurvature = self.desired_curvature
