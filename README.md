@@ -47,4 +47,63 @@ Grupo de Investigación **SICUEM** - Universidad Europea
 
 ### Clonación del Repositorio ---por hacer
 
+Luego, clona el repositorio de manera parcial para una descarga más rápida:
+
+git clone --filter=blob:none --recurse-submodules --also-filter-submodules https://github.com/commaai/openpilot.git
+
+O realiza una clonación completa:
+
+git clone --recurse-submodules https://github.com/commaai/openpilot.git
+
+2. Configurar el Entorno
+
+cd openpilot
+tools/ubuntu_setup.sh
+
+3. Sincronizar Git LFS
+
+git lfs pull
+
+4. Activar el Entorno Virtual de Python
+
+source .venv/bin/activate
+
+5. Compilar openpilot
+
+scons -u -j$(nproc)
+
+🏎️ Ejecución en Simulador
+
+openpilot se puede ejecutar en simuladores como MetaDrive o CARLA mediante un puente de comunicación.
+🚀 Iniciar openpilot
+
+./tools/sim/launch_openpilot.sh
+
+🔗 Uso del Bridge
+
+./run_bridge.py -h
+
+Esto mostrará las opciones disponibles:
+
+usage: run_bridge.py [-h] [--joystick] [--high_quality] [--dual_camera] [--simulator SIMULATOR] [--town TOWN] [--spawn_point NUM_SELECTED_SPAWN_POINT] [--host HOST] [--port PORT]
+
+Bridge between the simulator and openpilot.
+
+options:
+  -h, --help            show this help message and exit
+  --joystick
+  --high_quality
+  --dual_camera
+  --simulator SIMULATOR
+  --town TOWN
+  --spawn_point NUM_SELECTED_SPAWN_POINT
+  --host HOST
+  --port PORT
+
+🚗 Ejecución en MetaDrive
+
+Para iniciar el simulador MetaDrive con el bridge:
+
+./run_bridge.py --simulator metadrive
+
 
