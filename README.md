@@ -36,13 +36,10 @@ Grupo de Investigación **SICUEM** - Universidad Europea
 
 ### Requisitos Previos
 
-- **Sistema Operativo:** Ubuntu 20.04 o superior
-- **Dependencias:** Python 3.8+, C++, QT (para la interfaz gráfica)
+- **Sistema Operativo:** Ubuntu 24.04 o superior
+- **Dependencias:** Python 3.8+, C+, QT (para la interfaz gráfica)
 - **Hardware:** Compatible con Comma Two o EON
 
-### Clonación del Repositorio
+### Clonación del Repositorio ---por hacer
 
-```bash
-git clone https://github.com/tu-repositorio/sunnypilot.git
-cd sunnypilot
-git checkout sic-pruebas
+
