@@ -1,4 +1,3 @@
-
 # ![Logo de la Universidad Europea](https://upload.wikimedia.org/wikipedia/commons/3/3a/UE_Madrid_Logo_Positive_RGB.png)  
 # SIC-PRUEBAS - Sunnypilot
 
@@ -18,6 +17,7 @@ La rama `sic-pruebas` es una extensión de Sunnypilot desarrollada por el grupo 
 
 Además, se han realizado mejoras significativas en la **interfaz de usuario (front-end)**, optimizando la visualización de datos relevantes y mejorando la experiencia de usuario.
 
+---
 
 ## 📚 Documentación Adicional
 
@@ -39,53 +39,61 @@ Grupo de Investigación **SICUEM** - Universidad Europea
 
 ## 🚀 Instalación y Configuración
 
-### Requisitos Previos
+### ⚙️ Requisitos Previos
 
 - **Sistema Operativo:** Ubuntu 24.04 o superior
-- **Dependencias:** Python 3.8+, C+, QT (para la interfaz gráfica)
+- **Dependencias:** Python 3.8+, C++, QT (para la interfaz gráfica)
 - **Hardware:** Compatible con Comma Two o EON
 
-### Clonación del Repositorio ---por hacer
+> **Nota:** En sistemas Windows se recomienda utilizar WSL, y en macOS o distribuciones Linux no compatibles se recomienda el uso de dev containers.
 
-Luego, clona el repositorio de manera parcial para una descarga más rápida:
+---
 
+### 📥 Clonación del Repositorio
+
+```bash
+# Clonación parcial para descarga rápida
 git clone --filter=blob:none --recurse-submodules --also-filter-submodules https://github.com/commaai/openpilot.git
 
-O realiza una clonación completa:
-
+# O clonación completa
 git clone --recurse-submodules https://github.com/commaai/openpilot.git
+```
+---
+### ⚙️ Configuración del Entorno
 
-2. Configurar el Entorno
-
+```bash
+# Acceder al directorio del proyecto
 cd openpilot
+
+# Ejecutar el script de configuración para Ubuntu
 tools/ubuntu_setup.sh
 
-3. Sincronizar Git LFS
-
+# Sincronizar Git LFS
 git lfs pull
 
-4. Activar el Entorno Virtual de Python
-
+# Activar el entorno virtual de Python
 source .venv/bin/activate
 
-5. Compilar openpilot
-
+# Compilar openpilot
 scons -u -j$(nproc)
+```
+---
 
-🏎️ Ejecución en Simulador
+###🏎️ openpilot in Simulator
 
-openpilot se puede ejecutar en simuladores como MetaDrive o CARLA mediante un puente de comunicación.
-🚀 Iniciar openpilot
-
+```bash
+# Run locally
 ./tools/sim/launch_openpilot.sh
 
-🔗 Uso del Bridge
+```
+### 🔗 Bridge Usage
+```bash
+$ ./run_bridge.py -h
 
-./run_bridge.py -h
-
-Esto mostrará las opciones disponibles:
-
-usage: run_bridge.py [-h] [--joystick] [--high_quality] [--dual_camera] [--simulator SIMULATOR] [--town TOWN] [--spawn_point NUM_SELECTED_SPAWN_POINT] [--host HOST] [--port PORT]
+usage: run_bridge.py [-h] [--joystick] [--high_quality] [--dual_camera]
+                     [--simulator SIMULATOR] [--town TOWN]
+                     [--spawn_point NUM_SELECTED_SPAWN_POINT]
+                     [--host HOST] [--port PORT]
 
 Bridge between the simulator and openpilot.
 
@@ -100,10 +108,4 @@ options:
   --host HOST
   --port PORT
 
-🚗 Ejecución en MetaDrive
-
-Para iniciar el simulador MetaDrive con el bridge:
-
-./run_bridge.py --simulator metadrive
-
-
+```
