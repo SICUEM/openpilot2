@@ -1,4 +1,3 @@
-LINK DOCUMENTACION ADICIONAL:    https://docs.google.com/document/d/1sxwJNi6hhJmm7Wsi8D8DlvUuuSTA4Juq6f6QMueI7lE/edit?usp=sharing
 
 # ![Logo de la Universidad Europea](https://upload.wikimedia.org/wikipedia/commons/3/3a/UE_Madrid_Logo_Positive_RGB.png)  
 # SIC-PRUEBAS - Sunnypilot
@@ -18,6 +17,12 @@ La rama `sic-pruebas` es una extensión de Sunnypilot desarrollada por el grupo 
 - **Detección de Maniobras Críticas:** Desarrollo de algoritmos que permiten identificar cuándo el vehículo se aproxima a maniobras complejas, anticipándose a situaciones de riesgo para mejorar la seguridad.
 
 Además, se han realizado mejoras significativas en la **interfaz de usuario (front-end)**, optimizando la visualización de datos relevantes y mejorando la experiencia de usuario.
+
+
+## 📚 Documentación Adicional
+
+Para más detalles técnicos, consulta la documentación completa del proyecto:  
+👉 [Documentación del Proyecto](https://docs.google.com/document/d/1sxwJNi6hhJmm7Wsi8D8DlvUuuSTA4Juq6f6QMueI7lE/edit?usp=sharing)
 
 ---
 
