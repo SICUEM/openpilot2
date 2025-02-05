@@ -79,7 +79,7 @@ scons -u -j$(nproc)
 ```
 ---
 
-###🏎️ openpilot in Simulator
+### 🏎️ openpilot in Simulator
 
 ```bash
 # Run locally
