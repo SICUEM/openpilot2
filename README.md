@@ -1,6 +1,6 @@
 LINK DOCUMENTACION ADICIONAL:    https://docs.google.com/document/d/1sxwJNi6hhJmm7Wsi8D8DlvUuuSTA4Juq6f6QMueI7lE/edit?usp=sharing
 
-# ![Logo de la Universidad Europea](https://www.universidadeuropea.com/logo.png)  
+# ![Logo de la Universidad Europea](https://upload.wikimedia.org/wikipedia/commons/3/3a/UE_Madrid_Logo_Positive_RGB.png)  
 # SIC-PRUEBAS - Sunnypilot
 
 **Rama de Desarrollo:** `sic-pruebas`  
