@@ -320,7 +320,7 @@ class Controls:
           self.events.add(EventName.preLaneChangeRight)
     elif lane_change_svs.laneChangeState in (LaneChangeState.laneChangeStarting,
                                              LaneChangeState.laneChangeFinishing):
-      self.events.add(EventName.laneChange)
+      self.events.add(EventName.laneChange) #AQUI CAMBIA DE CARRIL HACE LA ACCION DE CAMBIAR (EVENTO)
 
     for i, pandaState in enumerate(self.sm['pandaStates']):
       # All pandas must match the list of safetyConfigs, and if outside this list, must be silent or noOutput
@@ -656,15 +656,35 @@ class Controls:
       actuators.accel = self.LoC.update(CC.longActive, CS, long_plan.aTarget, long_plan.shouldStop, pid_accel_limits)
 
       # Steering PID loop and lateral MPC
+      # Si se usa el planificador lateral (lateral planner), se calcula la curvatura deseada ajustada
+      # considerando el retardo del sistema. Esto se basa en la velocidad del vehículo (vEgo) y la
+      # curvatura planeada del camino (`lat_plan.curvatures`).
+      #CAMBIO DE CARRIL
       if self.model_use_lateral_planner:
         self.desired_curvature = get_lag_adjusted_curvature(self.CP, CS.vEgo, lat_plan.psis, lat_plan.curvatures)
       else:
+        # Si no se usa el planificador lateral, se limita la curvatura deseada para evitar valores extremos
+        # en función de la velocidad del vehículo (`vEgo`) y la curvatura prevista por el modelo (`model_v2.action.desiredCurvature`).
         self.desired_curvature = clip_curvature(CS.vEgo, self.desired_curvature, model_v2.action.desiredCurvature)
+
+      # Se asigna la curvatura deseada al actuador, indicando el grado de giro que debe seguir el vehículo.
       actuators.curvature = self.desired_curvature
-      actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(CC.latActive, CS, self.VM, lp,
-                                                                             self.steer_limited, self.desired_curvature,
-                                                                             self.sm['liveLocationKalman'],
-                                                                             model_data=model_v2)
+
+      # Se actualizan los actuadores laterales (volante):
+      # - `steer`: Señal de dirección que se enviará al auto.
+      # - `steeringAngleDeg`: Ángulo de dirección que se aplicará en grados.
+      # - `lac_log`: Registro de datos del control lateral.
+      actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(
+        CC.latActive,  # Indica si el control lateral está activo.
+        CS,  # Estado actual del vehículo.
+        self.VM,  # Modelo del vehículo para cálculos de dinámica.
+        lp,  # Parámetros en vivo de calibración.
+        self.steer_limited,  # Indica si la dirección está limitada por el sistema.
+        self.desired_curvature,  # Curvatura deseada basada en el plan de trayectoria.
+        self.sm['liveLocationKalman'],  # Datos en vivo de ubicación y orientación del vehículo.
+        model_data=model_v2  # Datos del modelo de conducción.
+      )
+
       if self.model_use_lateral_planner:
         actuators.curvature = self.desired_curvature
     else:
