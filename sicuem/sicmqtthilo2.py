@@ -512,15 +512,16 @@ class SicMqttHilo2:
           self.params.put("off_road_distance", str(off_road_distance))  # Cambiado a "off road"
 
           # Preparar el contenido para MQTT
-          contenido = (
-            f"Roundabout distance: {roundabout_distance if roundabout_distance != float('inf') else -1} m\n"
-            f"Turn distance: {turn_distance if turn_distance != float('inf') else -1} m\n"
-            f"Off road distance: {off_road_distance if off_road_distance != float('inf') else -1} m\n"
-            f"On road distance: {on_road_distance if on_road_distance != float('inf') else -1} m"
-          )
+          contenido = {
+            "roundabout": roundabout_distance if roundabout_distance != float('inf') else -1,
+            "turn": turn_distance if turn_distance != float('inf') else -1,
+            "off_road": off_road_distance if off_road_distance != float('inf') else -1,
+            "on_road": on_road_distance if on_road_distance != float('inf') else -1
+          }
+
           print(f"Distancias enviadas: {contenido}")
           if self.params.get_bool("mapbox_toggle"):
-            self.mqttc.publish("telemetry_mqtt/mapbox_status", str(contenido).format(self.DongleID), qos=0)
+            self.mqttc.publish("telemetry_mqtt/"+self.DongleID+"/mapbox_status", str(contenido), qos=0)
 
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
