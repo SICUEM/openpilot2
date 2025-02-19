@@ -86,15 +86,20 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
   updateButtonsLayout(false);
 
 // Ruta de la imagen
-QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/uem_logo.svg";
+QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/rigth.svg";
 
-// Botón "Girar a la Izquierda"
+QPixmap pixmap(button_icon_path);
+QTransform transform;
+transform.rotate(180);  // Rotar 180 grados
+pixmap = pixmap.transformed(transform);
+
 left_button = new QPushButton(this);
 left_button->setFixedSize(150, 150);  // Ajusta el tamaño según la imagen
-left_button->setIcon(QIcon(button_icon_path));
+left_button->setIcon(QIcon(pixmap));  // Establece la imagen rotada
 left_button->setIconSize(left_button->size());  // Ajusta la imagen al tamaño del botón
 left_button->setStyleSheet("border: none; background: transparent;");  // Sin bordes y fondo transparente
 left_button->move(20, height() / 2 - left_button->height() / 2);
+
 
 // Botón "Girar a la Derecha"
 right_button = new QPushButton(this);
