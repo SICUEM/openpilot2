@@ -1,29 +1,3 @@
-/**
-The MIT License
-
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-Last updated: July 29, 2024
-***/
-
 #pragma once
 
 #include <QPushButton>
@@ -37,7 +11,7 @@ class ExperimentalButtonSP : public ExperimentalButton {
   Q_OBJECT
 
 public:
-  explicit ExperimentalButtonSP(QWidget *parent = 0) : ExperimentalButton(parent) {};
+  explicit ExperimentalButtonSP(QWidget *parent = nullptr) : ExperimentalButton(parent) {};
   void updateState(const UIStateSP &s);
 };
 
@@ -45,7 +19,7 @@ class OnroadSettingsButton : public QPushButton {
   Q_OBJECT
 
 public:
-  explicit OnroadSettingsButton(QWidget *parent = 0);
+  explicit OnroadSettingsButton(QWidget *parent = nullptr);
   void updateState(const UIStateSP &s);
 
 private:
@@ -54,15 +28,33 @@ private:
   QPixmap settings_img;
 };
 
-
 class MapSettingsButton : public QPushButton {
   Q_OBJECT
 
 public:
-  explicit MapSettingsButton(QWidget *parent = 0);
+  explicit MapSettingsButton(QWidget *parent = nullptr);
 
 private:
   void paintEvent(QPaintEvent *event) override;
 
   QPixmap settings_img;
+};
+
+// **Nuevo botón GirarALaDerechaButton**
+class GirarALaDerechaButton : public QPushButton {
+  Q_OBJECT
+
+public:
+  explicit GirarALaDerechaButton(QWidget *parent = nullptr);
+  void updateState(const UIStateSP &s);
+
+private:
+  void paintEvent(QPaintEvent *event) override;
+  void changeMode();
+
+  bool girar_a_la_derecha;
+  bool engageable;
+  Params params;
+
+  QPixmap girar_img;
 };
