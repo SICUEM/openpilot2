@@ -49,6 +49,13 @@ public:
   OnroadSettingsButton *onroad_settings_btn;
 
 private:
+  QPushButton *left_button;
+  QPushButton *right_button;
+
+
+  void onLeftButtonClicked();
+  void onRightButtonClicked();
+
 
   void drawText(QPainter &p, int x, int y, const QString &text, int alpha = 255);
   void drawCenteredText(QPainter &p, int x, int y, const QString &text, QColor color);
@@ -217,6 +224,7 @@ private:
   cereal::ModelGeneration drivingModelGen;
 
 protected:
+  void resizeEvent(QResizeEvent *event) override;
   void paintGL() override;
   void initializeGL() override;
   void showEvent(QShowEvent *event) override;

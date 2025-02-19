@@ -47,7 +47,8 @@ UiElement DeveloperUi::getDRel(bool lead_status, float lead_d_rel) {
     }
   }
 
-  return UiElement(value, "REL DIST", "m", color);
+  //return UiElement(value, "REL DIST", "m", color);
+  return UiElement("","", "", color);
 }
 
 // Add Relative Velocity vs Primary Lead Car
@@ -66,7 +67,9 @@ UiElement DeveloperUi::getVRel(bool lead_status, float lead_v_rel, bool is_metri
     }
   }
 
-  return UiElement(value, "REL SPEED", speed_unit, color);
+  //return UiElement(value, "REL SPEED", speed_unit, color);
+    return UiElement("","", "", color);
+
 }
 
 // Add Real Steering Angle
@@ -83,7 +86,9 @@ UiElement DeveloperUi::getSteeringAngleDeg(float angle_steers, bool mads_enabled
     color = QColor(255, 188, 0, 255);
   }
 
-  return UiElement(value, "REAL STEER", "", color);
+  //return UiElement(value, "REAL STEER", "", color);
+    return UiElement("","", "", color);
+
 }
 
 // Add Actual Lateral Acceleration (roll compensated) when using Torque
@@ -94,7 +99,9 @@ UiElement DeveloperUi::getActualLateralAccel(float curvature, float v_ego, float
   QString value = QString::number(actualLateralAccel, 'f', 2);
   QColor color = (mads_enabled && lat_active) ? QColor(0, 255, 0, 255) : QColor(255, 255, 255, 255);
 
-  return UiElement(value, "ACTUAL LAT", "m/s²", color);
+ // return UiElement(value, "ACTUAL LAT", "m/s²", color);
+      return UiElement("","", "", color);
+
 }
 
 // Add Desired Steering Angle when using PID
@@ -115,7 +122,9 @@ UiElement DeveloperUi::getSteeringAngleDesiredDeg(bool mads_enabled, bool lat_ac
     }
   }
 
-  return UiElement(value, "DESIRED STEER", "", color);
+ // return UiElement(value, "DESIRED STEER", "", color);
+      return UiElement("","", "", color);
+
 }
 
 // Add Device Memory (RAM) Usage
@@ -124,7 +133,9 @@ UiElement DeveloperUi::getMemoryUsagePercent(int memory_usage_percent) {
   QString value = QString("%1%2").arg(QString::number(memory_usage_percent, 'd', 0)).arg("%");
   QColor color = (memory_usage_percent > 85) ? QColor(255, 188, 0, 255) : QColor(255, 255, 255, 255);
 
-  return UiElement(value, "RAM", "", color);
+  //return UiElement(value, "RAM", "", color);
+      return UiElement("","", "", color);
+
 }
 
 // Add Vehicle Current Acceleration

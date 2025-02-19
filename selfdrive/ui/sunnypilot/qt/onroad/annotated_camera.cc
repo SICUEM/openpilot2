@@ -63,6 +63,7 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
 
 
 
+
   main_layout = new QVBoxLayout(this);
   main_layout->setMargin(UI_BORDER_SIZE);
   main_layout->setSpacing(0);
@@ -83,6 +84,53 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
   buttons_layout->setContentsMargins(0, 0, 10, 20);
   main_layout->addLayout(buttons_layout);
   updateButtonsLayout(false);
+
+// Ruta de la imagen
+QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/uem_logo.svg";
+
+// Botón "Girar a la Izquierda"
+left_button = new QPushButton(this);
+left_button->setFixedSize(150, 150);  // Ajusta el tamaño según la imagen
+left_button->setIcon(QIcon(button_icon_path));
+left_button->setIconSize(left_button->size());  // Ajusta la imagen al tamaño del botón
+left_button->setStyleSheet("border: none; background: transparent;");  // Sin bordes y fondo transparente
+left_button->move(20, height() / 2 - left_button->height() / 2);
+
+// Botón "Girar a la Derecha"
+right_button = new QPushButton(this);
+right_button->setFixedSize(150, 150);
+right_button->setIcon(QIcon(button_icon_path));
+right_button->setIconSize(right_button->size());
+right_button->setStyleSheet("border: none; background: transparent;");
+right_button->move(width() - right_button->width() - 20, height() / 2 - right_button->height() / 2);
+
+// Conectar botones a funciones
+connect(left_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onLeftButtonClicked);
+connect(right_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onRightButtonClicked);
+
+
+}
+
+void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
+  QWidget::resizeEvent(event);
+
+  int screen_height = height();
+  int screen_width = width();
+
+  if (left_button) {
+    left_button->move(20, (screen_height / 2) - (left_button->height() / 2));
+  }
+  if (right_button) {
+    right_button->move(screen_width - right_button->width() - 20, (screen_height / 2) - (right_button->height() / 2));
+  }
+}
+
+void AnnotatedCameraWidgetSP::onLeftButtonClicked() {
+  qDebug() << "Girar a la Izquierda presionado";
+}
+
+void AnnotatedCameraWidgetSP::onRightButtonClicked() {
+  qDebug() << "Girar a la Derecha presionado";
 }
 
 void AnnotatedCameraWidgetSP::mousePressEvent(QMouseEvent* e) {
@@ -1522,6 +1570,15 @@ void AnnotatedCameraWidgetSP::paintGL() {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   painter.setPen(Qt::NoPen);
+
+// ######### CUADRADO BLANCO EN EL CENTRO #########
+ // int square_size = 200;  // Tamaño del cuadrado
+ // int center_x = width() / 2 - square_size / 2;
+ // int center_y = height() / 2 - square_size / 2;
+
+  //painter.setBrush(Qt::white);
+  //painter.drawRect(center_x, center_y, square_size, square_size);
+  // ######### FIN CUADRADO #########
 
   if (s->scene.world_objects_visible) {
     sp_update_model(s, model);
