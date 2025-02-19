@@ -210,8 +210,7 @@ class Controls:
 
     # controlsd is driven by carState, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
-
-
+    self.lane_change_sock = messaging.sub_sock('laneChangeCommand')
 
   def set_initial_state(self):
     if REPLAY:
@@ -454,6 +453,14 @@ class Controls:
     CS = car_state.carState if car_state else self.CS_prev
 
     self.sm.update(0)
+    #simular el intermitente.
+    lane_change_msg = messaging.recv_one_or_none(self.lane_change_sock)
+    if lane_change_msg is not None:
+      direction = lane_change_msg.laneChangeCommand.direction
+      if direction == Desire.laneChangeLeft:
+        CS.leftBlinker = True
+      elif direction == Desire.laneChangeRight:
+        CS.rightBlinker = True
 
     if not self.initialized:
       all_valid = CS.canValid and self.sm.all_checks()

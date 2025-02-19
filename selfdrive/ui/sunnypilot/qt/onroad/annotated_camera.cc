@@ -27,6 +27,8 @@ Last updated: July 29, 2024
 #include "selfdrive/ui/sunnypilot/qt/onroad/annotated_camera.h"
 
 #include <algorithm>
+#include <QProcess>
+
 #include <cmath>
 #include <QMouseEvent>
 #include <QPainterPath>
@@ -132,10 +134,17 @@ void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
 
 void AnnotatedCameraWidgetSP::onLeftButtonClicked() {
   qDebug() << "Girar a la Izquierda presionado";
+QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "left");
+
+
 }
 
 void AnnotatedCameraWidgetSP::onRightButtonClicked() {
   qDebug() << "Girar a la Derecha presionado";
+QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "rigth");
+
+
+
 }
 
 void AnnotatedCameraWidgetSP::mousePressEvent(QMouseEvent* e) {
