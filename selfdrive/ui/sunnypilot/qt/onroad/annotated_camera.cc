@@ -134,14 +134,14 @@ void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
 
 void AnnotatedCameraWidgetSP::onLeftButtonClicked() {
   qDebug() << "Girar a la Izquierda presionado";
-QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "left");
+//QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "left");
 
 
 }
 
 void AnnotatedCameraWidgetSP::onRightButtonClicked() {
   qDebug() << "Girar a la Derecha presionado";
-QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "rigth");
+//QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "rigth");
 
 
 
