@@ -457,10 +457,12 @@ class Controls:
     lane_change_msg = messaging.recv_one_or_none(self.lane_change_sock)
     if lane_change_msg is not None:
       direction = lane_change_msg.laneChangeCommand.direction
-      if direction == Desire.laneChangeLeft:
-        CS.leftBlinker = True
-      elif direction == Desire.laneChangeRight:
-        CS.rightBlinker = True
+      activate_blinker = lane_change_msg.laneChangeCommand.activateBlinker  # ← Nuevo campo
+
+      if direction == Desire.laneChangeLeft and activate_blinker:
+        self.events.add(car.CarEvent.EventName.preLaneChangeLeft)  # ← Disparar evento
+      elif direction == Desire.laneChangeRight and activate_blinker:
+        self.events.add(car.CarEvent.EventName.preLaneChangeRight)  # ← Disparar evento
 
     if not self.initialized:
       all_valid = CS.canValid and self.sm.all_checks()

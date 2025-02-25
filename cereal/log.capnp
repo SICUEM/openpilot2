@@ -342,7 +342,11 @@ struct CanData {
 }
 struct LaneChangeCommand {
   direction @0 :Desire;
+  state @1 :LaneChangeState;   # ← Nuevo campo para el estado del cambio de carril
+  activateBlinker @2 :Bool;    # ← Nuevo campo para activar el intermitente
 }
+
+
 
 
 struct DeviceState @0xa4d8b5af2aa492eb {
