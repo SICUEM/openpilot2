@@ -29,6 +29,11 @@ Last updated: July 29, 2024
 #include <algorithm>
 #include <QProcess>
 
+#include <QCoreApplication>
+#include <QCoreApplication>
+#include <QDir>
+
+
 #include <cmath>
 #include <QMouseEvent>
 #include <QPainterPath>
@@ -132,20 +137,55 @@ void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
   }
 }
 
+
+
+
+
+#include <QCoreApplication>
+#include <QProcess>
+#include <QDir>
+
+#include <QCoreApplication>
+#include <QProcess>
+#include <QDir>
+
 void AnnotatedCameraWidgetSP::onLeftButtonClicked() {
   qDebug() << "Girar a la Izquierda presionado";
-//QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "left");
 
+  // Obtener la ruta base de "openpilot/" automáticamente
+  QString basePath = QCoreApplication::applicationDirPath();
+  int index = basePath.indexOf("/selfdrive/");
+  if (index != -1) {
+    basePath = basePath.left(index);  // Recorta la ruta hasta "openpilot/"
+  }
 
+  // Construye la ruta completa a lane_change.py
+  QString scriptPath = basePath + "/sicuem/lane_change.py";
+
+  qDebug() << "Ejecutando script en: " << scriptPath;
+
+  QProcess::startDetached("python3", QStringList() << scriptPath << "left");
 }
 
 void AnnotatedCameraWidgetSP::onRightButtonClicked() {
   qDebug() << "Girar a la Derecha presionado";
-//QProcess::execute("python3", QStringList() << "/home/drago/Desktop/openpilot/sicuem/lane_change.py" << "rigth");
 
+  // Obtener la ruta base de "openpilot/" automáticamente
+  QString basePath = QCoreApplication::applicationDirPath();
+  int index = basePath.indexOf("/selfdrive/");
+  if (index != -1) {
+    basePath = basePath.left(index);  // Recorta la ruta hasta "openpilot/"
+  }
 
+  // Construye la ruta completa a lane_change.py
+  QString scriptPath = basePath + "/sicuem/lane_change.py";
 
+  qDebug() << "Ejecutando script en: " << scriptPath;
+
+  QProcess::startDetached("python3", QStringList() << scriptPath << "right");
 }
+
+
 
 void AnnotatedCameraWidgetSP::mousePressEvent(QMouseEvent* e) {
   bool propagate_event = true;

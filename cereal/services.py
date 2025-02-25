@@ -17,6 +17,7 @@ _services: dict[str, tuple] = {
   "accelerometer": (True, 104., 104),
   "accelerometer2": (True, 100., 100),
   "magnetometer": (True, 25.),
+  "laneChangeCommand": (True, 10.),
   "lightSensor": (True, 100., 100),
   "temperatureSensor": (True, 2., 200),
   "temperatureSensor2": (True, 2., 200),

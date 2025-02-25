@@ -439,8 +439,8 @@ class SicMqttHilo2:
     longitude = sm['gpsLocationExternal'].longitude
     altitude = sm['gpsLocationExternal'].altitude
 
-    print("latitude", latitude)
-    print("longitude", longitude)
+    #print("latitude", latitude)
+    #print("longitude", longitude)
 
 
     return {

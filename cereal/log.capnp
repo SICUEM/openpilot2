@@ -340,6 +340,10 @@ struct CanData {
   src     @3 :UInt8;
   busTimeDEPRECATED @1 :UInt16;
 }
+struct LaneChangeCommand {
+  direction @0 :Desire;
+}
+
 
 struct DeviceState @0xa4d8b5af2aa492eb {
   deviceType @45 :InitData.DeviceType;
@@ -2279,6 +2283,8 @@ struct Microphone {
 struct Event {
   logMonoTime @0 :UInt64;  # nanoseconds
   valid @67 :Bool = true;
+  laneChangeCommand @130 :LaneChangeCommand;
+
 
   union {
     # *********** log metadata ***********
