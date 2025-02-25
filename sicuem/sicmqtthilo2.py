@@ -41,9 +41,7 @@ class SicMqttHilo2:
     self.espera = 0.5                              # Intervalo de espera predeterminado en segundos
     self.indice_canal = 0                          # Índice inicial para los canales
     self.conectado = False
-
-    #self.sm = messaging.SubMaster(
-      #[ 'gpsLocationExternal'])
+    self.last_lider_toggle_state = None
 
 
     # Estado inicial de conexión MQTT
@@ -183,6 +181,9 @@ class SicMqttHilo2:
     time.sleep(self.velocidadActualizacion)
     hilo_telemetry = Thread(target=self.loop, daemon=True)
     hilo_telemetry.start()
+
+    self.enviar_estado_lider_toggle()
+
     return 0
 
 
@@ -247,7 +248,33 @@ class SicMqttHilo2:
       #else:
         #print("Telemetría deshabilitada, esperando...")
 
+      self.verificar_cambio_lider_toggle()
       time.sleep(0.5)  # Pausa breve antes de volver a verificar
+
+  def verificar_cambio_lider_toggle(self):
+    """Detecta cambios en `lider_toggle` y los envía por MQTT."""
+    # Obtener el estado actual de `lider_toggle`
+    lider_toggle_actual = self.params.get_bool("lider_toggle")
+
+    # Si es la primera vez o si ha cambiado, enviar por MQTT
+    if lider_toggle_actual != self.last_lider_toggle_state:
+      estado_mqtt = "on" if lider_toggle_actual else "off"
+      self.mqttc.publish(f"telemetry_mqtt/{self.DongleID}/lider_toggle", estado_mqtt, qos=0)
+      print(f"📡 Estado `lider_toggle` cambiado: {estado_mqtt}")
+
+      # Actualizar el estado registrado
+      self.last_lider_toggle_state = lider_toggle_actual
+
+  def enviar_estado_lider_toggle(self):
+    """Envia el estado inicial de `lider_toggle` cuando el programa inicia."""
+    lider_toggle_actual = self.params.get_bool("lider_toggle")
+    estado_mqtt = "on" if lider_toggle_actual else "off"
+
+    self.mqttc.publish(f"telemetry_mqtt/{self.DongleID}/lider_toggle", estado_mqtt, qos=0)
+    print(f"📡 Estado inicial `lider_toggle` enviado: {estado_mqtt}")
+
+    # Guardar el estado inicial para futuras comparaciones
+    self.last_lider_toggle_state = lider_toggle_actual
 
   def loop_principal(self):
     """
@@ -549,6 +576,8 @@ class SicMqttHilo2:
     return R * c
 
   def publicarInfo(self, canal,datos_importantes):
+
+
 
     if 'carState' in canal and self.params.get_bool("carState_toggle") \
       or 'controlsState' in canal and self.params.get_bool("controlsState_toggle") \

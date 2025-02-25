@@ -48,6 +48,12 @@ TelUemSettings::TelUemSettings(QWidget* parent) : QWidget(parent) {
   // param, title, desc, icon
   std::vector<std::tuple<QString, QString, QString, QString>> toggle_defs{
     {
+      "lider_toggle",
+      tr("LIDER"),
+      tr("Descripción del OPCION 2."),
+      "../assets/navigation/uem_logo.svg",
+    },
+    {
       "carState_toggle",
       tr("CarState UEM"),
       tr("Descripción del OPCION 2."),
