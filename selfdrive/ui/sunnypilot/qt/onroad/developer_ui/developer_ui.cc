@@ -141,16 +141,17 @@ UiElement DeveloperUi::getMemoryUsagePercent(int memory_usage_percent) {
 // Add Vehicle Current Acceleration
 // Unit: m/s²
 UiElement DeveloperUi::getAEgo(float a_ego) {
-  QString value = QString::number(a_ego, 'f', 1);
+  QString value = "0";
   QColor color = QColor(255, 255, 255, 255);
 
-  return UiElement(value, "ACC.", "m/s²", color);
+  return UiElement(value, "Vel. C1: ", "km/h", color);
 }
 
 // Add Relative Velocity to Primary Lead Car
 // Unit: kph if metric, else mph
 UiElement DeveloperUi::getVEgoLead(bool lead_status, float lead_v_rel, float v_ego, bool is_metric, const QString &speed_unit) {
-  QString value = lead_status ? QString::number((lead_v_rel + v_ego) * (is_metric ? MS_TO_KPH : MS_TO_MPH), 'f', 0) : "-";
+
+ /* QString value = lead_status ? QString::number((lead_v_rel + v_ego) * (is_metric ? MS_TO_KPH : MS_TO_MPH), 'f', 0) : "-";
   QColor color = QColor(255, 255, 255, 255);
 
   if (lead_status) {
@@ -161,9 +162,11 @@ UiElement DeveloperUi::getVEgoLead(bool lead_status, float lead_v_rel, float v_e
     } else if (lead_v_rel < 0) {
       color = QColor(255, 188, 0, 255);
     }
-  }
+  }*/
+  QString value = "0";
+  QColor color = QColor(255, 255, 255, 255);
 
-  return UiElement(value, "L.S.", speed_unit, color);
+  return UiElement(value, "Vel. C2:", speed_unit, color);
 }
 
 
@@ -265,10 +268,10 @@ UiElement DeveloperUi::getLatAccelFactorFiltered(float lat_accel_factor_filtered
 // Add Steering Torque from Car EPS
 // Unit: Newton Meters
 UiElement DeveloperUi::getSteeringTorqueEps(float steering_torque_eps) {
-  QString value = QString::number(std::fabs(steering_torque_eps), 'f', 1);
+  QString value = "0";
   QColor color = QColor(255, 255, 255, 255);
 
-  return UiElement(value, "E.T.", "N·dm", color);
+  return UiElement(value, "Vel C3: ", "km/h", color);
 }
 
 // Add Bearing Degree and Direction from Car (Compass)

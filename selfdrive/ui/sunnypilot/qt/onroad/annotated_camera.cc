@@ -93,7 +93,7 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
   updateButtonsLayout(false);
 
 // Ruta de la imagen
-QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/rigth.svg";
+QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/uem_logo.svg";
 
 QPixmap pixmap(button_icon_path);
 QTransform transform;
