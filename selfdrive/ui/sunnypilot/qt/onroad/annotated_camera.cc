@@ -87,13 +87,9 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
   left_img = loadPixmap("../assets/img_turn_left_icon.png", {subsign_img_size, subsign_img_size});
   right_img = loadPixmap("../assets/img_turn_right_icon.png", {subsign_img_size, subsign_img_size});
 
-  buttons_layout = new QHBoxLayout();
-  buttons_layout->setContentsMargins(0, 0, 10, 20);
-  main_layout->addLayout(buttons_layout);
-  updateButtonsLayout(false);
 
 // Ruta de la imagen
-QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/uem_logo.svg";
+QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/rigth.svg";
 
 QPixmap pixmap(button_icon_path);
 QTransform transform;
@@ -121,6 +117,10 @@ connect(left_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onLe
 connect(right_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onRightButtonClicked);
 
 
+  buttons_layout = new QHBoxLayout();
+  buttons_layout->setContentsMargins(0, 0, 10, 20);
+  main_layout->addLayout(buttons_layout);
+  updateButtonsLayout(false);
 }
 
 void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
