@@ -89,26 +89,35 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
 
 
 // Ruta de la imagen
-QString button_icon_path = "/home/drago/Desktop/openpilot/selfdrive/assets/navigation/rigth.svg";
+// Nota: `right_img` ya está cargado con `loadPixmap("../assets/img_turn_right_icon.png", {subsign_img_size, subsign_img_size});`
 
-QPixmap pixmap(button_icon_path);
-QTransform transform;
-transform.rotate(180);  // Rotar 180 grados
-pixmap = pixmap.transformed(transform);
+// Rotar la imagen izquierda
+QPixmap left_pixmap = left_img;
+if (left_pixmap.isNull()) {
+    qDebug() << "Error: No se pudo cargar la imagen izquierda desde left_img";
+}
 
+
+// Ajustar el tamaño deseado de los botones (ajústalo según lo que necesites)
+int button_size = 180;  // Cambia esto si quieres botones más grandes
+int icon_size = 160;    // Ajusta esto para que el icono se vea más grande dentro del botón
+
+// Configurar el botón izquierdo con la imagen rotada
 left_button = new QPushButton(this);
-left_button->setFixedSize(150, 150);  // Ajusta el tamaño según la imagen
-left_button->setIcon(QIcon(pixmap));  // Establece la imagen rotada
-left_button->setIconSize(left_button->size());  // Ajusta la imagen al tamaño del botón
-left_button->setStyleSheet("border: none; background: transparent;");  // Sin bordes y fondo transparente
+left_button->setFixedSize(button_size, button_size);
+left_button->setIcon(QIcon(left_pixmap));
+left_button->setIconSize(QSize(icon_size, icon_size));  // Ajustar el tamaño del icono dentro del botón
+left_button->setStyleSheet("border: none; background: transparent;");
 left_button->move(20, height() / 2 - left_button->height() / 2);
 
-
-// Botón "Girar a la Derecha"
+// Configurar el botón derecho con la imagen ya cargada
+if (right_img.isNull()) {
+    qDebug() << "Error: No se pudo cargar la imagen derecha desde right_img";
+}
 right_button = new QPushButton(this);
-right_button->setFixedSize(150, 150);
-right_button->setIcon(QIcon(button_icon_path));
-right_button->setIconSize(right_button->size());
+right_button->setFixedSize(button_size, button_size);
+right_button->setIcon(QIcon(right_img));
+right_button->setIconSize(QSize(icon_size, icon_size));  // Ajustar el tamaño del icono dentro del botón
 right_button->setStyleSheet("border: none; background: transparent;");
 right_button->move(width() - right_button->width() - 20, height() / 2 - right_button->height() / 2);
 
@@ -116,11 +125,13 @@ right_button->move(width() - right_button->width() - 20, height() / 2 - right_bu
 connect(left_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onLeftButtonClicked);
 connect(right_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onRightButtonClicked);
 
+// Agregar botones al layout
+buttons_layout = new QHBoxLayout();
+buttons_layout->setContentsMargins(0, 0, 10, 20);
+main_layout->addLayout(buttons_layout);
+updateButtonsLayout(false);
 
-  buttons_layout = new QHBoxLayout();
-  buttons_layout->setContentsMargins(0, 0, 10, 20);
-  main_layout->addLayout(buttons_layout);
-  updateButtonsLayout(false);
+
 }
 
 void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {

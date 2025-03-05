@@ -47,6 +47,13 @@ TelUemSettings::TelUemSettings(QWidget* parent) : QWidget(parent) {
   ListWidgetSP *list = new ListWidgetSP(this, false);
   // param, title, desc, icon
   std::vector<std::tuple<QString, QString, QString, QString>> toggle_defs{
+
+    {
+      "intervalos_toggle",
+      tr("INTERVALOS"),
+      tr("Descripción del OPCION 2."),
+      "../assets/navigation/uem_logo.svg",
+    },
     {
       "lider_toggle",
       tr("LIDER"),
