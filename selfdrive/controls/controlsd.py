@@ -305,12 +305,6 @@ class Controls:
     # Handle lane change
     lane_change_edge_block = self.sm['lateralPlanSPDEPRECATED'].laneChangeEdgeBlockDEPRECATED if self.model_use_lateral_planner else self.sm['modelV2SP'].laneChangeEdgeBlock
     lane_change_svs = self.sm['lateralPlanDEPRECATED'] if self.model_use_lateral_planner else self.sm['modelV2'].meta
-
-    # Asegurarse de que tiene los atributos antes de continuar
-    if not hasattr(lane_change_svs, "laneChangeState") or not hasattr(lane_change_svs, "laneChangeDirection"):
-      print("⚠️ Advertencia: laneChangeState o laneChangeDirection no están presentes en lane_change_svs.")
-      return  # Evita errores y detiene la ejecución
-
     if lane_change_svs.laneChangeState == LaneChangeState.preLaneChange and lane_change_edge_block:
       self.events.add(EventName.laneChangeRoadEdge)
     elif lane_change_svs.laneChangeState == LaneChangeState.preLaneChange:
@@ -451,31 +445,6 @@ class Controls:
 
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
-
-    lane_change_msg = messaging.recv_one_or_none(self.lane_change_sock)
-    if lane_change_msg is not None:
-      direction = getattr(lane_change_msg.laneChangeCommand, "direction", None)
-      activate_blinker = getattr(lane_change_msg.laneChangeCommand, "activateBlinker", False)
-
-      if direction in (Desire.laneChangeLeft, Desire.laneChangeRight):
-        print(f"🚗 Comando de cambio de carril recibido: {direction}. Activando intermitentes: {activate_blinker}")
-
-        # 🔹 Actualizar el estado de cambio de carril
-        lane_change_svs.laneChangeState = LaneChangeState.preLaneChange
-        lane_change_svs.laneChangeDirection = direction
-
-        # 🔹 Activar intermitentes manualmente
-        if activate_blinker:
-          if direction == Desire.laneChangeLeft:
-            CS.leftBlinker = True
-          elif direction == Desire.laneChangeRight:
-            CS.rightBlinker = True
-
-    if lane_change_svs.laneChangeState == LaneChangeState.laneChangeFinishing:
-      print("✅ Cambio de carril finalizado.")
-      lane_change_svs.laneChangeState = LaneChangeState.off
-      CS.leftBlinker = False
-      CS.rightBlinker = False
 
   def data_sample(self):
     """Receive data from sockets"""
