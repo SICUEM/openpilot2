@@ -641,7 +641,8 @@ class Controls:
     if intervalos_activado:
       self.v_cruise_helper.v_cruise_kph = self.target_speed
 
-    # --- Mantener la lógica original de OpenPilot ---
+
+
     # Update VehicleModel
     lp = self.sm['liveParameters']
     x = max(lp.stiffnessFactor, 0.1)
@@ -651,7 +652,8 @@ class Controls:
     # Update Torque Params
     if self.CP.lateralTuning.which() == 'torque':
       torque_params = self.sm['liveTorqueParameters']
-      if self.sm.all_checks(['liveTorqueParameters']) and (torque_params.useParams or self.live_torque) and not self.torqued_override:
+      if self.sm.all_checks(['liveTorqueParameters']) and (
+        torque_params.useParams or self.live_torque) and not self.torqued_override:
         self.LaC.update_live_torque_params(torque_params.latAccelFactorFiltered, torque_params.latAccelOffsetFiltered,
                                            torque_params.frictionCoefficientFiltered)
 
@@ -666,15 +668,26 @@ class Controls:
     # Check which actuators can be enabled
     standstill = CS.vEgo <= max(self.CP.minSteerSpeed, MIN_LATERAL_CONTROL_SPEED) or CS.standstill
     CC.latActive = (self.active or self.mads_ndlob) and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
-                   (not standstill or self.joystick_mode) and CS.madsEnabled and (not CS.brakePressed or self.mads_ndlob) and \
-                   (not CS.belowLaneChangeSpeed or (not (((self.sm.frame - self.last_blinker_frame) * DT_CTRL) < 1.0) and
-                   not (CS.leftBlinker or CS.rightBlinker))) and CS.latActive and self.sm['liveCalibration'].calStatus == log.LiveCalibrationData.Status.calibrated and \
+                   (not standstill or self.joystick_mode) and CS.madsEnabled and (
+                       not CS.brakePressed or self.mads_ndlob) and \
+                   (not CS.belowLaneChangeSpeed or (
+                       not (((self.sm.frame - self.last_blinker_frame) * DT_CTRL) < 1.0) and
+                       not (CS.leftBlinker or CS.rightBlinker))) and CS.latActive and self.sm[
+                     'liveCalibration'].calStatus == log.LiveCalibrationData.Status.calibrated and \
                    not self.process_not_running
-    CC.longActive = self.enabled_long and not (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and not self.events.contains(ET.OVERRIDE_LONGITUDINAL)
+    CC.longActive = self.enabled_long and not (
+        CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and not self.events.contains(
+      ET.OVERRIDE_LONGITUDINAL)
 
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state
 
+    '''
+    #CONTROL lateral
+    if not self.joystick_mode:
+      # Añadir aquí el código para forzar el giro a la derecha
+      self.desired_curvature = +0.01  # Ajusta este valor para el giro deseado hacia la derecha (+) o izq (-)
+    '''
     # Enable blinkers while lane changing
     if blinker_svs.laneChangeState != LaneChangeState.off:
       CC.leftBlinker = blinker_svs.laneChangeDirection == LaneChangeDirection.left
@@ -684,6 +697,7 @@ class Controls:
       self.last_blinker_frame = self.sm.frame
 
     # State specific actions
+
     if not CC.latActive:
       self.LaC.reset()
     if not CC.longActive:
@@ -691,21 +705,38 @@ class Controls:
 
     if not self.joystick_mode:
       # accel PID loop
-      pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_helper.v_cruise_kph * CV.KPH_TO_MS)
-      actuators.accel = clip(target_accel, -3.0, 1.5)  # Aplicar la aceleración calculada
+      pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo,
+                                                      self.v_cruise_helper.v_cruise_kph * CV.KPH_TO_MS)
+      actuators.accel = self.LoC.update(CC.longActive, CS, long_plan.aTarget, long_plan.shouldStop, pid_accel_limits)
 
       # Steering PID loop and lateral MPC
+      # Si se usa el planificador lateral (lateral planner), se calcula la curvatura deseada ajustada
+      # considerando el retardo del sistema. Esto se basa en la velocidad del vehículo (vEgo) y la
+      # curvatura planeada del camino (`lat_plan.curvatures`).
+      # CAMBIO DE CARRIL
       if self.model_use_lateral_planner:
         self.desired_curvature = get_lag_adjusted_curvature(self.CP, CS.vEgo, lat_plan.psis, lat_plan.curvatures)
       else:
+        # Si no se usa el planificador lateral, se limita la curvatura deseada para evitar valores extremos
+        # en función de la velocidad del vehículo (`vEgo`) y la curvatura prevista por el modelo (`model_v2.action.desiredCurvature`).
         self.desired_curvature = clip_curvature(CS.vEgo, self.desired_curvature, model_v2.action.desiredCurvature)
 
+      # Se asigna la curvatura deseada al actuador, indicando el grado de giro que debe seguir el vehículo.
       actuators.curvature = self.desired_curvature
 
-      # Actualizar el control de dirección
+      # Se actualizan los actuadores laterales (volante):
+      # - `steer`: Señal de dirección que se enviará al auto.
+      # - `steeringAngleDeg`: Ángulo de dirección que se aplicará en grados.
+      # - `lac_log`: Registro de datos del control lateral.
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(
-        CC.latActive, CS, self.VM, lp, self.steer_limited,
-        self.desired_curvature, self.sm['liveLocationKalman'], model_data=model_v2
+        CC.latActive,  # Indica si el control lateral está activo.
+        CS,  # Estado actual del vehículo.
+        self.VM,  # Modelo del vehículo para cálculos de dinámica.
+        lp,  # Parámetros en vivo de calibración.
+        self.steer_limited,  # Indica si la dirección está limitada por el sistema.
+        self.desired_curvature,  # Curvatura deseada basada en el plan de trayectoria.
+        self.sm['liveLocationKalman'],  # Datos en vivo de ubicación y orientación del vehículo.
+        model_data=model_v2  # Datos del modelo de conducción.
       )
 
       if self.model_use_lateral_planner:
@@ -713,20 +744,81 @@ class Controls:
     else:
       lac_log = log.ControlsState.LateralDebugState.new_message()
       if self.sm.recv_frame['testJoystick'] > 0:
+        # reset joystick if it hasn't been received in a while
         should_reset_joystick = (self.sm.frame - self.sm.recv_frame['testJoystick']) * DT_CTRL > 0.2
-        joystick_axes = self.sm['testJoystick'].axes if not should_reset_joystick else [0.0, 0.0]
+        if not should_reset_joystick:
+          joystick_axes = self.sm['testJoystick'].axes
+        else:
+          joystick_axes = [0.0, 0.0]
 
         if CC.longActive:
           actuators.accel = 4.0 * clip(joystick_axes[0], -1, 1)
 
         if CC.latActive:
           steer = clip(joystick_axes[1], -1, 1)
+          # max angle is 45 for angle-based cars, max curvature is 0.02
           actuators.steer, actuators.steeringAngleDeg, actuators.curvature = steer, steer * 90., steer * -0.02
 
         lac_log.active = self.active
         lac_log.steeringAngleDeg = CS.steeringAngleDeg
         lac_log.output = actuators.steer
         lac_log.saturated = abs(actuators.steer) >= 0.9
+
+    if CS.steeringPressed:
+      self.last_steering_pressed_frame = self.sm.frame
+    recent_steer_pressed = (self.sm.frame - self.last_steering_pressed_frame) * DT_CTRL < 2.0
+
+    # Send a "steering required alert" if saturation count has reached the limit
+    if lac_log.active and not recent_steer_pressed and not self.CP.notCar and CS.madsEnabled:
+      if self.CP.lateralTuning.which() == 'torque' and not self.joystick_mode:
+        undershooting = abs(lac_log.desiredLateralAccel) / abs(1e-3 + lac_log.actualLateralAccel) > 1.2
+        turning = abs(lac_log.desiredLateralAccel) > 1.0
+        good_speed = CS.vEgo > 5
+        max_torque = abs(self.sm['carOutput'].actuatorsOutput.steer) > 0.99
+        if undershooting and turning and good_speed and max_torque:
+          lac_log.active and self.events.add(EventName.steerSaturated)
+      elif lac_log.saturated:
+        # TODO probably should not use dpath_points but curvature
+        dpath_points = lat_plan.dPathPoints if self.model_use_lateral_planner else model_v2.position.y
+        if len(dpath_points):
+          # Check if we deviated from the path
+          # TODO use desired vs actual curvature
+          if self.CP.steerControlType == car.CarParams.SteerControlType.angle:
+            steering_value = actuators.steeringAngleDeg
+          else:
+            steering_value = actuators.steer
+
+          left_deviation = steering_value > 0 and dpath_points[0] < -0.20
+          right_deviation = steering_value < 0 and dpath_points[0] > 0.20
+
+          if left_deviation or right_deviation:
+            self.events.add(EventName.steerSaturated)
+
+    # Ensure no NaNs/Infs
+    for p in ACTUATOR_FIELDS:
+      attr = getattr(actuators, p)
+      if not isinstance(attr, SupportsFloat):
+        continue
+
+      if not math.isfinite(attr):
+        cloudlog.error(f"actuators.{p} not finite {actuators.to_dict()}")
+        setattr(actuators, p, 0.0)
+
+    # toggle experimental mode once on distance button hold
+    if self.CP.openpilotLongitudinalControl:
+      if self.v_cruise_helper.button_timers[ButtonType.gapAdjustCruise] == CRUISE_LONG_PRESS and \
+        not self.experimental_mode_update:
+        self.experimental_mode = not self.experimental_mode
+        self.params.put_bool_nonblocking("ExperimentalMode", self.experimental_mode)
+        self.experimental_mode_update = True
+
+    # decrement personality on distance button press
+    if self.CP.openpilotLongitudinalControl:
+      if any(not be.pressed and be.type == ButtonType.gapAdjustCruise for be in CS.buttonEvents):
+        if not self.experimental_mode_update:
+          self.personality = (self.personality - 1) % 3
+          self.params.put_nonblocking('LongitudinalPersonality', str(self.personality))
+        self.experimental_mode_update = False
 
     return CC, lac_log
 
