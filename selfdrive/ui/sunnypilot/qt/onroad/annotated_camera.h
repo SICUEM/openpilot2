@@ -52,9 +52,13 @@ private:
   QPushButton *left_button;
   QPushButton *right_button;
 
-
   void onLeftButtonClicked();
   void onRightButtonClicked();
+
+  void activateLeftBlinker();  // Declaración de la función
+  void activateRightBlinker(); // Declaración de la función
+  void changeLane(const QString &direction); // Declaración de la función
+
 
 
   void drawText(QPainter &p, int x, int y, const QString &text, int alpha = 255);

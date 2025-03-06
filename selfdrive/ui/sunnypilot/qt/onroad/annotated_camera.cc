@@ -163,40 +163,41 @@ void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
 void AnnotatedCameraWidgetSP::onLeftButtonClicked() {
   qDebug() << "Girar a la Izquierda presionado";
 
-  // Obtener la ruta base de "openpilot/" automáticamente
-  QString basePath = QCoreApplication::applicationDirPath();
-  int index = basePath.indexOf("/selfdrive/");
-  if (index != -1) {
-    basePath = basePath.left(index);  // Recorta la ruta hasta "openpilot/"
-  }
+  // Activar intermitente izquierdo
+  activateLeftBlinker();
 
-  // Construye la ruta completa a lane_change.py
-  QString scriptPath = basePath + "/sicuem/lane_change.py";
-
-  qDebug() << "Ejecutando script en: " << scriptPath;
-
-  QProcess::startDetached("python3", QStringList() << scriptPath << "left");
+  // Enviar señal para cambiar de carril a la izquierda
+  changeLane("left");
 }
 
 void AnnotatedCameraWidgetSP::onRightButtonClicked() {
   qDebug() << "Girar a la Derecha presionado";
 
-  // Obtener la ruta base de "openpilot/" automáticamente
-  QString basePath = QCoreApplication::applicationDirPath();
-  int index = basePath.indexOf("/selfdrive/");
-  if (index != -1) {
-    basePath = basePath.left(index);  // Recorta la ruta hasta "openpilot/"
-  }
+  // Activar intermitente derecho
+  activateRightBlinker();
 
-  // Construye la ruta completa a lane_change.py
-  QString scriptPath = basePath + "/sicuem/lane_change.py";
-
-  qDebug() << "Ejecutando script en: " << scriptPath;
-
-  QProcess::startDetached("python3", QStringList() << scriptPath << "right");
+  // Enviar señal para cambiar de carril a la derecha
+  changeLane("right");
 }
 
+void AnnotatedCameraWidgetSP::activateLeftBlinker() {
+  // Lógica para activar el intermitente izquierdo
+  left_blinker = true;
+  right_blinker = false;
+  update(); // Redibujar la interfaz para reflejar el cambio
+}
 
+void AnnotatedCameraWidgetSP::activateRightBlinker() {
+  // Lógica para activar el intermitente derecho
+  left_blinker = false;
+  right_blinker = true;
+  update(); // Redibujar la interfaz para reflejar el cambio
+}
+void AnnotatedCameraWidgetSP::changeLane(const QString &direction) {
+  // Lógica para enviar una señal de cambio de carril
+  QString scriptPath = QCoreApplication::applicationDirPath() + "/sicuem/lane_change.py";
+  QProcess::startDetached("python3", QStringList() << scriptPath << direction);
+}
 
 void AnnotatedCameraWidgetSP::mousePressEvent(QMouseEvent* e) {
   bool propagate_event = true;
