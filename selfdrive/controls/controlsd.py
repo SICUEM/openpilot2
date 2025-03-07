@@ -317,9 +317,9 @@ class Controls:
          (CS.rightBlindspot and direction == LaneChangeDirection.right):
         self.events.add(EventName.laneChangeBlocked)
       else:
-        if direction == LaneChangeDirection.left:
+        if direction == LaneChangeDirection.left or self.sm['cambiarAIzq']:
           self.events.add(EventName.preLaneChangeLeft)
-        else:
+        elif direction == LaneChangeDirection.right or self.sm['cambiarADer']:
           self.events.add(EventName.preLaneChangeRight)
     elif lane_change_svs.laneChangeState in (LaneChangeState.laneChangeStarting,
                                              LaneChangeState.laneChangeFinishing):

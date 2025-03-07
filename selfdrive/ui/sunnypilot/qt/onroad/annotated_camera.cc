@@ -176,6 +176,7 @@ void AnnotatedCameraWidgetSP::onRightButtonClicked() {
   // Activar intermitente derecho
   activateRightBlinker();
 
+
   // Enviar señal para cambiar de carril a la derecha
   changeLane("right");
 }
@@ -191,13 +192,23 @@ void AnnotatedCameraWidgetSP::activateRightBlinker() {
   // Lógica para activar el intermitente derecho
   left_blinker = false;
   right_blinker = true;
+
   update(); // Redibujar la interfaz para reflejar el cambio
 }
 void AnnotatedCameraWidgetSP::changeLane(const QString &direction) {
   // Lógica para enviar una señal de cambio de carril
-  QString scriptPath = QCoreApplication::applicationDirPath() + "/sicuem/lane_change.py";
-  QProcess::startDetached("python3", QStringList() << scriptPath << direction);
-}
+  QString basePath = QCoreApplication::applicationDirPath();
+  int index = basePath.indexOf("/selfdrive/");
+  if (index != -1) {
+    basePath = basePath.left(index);  // Recorta la ruta hasta "openpilot/"
+  }
+
+  // Construye la ruta completa a lane_change.py
+  QString scriptPath = basePath + "/sicuem/lane_change.py";
+
+  qDebug() << "Ejecutando script en: " << scriptPath;
+
+  QProcess::startDetached("python3", QStringList() << scriptPath << "left");}
 
 void AnnotatedCameraWidgetSP::mousePressEvent(QMouseEvent* e) {
   bool propagate_event = true;

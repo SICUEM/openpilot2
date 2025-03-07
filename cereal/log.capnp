@@ -342,8 +342,10 @@ struct CanData {
 }
 struct LaneChangeCommand {
   direction @0 :Desire;
-  state @1 :LaneChangeState;   # ← Nuevo campo para el estado del cambio de carril
-  activateBlinker @2 :Bool;    # ← Nuevo campo para activar el intermitente
+  state @1 :LaneChangeState;   # ← New field for lane change state
+  activateBlinker @2 :Bool;    # ← New field to activate the blinker
+  cambiarADer @3 :Bool;        # ← Updated field name to camelCase
+  cambiarAIzq @4 :Bool;        # ← Updated field name to camelCase
 }
 
 

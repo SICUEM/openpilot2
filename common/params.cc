@@ -142,6 +142,9 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"IsEngaged", PERSISTENT},
     {"IsLdwEnabled", PERSISTENT | BACKUP},
     {"IsMetric", PERSISTENT | BACKUP},
+    {"cambiar_a_izq",PERSISTENT},//Adrian Cañadas Gallardo
+    {"cambiar_a_der",PERSISTENT},//Adrian Cañadas Gallardo
+
     {"ActivateEvent",PERSISTENT},//Adrian Cañadas Gallardo
     {"telemetria_uem",PERSISTENT},//Adrian Cañadas Gallardo
     {"carState_toggle",PERSISTENT},//Adrian Cañadas Gallardo

@@ -1,42 +1,37 @@
 #!/usr/bin/env python3
 import sys
-import time
+import os
 import cereal.messaging as messaging
-from cereal import log
 
-Desire = log.Desire
-LaneChangeState = log.LaneChangeState
+class LaneChangeHandler:
+    def __init__(self):
+        self.pm = messaging.PubMaster(['laneChangeCommand'])
+
+    def handle_lane_change(self, direction):
+        if direction == "right":
+            self.publish_lane_change_command('cambiarADer', True, True)
+        elif direction == "left":
+            self.publish_lane_change_command('cambiarAIzq', True, True)
+        else:
+            print("Dirección inválida. Usa 'left' o 'right'.")
+
+    def publish_lane_change_command(self, field, state, activate_blinker):
+        msg = messaging.new_message('laneChangeCommand')
+        if field == 'cambiarADer':
+            msg.laneChangeCommand.cambiarADer = state
+        elif field == 'cambiarAIzq':
+            msg.laneChangeCommand.cambiarAIzq = state
+        msg.laneChangeCommand.activateBlinker = activate_blinker
+        self.pm.send('laneChangeCommand', msg)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Uso: python3 lane_change.py [left|right]")
         sys.exit(1)
 
+    # Update PWD environment variable to match the current directory
+    os.environ['PWD'] = os.getcwd()
+
     direction = sys.argv[1].lower()
-    if direction not in ["left", "right"]:
-        print("❌ Dirección inválida. Usa 'left' o 'right'.")
-        sys.exit(1)
-
-    # Publicador de mensajes (Solo laneChangeCommand)
-    pm = messaging.PubMaster(['laneChangeCommand'])
-
-    # Crear mensaje de cambio de carril
-    lane_change_msg = messaging.new_message('laneChangeCommand')
-    lane_change_msg.laneChangeCommand.direction = (
-        Desire.laneChangeLeft if direction == "left" else Desire.laneChangeRight
-    )
-    lane_change_msg.laneChangeCommand.state = LaneChangeState.preLaneChange
-    lane_change_msg.laneChangeCommand.activateBlinker = True
-
-    try:
-        for _ in range(5):
-            pm.send('laneChangeCommand', lane_change_msg)
-            lane_change_msg.clear_write_flag()  # ✅ Limpia la bandera de escritura
-            print(f"🚗 Enviando comando de cambio de carril hacia {direction}... (Estado: preLaneChange)")
-            time.sleep(0.1)
-    except Exception as e:
-        print(f"❌ Error al enviar mensaje: {e}")
-    finally:
-        del pm  # Cierra el publicador
-
-    print(f"✅ Comando de cambio de carril enviado correctamente hacia {direction}.")
+    handler = LaneChangeHandler()
+    handler.handle_lane_change(direction)
