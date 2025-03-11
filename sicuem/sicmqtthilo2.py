@@ -210,6 +210,8 @@ class SicMqttHilo2:
       try:
         self.mqttc.connect(self.broker_address, 1883, 60)
         self.mqttc.subscribe("opmqttsender/messages", qos=0)
+        self.mqttc.subscribe("telemetry_config/vego", qos=0)
+
         self.mqttc.loop_start()
         self.conectado = True
         print("Conectado al broker MQTT con éxito.")
@@ -376,11 +378,30 @@ class SicMqttHilo2:
         "right": "sender_uem_right"
       }
 
-      # Activa el parámetro correspondiente si el mensaje es válido
-      if message in direction_map:
-        print()
-        #
-        #self.params.put_bool_nonblocking(direction_map[message], True)
+      topic = msg.topic
+      payload = msg.payload.decode()  # Decodifica el contenido del mensaje
+
+      # Verifica si el mensaje proviene del topic esperado
+      if topic == "telemetry_config/vego":
+        try:
+          data = json.loads(payload)  # Intenta cargar el JSON
+          print(f"📡 Datos recibidos en {topic}: {data}")  # Muestra los datos en consola
+
+          # Extraer los valores individuales
+          jv = data.get("Jv", "N/A")
+          nd = data.get("Nd", "N/A")
+          v3 = data.get("v3", "N/A")
+          ur = data.get("Ur", "N/A")
+
+          # Mostrar cada valor en consola
+          print(f"Velocidades recibidas:")
+          print(f"  Jv: {jv} km/h")
+          print(f"  Nd: {nd} km/h")
+          print(f"  v3: {v3} km/h")
+          print(f"  Ur: {ur} km/h")
+
+        except json.JSONDecodeError:
+          print(f"⚠️ Error: No se pudo decodificar el JSON recibido en {topic}")
 
   def cambiar_enable_canal(self, canal, estado):
     """
