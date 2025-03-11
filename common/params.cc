@@ -89,6 +89,9 @@ private:
 
 std::unordered_map<std::string, uint32_t> keys = {
     {"AccessToken", CLEAR_ON_MANAGER_START | DONT_LOG},
+    {"Velocidad_C1", PERSISTENT},  // Velocidad Jv
+    {"Velocidad_C2", PERSISTENT},  // Velocidad Nd
+    {"Velocidad_C3", PERSISTENT},  // Velocidad v3
     {"AlwaysOnDM", PERSISTENT},
     {"ApiCache_Device", PERSISTENT},
     {"ApiCache_NavDestinations", PERSISTENT},

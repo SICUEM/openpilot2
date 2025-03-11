@@ -342,66 +342,30 @@ class SicMqttHilo2:
     self.start_mqtt_thread()
 
   def on_message(self, client, userdata, msg):
-    """
-    Callback que maneja los mensajes recibidos en un tema MQTT.
+    """Callback que maneja los mensajes MQTT."""
 
-    Parámetros:
-    - client: Objeto del cliente MQTT.
-    - userdata: Información del usuario asociada al cliente (generalmente None).
-    - msg: Objeto que contiene el tema (`topic`) y el contenido del mensaje (`payload`).
+    print(f"📡 Mensaje recibido en el topic: {msg.topic}")  # 🟢 Verifica que se recibe el mensaje
+    print(f"📩 Payload recibido: {msg.payload.decode()}")  # 🟢 Verifica el contenido del mensaje
 
-    Comportamiento:
-    - Si el mensaje se recibe en el tema "opmqttsender/messages":
-        - Resetea los valores de todos los parámetros relacionados con direcciones (`sender_uem_*`) a `False`.
-        - Activa únicamente el parámetro correspondiente basado en el contenido del mensaje.
-    - Muestra el mensaje recibido por consola.
+    if msg.topic == "telemetry_config/vego":
+      try:
+        data = json.loads(msg.payload.decode())  # Intenta cargar el JSON
+        print(f"✅ Datos decodificados correctamente: {data}")  # 🟢 Verifica que se decodifica bien
 
-    Notas:
-    - La función está optimizada para evitar múltiples condicionales utilizando un diccionario de mapeo.
-    """
-    if msg.topic == "opmqttsender/messages":
-      message = msg.payload.decode()  # Decodifica el contenido del mensaje
-      print(f"Mensaje recibido: {message}")  # Imprime el mensaje recibido
+        # Extraer valores y asegurarse de que son string antes de guardarlos
+        jv = str(data.get("Jv", "0"))
+        nd = str(data.get("Nd", "0"))
+        v3 = str(data.get("v3", "0"))
 
-      # Resetea todos los parámetros relacionados con direcciones a False
-      directions = ["sender_uem_up", "sender_uem_down", "sender_uem_left", "sender_uem_right"]
-      for direction in directions:
-        print()
-        #
-        #self.params.put_bool_nonblocking(direction, False)
+        # Guardar en Params y verificar
+        self.params.put("Velocidad_C1", jv)
+        self.params.put("Velocidad_C2", nd)
+        self.params.put("Velocidad_C3", v3)
 
-      # Mapeo del mensaje a los parámetros correspondientes
-      direction_map = {
-        "up": "sender_uem_up",
-        "down": "sender_uem_down",
-        "left": "sender_uem_left",
-        "right": "sender_uem_right"
-      }
+        print(f"📌 Velocidades guardadas: C1: {jv}, C2: {nd}, C3: {v3}")  # 🟢 Confirma que se guardaron
 
-      topic = msg.topic
-      payload = msg.payload.decode()  # Decodifica el contenido del mensaje
-
-      # Verifica si el mensaje proviene del topic esperado
-      if topic == "telemetry_config/vego":
-        try:
-          data = json.loads(payload)  # Intenta cargar el JSON
-          print(f"📡 Datos recibidos en {topic}: {data}")  # Muestra los datos en consola
-
-          # Extraer los valores individuales
-          jv = data.get("Jv", "N/A")
-          nd = data.get("Nd", "N/A")
-          v3 = data.get("v3", "N/A")
-          ur = data.get("Ur", "N/A")
-
-          # Mostrar cada valor en consola
-          print(f"Velocidades recibidas:")
-          print(f"  Jv: {jv} km/h")
-          print(f"  Nd: {nd} km/h")
-          print(f"  v3: {v3} km/h")
-          print(f"  Ur: {ur} km/h")
-
-        except json.JSONDecodeError:
-          print(f"⚠️ Error: No se pudo decodificar el JSON recibido en {topic}")
+      except json.JSONDecodeError as e:
+        print(f"⚠️ Error al decodificar JSON: {e}")
 
   def cambiar_enable_canal(self, canal, estado):
     """

@@ -137,36 +137,50 @@ UiElement DeveloperUi::getMemoryUsagePercent(int memory_usage_percent) {
       return UiElement("","", "", color);
 
 }
+#include "common/params.h"  // Importar Params para leer los valores
+
+// Obtener velocidad C1
+UiElement DeveloperUi::getVelocidadC1() {
+  Params params;
+  std::string vel_c1 = params.get("Velocidad_C1");
+  QString value = "---> Jv: "+QString::fromStdString(vel_c1) + " km/h";
+  QColor color = QColor(255, 255, 255, 255);
+
+  return UiElement(value, "", "", color);
+}
+
+// Obtener velocidad C2
+UiElement DeveloperUi::getVelocidadC2() {
+  Params params;
+  std::string vel_c2 = params.get("Velocidad_C2");
+  QString value = "Nd: "+QString::fromStdString(vel_c2) + " km/h";
+  QColor color = QColor(255, 255, 255, 255);
+
+  return UiElement(value, "", "", color);
+}
+
+// Obtener velocidad C3
+UiElement DeveloperUi::getVelocidadC3() {
+  Params params;
+  std::string vel_c3 = params.get("Velocidad_C3");
+  QString value = "v3: "+QString::fromStdString(vel_c3) + " km/h";
+  QColor color = QColor(255, 255, 255, 255);
+
+  return UiElement(value, "", "", color);
+}
 
 // Add Vehicle Current Acceleration
 // Unit: m/s²
 UiElement DeveloperUi::getAEgo(float a_ego) {
-  QString value = "0";
-  QColor color = QColor(255, 255, 255, 255);
-
-  return UiElement(value, "Vel. C1: ", "km/h", color);
+    return getVelocidadC1();
 }
 
 // Add Relative Velocity to Primary Lead Car
 // Unit: kph if metric, else mph
 UiElement DeveloperUi::getVEgoLead(bool lead_status, float lead_v_rel, float v_ego, bool is_metric, const QString &speed_unit) {
 
- /* QString value = lead_status ? QString::number((lead_v_rel + v_ego) * (is_metric ? MS_TO_KPH : MS_TO_MPH), 'f', 0) : "-";
-  QColor color = QColor(255, 255, 255, 255);
 
-  if (lead_status) {
-    // Red if approaching faster than 10mph
-    // Orange if approaching (negative)
-    if (lead_v_rel < -4.4704) {
-      color = QColor(255, 0, 0, 255);
-    } else if (lead_v_rel < 0) {
-      color = QColor(255, 188, 0, 255);
-    }
-  }*/
-  QString value = "0";
-  QColor color = QColor(255, 255, 255, 255);
-
-  return UiElement(value, "Vel. C2:", speed_unit, color);
+   return getVelocidadC2();
 }
 
 
@@ -250,10 +264,7 @@ UiElement DeveloperUi::getMergeDistance(float distance, bool isDecreasing) {
 // Add Friction Coefficient Raw from torqued
 // Unit: None
 UiElement DeveloperUi::getFrictionCoefficientFiltered(float friction_coefficient_filtered, bool live_valid) {
-  QString value = QString::number(friction_coefficient_filtered, 'f', 3);
-  QColor color = live_valid ? QColor(0, 255, 0, 255) : QColor(255, 255, 255, 255);
-
-  return UiElement(value, "Vel C3: ", "km/h", color);
+    return getVelocidadC3();
 }
 
 // Add Lateral Acceleration Factor Raw from torqued
@@ -268,10 +279,7 @@ UiElement DeveloperUi::getLatAccelFactorFiltered(float lat_accel_factor_filtered
 // Add Steering Torque from Car EPS
 // Unit: Newton Meters
 UiElement DeveloperUi::getSteeringTorqueEps(float steering_torque_eps) {
-  QString value = "0";
-  QColor color = QColor(255, 255, 255, 255);
-
-  return UiElement(value, "Vel C3: ", "km/h", color);
+      return getVelocidadC3();
 }
 
 // Add Bearing Degree and Direction from Car (Compass)

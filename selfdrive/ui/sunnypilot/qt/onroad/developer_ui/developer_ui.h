@@ -50,6 +50,13 @@ public:
   static UiElement getLatitude(float latitude);
   static UiElement getLongitude(float longitude);
 
+    // 📌 🚀 Velocidades recibidas desde MQTT
+  static UiElement getVelocidadC1();
+  static UiElement getVelocidadC2();
+  static UiElement getVelocidadC3();
+
+
+
   // Maneuver distances
   static UiElement getRoundaboutDistance(float distance, bool isDecreasing);  // Rotonda
   static UiElement getIntersectionDistance(float distance, bool isDecreasing);  // Cruce
