@@ -615,6 +615,9 @@ class Controls:
 
     # Si el toggle está activado, alternamos entre "driving", "stopping" y "waiting" cada 10 segundos
     if intervalos_activado:
+
+      print ("intervalos activado")
+      '''
       current_time = time.monotonic()
 
       if current_time - self.last_toggle_time >= 10:
@@ -636,10 +639,8 @@ class Controls:
     else:  # "waiting"
       self.target_speed = 0.0  # Mantenerse quieto
       target_accel = 0.0  # Sin aceleración
+    '''
 
-    # Aplicar cambios a `vCruise` solo si intervalos_toggle está activado
-    if intervalos_activado:
-      self.v_cruise_helper.v_cruise_kph = self.target_speed
 
 
 
