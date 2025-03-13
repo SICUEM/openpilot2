@@ -340,16 +340,6 @@ struct CanData {
   src     @3 :UInt8;
   busTimeDEPRECATED @1 :UInt16;
 }
-struct LaneChangeCommand {
-  direction @0 :Desire;
-  state @1 :LaneChangeState;   # ← New field for lane change state
-  activateBlinker @2 :Bool;    # ← New field to activate the blinker
-  cambiarADer @3 :Bool;        # ← Updated field name to camelCase
-  cambiarAIzq @4 :Bool;        # ← Updated field name to camelCase
-}
-
-
-
 
 struct DeviceState @0xa4d8b5af2aa492eb {
   deviceType @45 :InitData.DeviceType;
@@ -2289,8 +2279,6 @@ struct Microphone {
 struct Event {
   logMonoTime @0 :UInt64;  # nanoseconds
   valid @67 :Bool = true;
-  laneChangeCommand @130 :LaneChangeCommand;
-
 
   union {
     # *********** log metadata ***********

@@ -210,11 +210,8 @@ class Controls:
 
     # controlsd is driven by carState, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
-    self.lane_change_sock = messaging.sub_sock('laneChangeCommand')
 
-    self.last_toggle_time = time.monotonic()  # Temporizador
-    self.state_mode = "driving"  # Alterna entre "driving" y "stopping"
-    self.target_speed = 30.0  # Velocidad objetivo inicial (km/h)
+
 
   def set_initial_state(self):
     if REPLAY:
@@ -317,9 +314,9 @@ class Controls:
          (CS.rightBlindspot and direction == LaneChangeDirection.right):
         self.events.add(EventName.laneChangeBlocked)
       else:
-        if direction == LaneChangeDirection.left or self.sm['cambiarAIzq']:
+        if direction == LaneChangeDirection.left:
           self.events.add(EventName.preLaneChangeLeft)
-        elif direction == LaneChangeDirection.right or self.sm['cambiarADer']:
+        else:
           self.events.add(EventName.preLaneChangeRight)
     elif lane_change_svs.laneChangeState in (LaneChangeState.laneChangeStarting,
                                              LaneChangeState.laneChangeFinishing):
@@ -457,16 +454,6 @@ class Controls:
     CS = car_state.carState if car_state else self.CS_prev
 
     self.sm.update(0)
-    #simular el intermitente.
-    lane_change_msg = messaging.recv_one_or_none(self.lane_change_sock)
-    if lane_change_msg is not None:
-      direction = lane_change_msg.laneChangeCommand.direction
-      activate_blinker = lane_change_msg.laneChangeCommand.activateBlinker  # ← Nuevo campo
-
-      if direction == Desire.laneChangeLeft and activate_blinker:
-        self.events.add(car.CarEvent.EventName.preLaneChangeLeft)  # ← Disparar evento
-      elif direction == Desire.laneChangeRight and activate_blinker:
-        self.events.add(car.CarEvent.EventName.preLaneChangeRight)  # ← Disparar evento
 
     if not self.initialized:
       all_valid = CS.canValid and self.sm.all_checks()
@@ -607,42 +594,7 @@ class Controls:
       self.current_alert_types.append(ET.WARNING)
 
   def state_control(self, CS):
-    """Calcula la aceleración y velocidad deseada para detener y arrancar cada 5 segundos"""
-
-    # Obtener el tiempo actual
-    current_time = time.monotonic()
-    intervalos_activado = self.params.get_bool("intervalos_toggle")
-
-    # Si el toggle está activado, alternamos entre "driving", "stopping" y "waiting" cada 10 segundos
-    if intervalos_activado:
-
-      print ("intervalos activado")
-      '''
-      current_time = time.monotonic()
-
-      if current_time - self.last_toggle_time >= 10:
-        if self.state_mode == "driving":
-          self.state_mode = "stopping"
-        elif self.state_mode == "stopping":
-          self.state_mode = "waiting"
-        else:
-          self.state_mode = "driving"
-        self.last_toggle_time = current_time  # Resetear el temporizador
-
-    # Ajustar `vCruise` y `accel` según el estado, pero sin afectar si el toggle está desactivado
-    if self.state_mode == "driving":
-      self.target_speed = 30.0  # Velocidad objetivo de conducción
-      target_accel = 1.5  # Aceleración suave al arrancar
-    elif self.state_mode == "stopping":
-      self.target_speed = max(0.0, CS.vEgo * CV.MS_TO_KPH - 5.0)  # Reducir velocidad progresivamente
-      target_accel = -1.5  # Frenado progresivo
-    else:  # "waiting"
-      self.target_speed = 0.0  # Mantenerse quieto
-      target_accel = 0.0  # Sin aceleración
-    '''
-
-
-
+    """Given the state, this function returns a CarControl packet"""
 
     # Update VehicleModel
     lp = self.sm['liveParameters']
@@ -653,8 +605,7 @@ class Controls:
     # Update Torque Params
     if self.CP.lateralTuning.which() == 'torque':
       torque_params = self.sm['liveTorqueParameters']
-      if self.sm.all_checks(['liveTorqueParameters']) and (
-        torque_params.useParams or self.live_torque) and not self.torqued_override:
+      if self.sm.all_checks(['liveTorqueParameters']) and (torque_params.useParams or self.live_torque) and not self.torqued_override:
         self.LaC.update_live_torque_params(torque_params.latAccelFactorFiltered, torque_params.latAccelOffsetFiltered,
                                            torque_params.frictionCoefficientFiltered)
 
@@ -669,16 +620,11 @@ class Controls:
     # Check which actuators can be enabled
     standstill = CS.vEgo <= max(self.CP.minSteerSpeed, MIN_LATERAL_CONTROL_SPEED) or CS.standstill
     CC.latActive = (self.active or self.mads_ndlob) and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
-                   (not standstill or self.joystick_mode) and CS.madsEnabled and (
-                       not CS.brakePressed or self.mads_ndlob) and \
-                   (not CS.belowLaneChangeSpeed or (
-                       not (((self.sm.frame - self.last_blinker_frame) * DT_CTRL) < 1.0) and
-                       not (CS.leftBlinker or CS.rightBlinker))) and CS.latActive and self.sm[
-                     'liveCalibration'].calStatus == log.LiveCalibrationData.Status.calibrated and \
+                   (not standstill or self.joystick_mode) and CS.madsEnabled and (not CS.brakePressed or self.mads_ndlob) and \
+                   (not CS.belowLaneChangeSpeed or (not (((self.sm.frame - self.last_blinker_frame) * DT_CTRL) < 1.0) and
+                   not (CS.leftBlinker or CS.rightBlinker))) and CS.latActive and self.sm['liveCalibration'].calStatus == log.LiveCalibrationData.Status.calibrated and \
                    not self.process_not_running
-    CC.longActive = self.enabled_long and not (
-        CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and not self.events.contains(
-      ET.OVERRIDE_LONGITUDINAL)
+    CC.longActive = self.enabled_long and not (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) and not self.events.contains(ET.OVERRIDE_LONGITUDINAL)
 
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state
@@ -706,15 +652,14 @@ class Controls:
 
     if not self.joystick_mode:
       # accel PID loop
-      pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo,
-                                                      self.v_cruise_helper.v_cruise_kph * CV.KPH_TO_MS)
+      pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_helper.v_cruise_kph * CV.KPH_TO_MS)
       actuators.accel = self.LoC.update(CC.longActive, CS, long_plan.aTarget, long_plan.shouldStop, pid_accel_limits)
 
       # Steering PID loop and lateral MPC
       # Si se usa el planificador lateral (lateral planner), se calcula la curvatura deseada ajustada
       # considerando el retardo del sistema. Esto se basa en la velocidad del vehículo (vEgo) y la
       # curvatura planeada del camino (`lat_plan.curvatures`).
-      # CAMBIO DE CARRIL
+      #CAMBIO DE CARRIL
       if self.model_use_lateral_planner:
         self.desired_curvature = get_lag_adjusted_curvature(self.CP, CS.vEgo, lat_plan.psis, lat_plan.curvatures)
       else:
@@ -746,14 +691,14 @@ class Controls:
       lac_log = log.ControlsState.LateralDebugState.new_message()
       if self.sm.recv_frame['testJoystick'] > 0:
         # reset joystick if it hasn't been received in a while
-        should_reset_joystick = (self.sm.frame - self.sm.recv_frame['testJoystick']) * DT_CTRL > 0.2
+        should_reset_joystick = (self.sm.frame - self.sm.recv_frame['testJoystick'])*DT_CTRL > 0.2
         if not should_reset_joystick:
           joystick_axes = self.sm['testJoystick'].axes
         else:
           joystick_axes = [0.0, 0.0]
 
         if CC.longActive:
-          actuators.accel = 4.0 * clip(joystick_axes[0], -1, 1)
+          actuators.accel = 4.0*clip(joystick_axes[0], -1, 1)
 
         if CC.latActive:
           steer = clip(joystick_axes[1], -1, 1)
@@ -767,7 +712,7 @@ class Controls:
 
     if CS.steeringPressed:
       self.last_steering_pressed_frame = self.sm.frame
-    recent_steer_pressed = (self.sm.frame - self.last_steering_pressed_frame) * DT_CTRL < 2.0
+    recent_steer_pressed = (self.sm.frame - self.last_steering_pressed_frame)*DT_CTRL < 2.0
 
     # Send a "steering required alert" if saturation count has reached the limit
     if lac_log.active and not recent_steer_pressed and not self.CP.notCar and CS.madsEnabled:
@@ -808,7 +753,7 @@ class Controls:
     # toggle experimental mode once on distance button hold
     if self.CP.openpilotLongitudinalControl:
       if self.v_cruise_helper.button_timers[ButtonType.gapAdjustCruise] == CRUISE_LONG_PRESS and \
-        not self.experimental_mode_update:
+            not self.experimental_mode_update:
         self.experimental_mode = not self.experimental_mode
         self.params.put_bool_nonblocking("ExperimentalMode", self.experimental_mode)
         self.experimental_mode_update = True

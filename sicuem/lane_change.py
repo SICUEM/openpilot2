@@ -29,9 +29,12 @@ if __name__ == "__main__":
         print("Uso: python3 lane_change.py [left|right]")
         sys.exit(1)
 
+    '''
+
     # Update PWD environment variable to match the current directory
     os.environ['PWD'] = os.getcwd()
 
     direction = sys.argv[1].lower()
     handler = LaneChangeHandler()
     handler.handle_lane_change(direction)
+    '''

@@ -1283,31 +1283,59 @@ Warning: You are on a metered connection!</source>
     <name>PrimeAdWidget</name>
     <message>
         <source>Upgrade Now</source>
-        <translation>馬上升級</translation>
+        <translation type="vanished">馬上升級</translation>
     </message>
     <message>
         <source>Become a comma prime member at connect.comma.ai</source>
-        <translation>成為 connect.comma.ai 的高級會員</translation>
+        <translation type="vanished">成為 connect.comma.ai 的高級會員</translation>
     </message>
     <message>
         <source>PRIME FEATURES:</source>
-        <translation>高級會員特點：</translation>
+        <translation type="vanished">高級會員特點：</translation>
     </message>
     <message>
         <source>Remote access</source>
-        <translation>遠端存取</translation>
+        <translation type="vanished">遠端存取</translation>
     </message>
     <message>
         <source>24/7 LTE connectivity</source>
-        <translation>24/7 LTE 連線</translation>
+        <translation type="vanished">24/7 LTE 連線</translation>
     </message>
     <message>
         <source>Turn-by-turn navigation</source>
-        <translation>導航功能</translation>
+        <translation type="vanished">導航功能</translation>
     </message>
     <message>
         <source>1 year of drive storage</source>
-        <translation>一年的行駛記錄儲存空間</translation>
+        <translation type="vanished">一年的行駛記錄儲存空間</translation>
+    </message>
+    <message>
+        <source>SICUEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Grupo de investigacion de la Universidad Europea</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Integrantes del grupo:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Adrian Cañadas</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Javier F.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nourdine A.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sergio B.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1651,6 +1679,10 @@ Reboot Required.</source>
     </message>
     <message>
         <source>Vehicle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>UEM</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2683,6 +2715,57 @@ Reboot Required.</source>
     </message>
 </context>
 <context>
+    <name>TelUemSettings</name>
+    <message>
+        <source>INTERVALOS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Descripción del OPCION 2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LIDER</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CarState UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>carControl UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GPSLocation UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Descripción del OPCION 3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>navInstruction UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Descripción del OPCION 4.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>radarState UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>drivingModelData UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RESPUESTA MAPBOX </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>TermsPage</name>
     <message>
         <source>Terms &amp; Conditions</source>
@@ -3064,6 +3147,41 @@ This feature must be used along with SLC, and/or V-TSC, and/or M-TSC.</source>
     </message>
 </context>
 <context>
+    <name>TogglesPanelUEM</name>
+    <message>
+        <source>TELEMETRIA UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Activar evento a mostrar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CarState TELEMETRIA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Descripción del OPCION 2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GPSLocation TELEMETRIA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Descripción del OPCION 3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CarControl TELEMETRIA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Descripción del OPCION 4.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>TorqueFriction</name>
     <message>
         <source>FRICTION</source>
@@ -3098,6 +3216,45 @@ This feature must be used along with SLC, and/or V-TSC, and/or M-TSC.</source>
     </message>
     <message>
         <source>Offline Only</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UemPanel</name>
+    <message>
+        <source>TELEMETRIA UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>EXPLICACION TELEMETRIA UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Conf. TELEMETRIA UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>INFO SOFTWARE UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sender UEM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Formerly known as &lt;b&gt;&quot;NNFF&quot;&lt;/b&gt;, this replaces the lateral &lt;b&gt;&quot;torque&quot;&lt;/b&gt; controller, with one using a neural network trained on each car&apos;s (actually, each separate EPS firmware) driving data for increased controls accuracy.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reach out to the sunnypilot team in the following channel at the sunnypilot Discord server with feedback, or to provide log data for your car if your car is currently unsupported: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add custom offsets to Camera and Path in sunnypilot.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default is Laneless. In Auto mode, sunnnypilot dynamically chooses between Laneline or Laneless model based on lane recognition confidence level on road and certain conditions.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
