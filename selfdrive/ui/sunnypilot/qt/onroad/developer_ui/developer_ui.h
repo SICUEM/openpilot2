@@ -54,6 +54,8 @@ public:
   static UiElement getVelocidadC1();
   static UiElement getVelocidadC2();
   static UiElement getVelocidadC3();
+  static UiElement getVelocidadC4();
+
 
 
 

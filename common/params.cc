@@ -92,6 +92,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"Velocidad_C1", PERSISTENT},  // Velocidad Jv
     {"Velocidad_C2", PERSISTENT},  // Velocidad Nd
     {"Velocidad_C3", PERSISTENT},  // Velocidad v3
+    {"Velocidad_C4", PERSISTENT},  // Velocidad sim
+
     {"AlwaysOnDM", PERSISTENT},
     {"ApiCache_Device", PERSISTENT},
     {"ApiCache_NavDestinations", PERSISTENT},

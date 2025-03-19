@@ -356,13 +356,15 @@ class SicMqttHilo2:
         jv = str(data.get("Jv", "0"))
         nd = str(data.get("Nd", "0"))
         v3 = str(data.get("v3", "0"))
+        sim = str(data.get("Ur", "0"))
 
         # Guardar en Params y verificar
         self.params.put("Velocidad_C1", jv)
         self.params.put("Velocidad_C2", nd)
         self.params.put("Velocidad_C3", v3)
+        self.params.put("Velocidad_C4", sim)
 
-        print(f"📌 Velocidades guardadas: C1: {jv}, C2: {nd}, C3: {v3}")  # 🟢 Confirma que se guardaron
+        print(f"📌 Velocidades guardadas: C1: {jv}, C2: {nd}, C3: {v3}" + f", C4: {sim}")
 
       except json.JSONDecodeError as e:
         print(f"⚠️ Error al decodificar JSON: {e}")

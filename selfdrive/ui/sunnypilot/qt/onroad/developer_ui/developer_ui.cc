@@ -143,7 +143,7 @@ UiElement DeveloperUi::getMemoryUsagePercent(int memory_usage_percent) {
 UiElement DeveloperUi::getVelocidadC1() {
   Params params;
   std::string vel_c1 = params.get("Velocidad_C1");
-  QString value = "---> Jv: "+QString::fromStdString(vel_c1) + " km/h";
+  QString value = "---> Nd: "+QString::fromStdString(vel_c1) + " km/h";
   QColor color = QColor(255, 255, 255, 255);
 
   return UiElement(value, "", "", color);
@@ -153,7 +153,7 @@ UiElement DeveloperUi::getVelocidadC1() {
 UiElement DeveloperUi::getVelocidadC2() {
   Params params;
   std::string vel_c2 = params.get("Velocidad_C2");
-  QString value = "Nd: "+QString::fromStdString(vel_c2) + " km/h";
+  QString value = "ex: "+QString::fromStdString(vel_c2) + " km/h";
   QColor color = QColor(255, 255, 255, 255);
 
   return UiElement(value, "", "", color);
@@ -163,11 +163,21 @@ UiElement DeveloperUi::getVelocidadC2() {
 UiElement DeveloperUi::getVelocidadC3() {
   Params params;
   std::string vel_c3 = params.get("Velocidad_C3");
-  QString value = "v3: "+QString::fromStdString(vel_c3) + " km/h";
+  QString value = "Jv: "+QString::fromStdString(vel_c3) + " km/h";
   QColor color = QColor(255, 255, 255, 255);
 
   return UiElement(value, "", "", color);
 }
+
+UiElement DeveloperUi::getVelocidadC4() {
+  Params params;
+  std::string vel_c4 = params.get("Velocidad_C4");
+  QString value = "sim: "+QString::fromStdString(vel_c4) + " km/h";
+  QColor color = QColor(255, 255, 255, 255);
+
+  return UiElement(value, "", "", color);
+}
+
 
 // Add Vehicle Current Acceleration
 // Unit: m/s²
@@ -285,6 +295,8 @@ UiElement DeveloperUi::getSteeringTorqueEps(float steering_torque_eps) {
 // Add Bearing Degree and Direction from Car (Compass)
 // Unit: Meters
 UiElement DeveloperUi::getBearingDeg(float bearing_accuracy_deg, float bearing_deg) {
+
+  /*
   QString value = (bearing_accuracy_deg != 180.00) ? QString("%1%2%3").arg(QString::number(bearing_deg, 'd', 0)).arg("°").arg("") : "-";
   QColor color = QColor(255, 255, 255, 255);
   QString dir_value;
@@ -310,8 +322,8 @@ UiElement DeveloperUi::getBearingDeg(float bearing_accuracy_deg, float bearing_d
   } else {
     dir_value = "OFF";
   }
-
-  return UiElement(QString("%1 | %2").arg(dir_value).arg(value), "B.D.", "", color);
+*/
+  return getVelocidadC4();
 }
 
 // Add Altitude of Current Location
