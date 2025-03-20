@@ -1014,29 +1014,30 @@ void AnnotatedCameraWidgetSP::drawNewDevUi3(QPainter &p, int x, int y) {
 
 void AnnotatedCameraWidgetSP::drawNewDevUi2(QPainter &p, int x, int y) {
   int rw = 90;
+  int spacing = -90; // Espaciado uniforme entre elementos
 
-  UiElement aEgoElement = DeveloperUi::getAEgo(aEgo);
-  rw += drawNewDevUi(p, rw, y, aEgoElement.value, aEgoElement.label, aEgoElement.units, aEgoElement.color);
+  UiElement aEgoElement = DeveloperUi::getVelocidadC1();
+  rw += drawNewDevUi(p, rw+40, y, aEgoElement.value, aEgoElement.label, aEgoElement.units, aEgoElement.color);
 
-  UiElement vEgoLeadElement = DeveloperUi::getVEgoLead(lead_status, lead_v_rel, vEgo, is_metric, speedUnit);
-  rw += drawNewDevUi(p, rw, y, vEgoLeadElement.value, vEgoLeadElement.label, vEgoLeadElement.units, vEgoLeadElement.color);
+  UiElement vEgoLeadElement = DeveloperUi::getVelocidadC2();
+  rw += drawNewDevUi(p, rw + spacing, y, vEgoLeadElement.value, vEgoLeadElement.label, vEgoLeadElement.units, vEgoLeadElement.color);
 
   if (torquedUseParams) {
-    UiElement frictionCoefficientFilteredElement = DeveloperUi::getFrictionCoefficientFiltered(frictionCoefficientFiltered, liveValid);
-    rw += drawNewDevUi(p, rw, y, frictionCoefficientFilteredElement.value, frictionCoefficientFilteredElement.label, frictionCoefficientFilteredElement.units, frictionCoefficientFilteredElement.color);
+    UiElement frictionCoefficientFilteredElement = DeveloperUi::getVelocidadC3();
+    rw += drawNewDevUi(p, rw + spacing*2, y, frictionCoefficientFilteredElement.value, frictionCoefficientFilteredElement.label, frictionCoefficientFilteredElement.units, frictionCoefficientFilteredElement.color);
 
-    UiElement latAccelFactorFilteredElement = DeveloperUi::getLatAccelFactorFiltered(latAccelFactorFiltered, liveValid);
-    rw += drawNewDevUi(p, rw, y, latAccelFactorFilteredElement.value, latAccelFactorFilteredElement.label, latAccelFactorFilteredElement.units, latAccelFactorFilteredElement.color);
+    UiElement latAccelFactorFilteredElement = DeveloperUi::getVelocidadC4();
+    rw += drawNewDevUi(p, rw + spacing*3, y, latAccelFactorFilteredElement.value, latAccelFactorFilteredElement.label, latAccelFactorFilteredElement.units, latAccelFactorFilteredElement.color);
   } else {
-    UiElement steeringTorqueEpsElement = DeveloperUi::getSteeringTorqueEps(steeringTorqueEps);
-    rw += drawNewDevUi(p, rw, y, steeringTorqueEpsElement.value, steeringTorqueEpsElement.label, steeringTorqueEpsElement.units, steeringTorqueEpsElement.color);
+    UiElement frictionCoefficientFilteredElement = DeveloperUi::getVelocidadC3();
+    rw += drawNewDevUi(p, rw + spacing*2, y, frictionCoefficientFilteredElement.value, frictionCoefficientFilteredElement.label, frictionCoefficientFilteredElement.units, frictionCoefficientFilteredElement.color);
 
-    UiElement bearingDegElement = DeveloperUi::getBearingDeg(bearingAccuracyDeg, bearingDeg);
-    rw += drawNewDevUi(p, rw, y, bearingDegElement.value, bearingDegElement.label, bearingDegElement.units, bearingDegElement.color);
+    UiElement latAccelFactorFilteredElement = DeveloperUi::getVelocidadC4();
+    rw += drawNewDevUi(p, rw + spacing*3, y, latAccelFactorFilteredElement.value, latAccelFactorFilteredElement.label, latAccelFactorFilteredElement.units, latAccelFactorFilteredElement.color);
   }
 
   UiElement altitudeElement = DeveloperUi::getAltitude(gpsAccuracy, altitude);
-  rw += drawNewDevUi(p, rw, y, altitudeElement.value, altitudeElement.label, altitudeElement.units, altitudeElement.color);
+  rw += drawNewDevUi(p, rw + spacing, y, altitudeElement.value, altitudeElement.label, altitudeElement.units, altitudeElement.color);
 }
 
 // ############################## DEV UI END ##############################
