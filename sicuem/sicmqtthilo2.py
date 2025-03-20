@@ -82,22 +82,14 @@ class SicMqttHilo2:
     }
 
   def initialize_mqtt_client(self):
-    """
-    Configura el cliente MQTT y sus callbacks.
+    """Configura el cliente MQTT y sus callbacks con reconexión automática."""
+    self.mqttc = mqtt.Client()
+    self.mqttc.on_connect = self.on_connect
+    self.mqttc.on_disconnect = self.on_disconnect
+    self.mqttc.on_message = self.on_message
 
-    - Crea una instancia de cliente MQTT.
-    - Asocia funciones de callback para manejar eventos de conexión, desconexión y recepción de mensajes.
-
-    Comentarios clave:
-    - `on_connect`: Se llama automáticamente cuando el cliente se conecta al broker.
-    - `on_disconnect`: Maneja desconexiones, permitiendo reconexiones automáticas.
-    - `on_message`: Procesa mensajes recibidos en los tópicos suscritos.
-    """
-    self.mqttc = mqtt.Client()                      # Inicializa el cliente MQTT
-    self.mqttc.on_connect = self.on_connect         # Callback para manejar la conexión
-    self.mqttc.on_disconnect = self.on_disconnect   # Callback para manejar la desconexión
-    self.mqttc.on_message = self.on_message         # Callback para manejar mensajes recibidos
-
+    # Configurar reintento de conexión automática
+    self.mqttc.reconnect_delay_set(min_delay=1, max_delay=30)
 
   def load_configuration(self):
     """
@@ -205,21 +197,23 @@ class SicMqttHilo2:
         print(f"Error al habilitar el canal {item['canal']}: {e}")
 
   def setup_mqtt_connection(self):
-    """Configura la conexión MQTT y maneja los errores sin bloquear el programa."""
+    """Configura la conexión MQTT con manejo de reconexión."""
     while not self.stop_event.is_set():
       try:
         self.mqttc.connect(self.broker_address, 1883, 60)
         self.mqttc.subscribe("opmqttsender/messages", qos=0)
         self.mqttc.subscribe("telemetry_config/vego", qos=0)
 
-        self.mqttc.loop_start()
-        self.conectado = True
-        print("Conectado al broker MQTT con éxito.")
+        # Evita iniciar múltiples veces el loop
+        if not self.conectado:
+          self.mqttc.loop_start()
+          self.conectado = True
+          print("Conectado al broker MQTT con éxito.")
         break
       except Exception as e:
         print(f"Error al conectar con el broker MQTT: {e}")
         print("Reintentando conexión en 5 segundos...")
-        time.sleep(5)  # Reintentar después de 5 segundos
+        time.sleep(5)
 
   def signal_handler(self, sig, frame):
     """Manejador de la señal SIGINT para detener el programa de forma controlada."""
@@ -336,11 +330,19 @@ class SicMqttHilo2:
       print("Conectado al broker MQTT con éxito.")
 
   def on_disconnect(self, client, userdata, rc):
-    """Maneja la desconexión del cliente MQTT y trata de reconectar."""
+    """Maneja la desconexión e intenta reconectar automáticamente."""
     self.conectado = False
     print("Desconectado del broker MQTT. Intentando reconectar...")
-    self.start_mqtt_thread()
 
+    # Intentar reconectar automáticamente
+    while not self.stop_event.is_set():
+      try:
+        self.mqttc.reconnect()  # Intenta reconectar sin bloquear el hilo principal
+        print("Reconectado exitosamente.")
+        break
+      except Exception as e:
+        print(f"Fallo en la reconexión: {e}. Reintentando en 5 segundos...")
+        time.sleep(5)
   def on_message(self, client, userdata, msg):
     """Callback que maneja los mensajes MQTT."""
 
