@@ -90,7 +90,7 @@ AnnotatedCameraWidgetSP::AnnotatedCameraWidgetSP(VisionStreamType type, QWidget*
 
 // Ruta de la imagen
 // Nota: `right_img` ya está cargado con `loadPixmap("../assets/img_turn_right_icon.png", {subsign_img_size, subsign_img_size});`
-
+/*
 // Rotar la imagen izquierda
 QPixmap left_pixmap = left_img;
 if (left_pixmap.isNull()) {
@@ -111,9 +111,7 @@ left_button->setStyleSheet("border: none; background: transparent;");
 left_button->move(20, height() / 2 - left_button->height() / 2);
 
 // Configurar el botón derecho con la imagen ya cargada
-if (right_img.isNull()) {
-    qDebug() << "Error: No se pudo cargar la imagen derecha desde right_img";
-}
+
 right_button = new QPushButton(this);
 right_button->setFixedSize(button_size, button_size);
 right_button->setIcon(QIcon(right_img));
@@ -122,9 +120,9 @@ right_button->setStyleSheet("border: none; background: transparent;");
 right_button->move(width() - right_button->width() - 20, height() / 2 - right_button->height() / 2);
 
 // Conectar botones a funciones
-connect(left_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onLeftButtonClicked);
-connect(right_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onRightButtonClicked);
-
+//connect(left_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onLeftButtonClicked);
+//connect(right_button, &QPushButton::clicked, this, &AnnotatedCameraWidgetSP::onRightButtonClicked);
+*/
 // Agregar botones al layout
 buttons_layout = new QHBoxLayout();
 buttons_layout->setContentsMargins(0, 0, 10, 20);
@@ -133,7 +131,7 @@ updateButtonsLayout(false);
 
 
 }
-
+/*
 void AnnotatedCameraWidgetSP::resizeEvent(QResizeEvent *event) {
   QWidget::resizeEvent(event);
 
@@ -195,6 +193,8 @@ void AnnotatedCameraWidgetSP::activateRightBlinker() {
 
   update(); // Redibujar la interfaz para reflejar el cambio
 }
+
+
 void AnnotatedCameraWidgetSP::changeLane(const QString &direction) {
   // Lógica para enviar una señal de cambio de carril
   QString basePath = QCoreApplication::applicationDirPath();
@@ -208,7 +208,7 @@ void AnnotatedCameraWidgetSP::changeLane(const QString &direction) {
 
   qDebug() << "Ejecutando script en: " << scriptPath;
 
-  QProcess::startDetached("python3", QStringList() << scriptPath << "left");}
+  QProcess::startDetached("python3", QStringList() << scriptPath << "left");}*/
 
 void AnnotatedCameraWidgetSP::mousePressEvent(QMouseEvent* e) {
   bool propagate_event = true;

@@ -49,15 +49,15 @@ public:
   OnroadSettingsButton *onroad_settings_btn;
 
 private:
-  QPushButton *left_button;
-  QPushButton *right_button;
+  //QPushButton *left_button;
+  //QPushButton *right_button;
 
-  void onLeftButtonClicked();
-  void onRightButtonClicked();
+  //void onLeftButtonClicked();
+  //void onRightButtonClicked();
 
-  void activateLeftBlinker();  // Declaración de la función
-  void activateRightBlinker(); // Declaración de la función
-  void changeLane(const QString &direction); // Declaración de la función
+  //void activateLeftBlinker();  // Declaración de la función
+  //void activateRightBlinker(); // Declaración de la función
+  //void changeLane(const QString &direction); // Declaración de la función
 
 
 
@@ -228,7 +228,7 @@ private:
   cereal::ModelGeneration drivingModelGen;
 
 protected:
-  void resizeEvent(QResizeEvent *event) override;
+  //void resizeEvent(QResizeEvent *event) override;
   void paintGL() override;
   void initializeGL() override;
   void showEvent(QShowEvent *event) override;
