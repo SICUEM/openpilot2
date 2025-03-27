@@ -309,7 +309,18 @@ class Controls:
     if lane_change_svs.laneChangeState == LaneChangeState.preLaneChange and lane_change_edge_block:
       self.events.add(EventName.laneChangeRoadEdge)
     elif lane_change_svs.laneChangeState == LaneChangeState.preLaneChange:
-      direction = lane_change_svs.laneChangeDirection
+      direction = lane_change_svs.laneChangeDirection  # ← valor por defecto del modelo
+      try:
+        force_lc = self.params.get("ForceLaneChangeLeft")
+        if force_lc is not None and force_lc == b"1":
+          direction = LaneChangeDirection.left
+          CS.leftBlinker = True
+          self.last_blinker_frame = self.sm.frame
+          self.params.delete("ForceLaneChangeLeft")
+
+      except Exception as e:
+        cloudlog.error(f"Error leyendo ForceLaneChangeLeft: {e}")
+
       if (CS.leftBlindspot and direction == LaneChangeDirection.left) or \
          (CS.rightBlindspot and direction == LaneChangeDirection.right):
         self.events.add(EventName.laneChangeBlocked)
@@ -446,6 +457,11 @@ class Controls:
 
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
+
+
+    #adri lane_change
+    # adri lane_change
+
 
   def data_sample(self):
     """Receive data from sockets"""
@@ -636,9 +652,14 @@ class Controls:
       self.desired_curvature = +0.01  # Ajusta este valor para el giro deseado hacia la derecha (+) o izq (-)
     '''
     # Enable blinkers while lane changing
+    # Enable blinkers while lane changing
     if blinker_svs.laneChangeState != LaneChangeState.off:
       CC.leftBlinker = blinker_svs.laneChangeDirection == LaneChangeDirection.left
       CC.rightBlinker = blinker_svs.laneChangeDirection == LaneChangeDirection.right
+
+    # ← FUERZA EL ICONO DEL INTERMITENTE SI EL BLINKER FUE FORZADO
+    if CS.leftBlinker:
+      CC.leftBlinker = True
 
     if CS.leftBlinker or CS.rightBlinker:
       self.last_blinker_frame = self.sm.frame

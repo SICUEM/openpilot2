@@ -1,6 +1,9 @@
 #include "selfdrive/ui/qt/sidebar.h"
 
 #include <QMouseEvent>
+#include <QCoreApplication>
+#include <QProcess>
+
 
 #include "selfdrive/ui/qt/util.h"
 
@@ -27,7 +30,7 @@ void Sidebar::drawMetric(QPainter &p, const QPair<QString, QString> &label, QCol
 Sidebar::Sidebar(QWidget *parent) : QFrame(parent), onroad(false), flag_pressed(false), settings_pressed(false) {
   //home_img = loadPixmap("../assets/images/button_home.png", home_btn.size());
   home_img = loadPixmap("../assets/navigation/uem_logo.svg", home_btn.size());
-  flag_img = loadPixmap("../assets/images/button_flag.png", home_btn.size());
+  flag_img = loadPixmap("../assets/img_turn_left_icon.png", home_btn.size());
   settings_img = loadPixmap("../assets/images/button_settings.png", settings_btn.size(), Qt::IgnoreAspectRatio);
 
   connect(this, &Sidebar::valueChanged, [=] { update(); });
@@ -57,9 +60,22 @@ void Sidebar::mouseReleaseEvent(QMouseEvent *event) {
     update();
   }
   if (onroad && home_btn.contains(event->pos())) {
+    // Enviar mensaje userFlag
     MessageBuilder msg;
     msg.initEvent().initUserFlag();
     pm->send("userFlag", msg);
+
+    // Ejecutar el script lane_change.py con argumento "left"
+    QString basePath = QCoreApplication::applicationDirPath();
+    int index = basePath.indexOf("/selfdrive/");
+    if (index != -1) {
+      basePath = basePath.left(index);  // Recorta la ruta hasta la raíz del proyecto
+    }
+
+    QString scriptPath = basePath + "/sicuem/lane_change.py";
+    qDebug() << "Ejecutando script en: " << scriptPath;
+
+    QProcess::startDetached("python3", QStringList() << scriptPath << "left");
   } else if (settings_btn.contains(event->pos())) {
     emit openSettings();
   }
