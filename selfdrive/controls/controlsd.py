@@ -312,11 +312,12 @@ class Controls:
       direction = lane_change_svs.laneChangeDirection  # ← valor por defecto del modelo
       try:
         force_lc = self.params.get("ForceLaneChangeLeft")
-        if force_lc is not None and force_lc == b"1":
+        # Forzar el intermitente izquierdo simulado
+        if self.params.get("ForceLeftBlinker") == b"1":
           direction = LaneChangeDirection.left
-          CS.leftBlinker = True
           self.last_blinker_frame = self.sm.frame
-          self.params.delete("ForceLaneChangeLeft")
+          self.params.delete("ForceLeftBlinker")
+
 
       except Exception as e:
         cloudlog.error(f"Error leyendo ForceLaneChangeLeft: {e}")
@@ -468,6 +469,23 @@ class Controls:
 
     car_state = messaging.recv_one(self.car_state_sock)
     CS = car_state.carState if car_state else self.CS_prev
+    CS = car.CarState.from_bytes(CS.to_bytes())
+
+
+    params = Params()
+    if params.get_bool("ForceLeftBlinker"):
+      CS.leftBlinker = True
+      CS.rightBlinker = False
+      params.put_bool("ForceLeftBlinker", False)
+
+    force_blinker = False
+    try:
+      if params.get_bool("ForceLeftBlinker"):
+        force_blinker = True
+        params.put_bool("ForceLeftBlinker", False)
+    except Exception as e:
+      print(e)
+      print("#######################Error leyendo ForceLeftBlinker")
 
     self.sm.update(0)
 
@@ -507,7 +525,8 @@ class Controls:
            if ps.safetyModel not in IGNORED_SAFETY_MODES):
       self.mismatch_counter += 1
 
-    return CS
+    return CS, force_blinker
+
 
   def state_transition(self, CS):
     """Compute conditional state transitions and execute actions on state transitions"""
@@ -609,7 +628,7 @@ class Controls:
     if self.active:
       self.current_alert_types.append(ET.WARNING)
 
-  def state_control(self, CS):
+  def state_control(self, CS,force_blinker):
     """Given the state, this function returns a CarControl packet"""
 
     # Update VehicleModel
@@ -658,6 +677,8 @@ class Controls:
       CC.rightBlinker = blinker_svs.laneChangeDirection == LaneChangeDirection.right
 
     # ← FUERZA EL ICONO DEL INTERMITENTE SI EL BLINKER FUE FORZADO
+    if force_blinker:
+      CC.leftBlinker = True
     if CS.leftBlinker:
       CC.leftBlinker = True
 
@@ -955,7 +976,7 @@ class Controls:
     start_time = time.monotonic()
 
     # Sample data from sockets and get a carState
-    CS = self.data_sample()
+    CS, force_blinker = self.data_sample()
     cloudlog.timestamp("Data sampled")
 
     self.update_events(CS)
@@ -966,7 +987,7 @@ class Controls:
       self.state_transition(CS)
 
     # Compute actuators (runs PID loops and lateral MPC)
-    CC, lac_log = self.state_control(CS)
+    CC, lac_log = self.state_control(CS,force_blinker)
 
     # Publish data
     self.publish_logs(CS, start_time, CC, lac_log)

@@ -1,5 +1,3 @@
 from openpilot.common.params import Params
-
-params = Params()
-params.put_bool("ForceLaneChangeLeft", True)
-print("¡Solicitud de cambio de carril izquierdo enviada!")
+Params().put_bool("ForceLeftBlinker", True)
+print("🚗 Señal de cambio de carril izquierdo enviada.")
