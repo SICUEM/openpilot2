@@ -202,7 +202,7 @@ class SicMqttHilo2:
       try:
         self.mqttc.connect(self.broker_address, 1883, 60)
         self.mqttc.subscribe("opmqttsender/messages", qos=0)
-        self.mqttc.subscribe("telemetry_config/vego", qos=0)
+        self.mqttc.subscribe("telemetry_publish/vego", qos=0)
 
         # Evita iniciar múltiples veces el loop
         if not self.conectado:
@@ -349,7 +349,7 @@ class SicMqttHilo2:
     print(f"📡 Mensaje recibido en el topic: {msg.topic}")  # 🟢 Verifica que se recibe el mensaje
     print(f"📩 Payload recibido: {msg.payload.decode()}")  # 🟢 Verifica el contenido del mensaje
 
-    if msg.topic == "telemetry_config/vego":
+    if msg.topic == "telemetry_publish/vego":
       try:
         data = json.loads(msg.payload.decode())  # Intenta cargar el JSON
         print(f"✅ Datos decodificados correctamente: {data}")  # 🟢 Verifica que se decodifica bien
