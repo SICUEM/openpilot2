@@ -311,6 +311,7 @@ class Controls:
     elif lane_change_svs.laneChangeState == LaneChangeState.preLaneChange:
       direction = lane_change_svs.laneChangeDirection  # ← valor por defecto del modelo
       try:
+        
         force_lc = self.params.get("ForceLaneChangeLeft")
         if force_lc is not None and force_lc == b"1":
           direction = LaneChangeDirection.left
