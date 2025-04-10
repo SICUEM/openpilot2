@@ -143,7 +143,7 @@ UiElement DeveloperUi::getMemoryUsagePercent(int memory_usage_percent) {
 UiElement DeveloperUi::getVelocidadC1() {
   Params params;
   std::string vel_c1 = params.get("Velocidad_C1");
-  QString value = "---> Nd: "+QString::fromStdString(vel_c1) + " km/h";
+  QString value = "---> Jv: "+QString::fromStdString(vel_c1) + " km/h";
   QColor color = QColor(255, 255, 255, 255);
 
   return UiElement(value, "", "", color);
@@ -163,7 +163,7 @@ UiElement DeveloperUi::getVelocidadC2() {
 UiElement DeveloperUi::getVelocidadC3() {
   Params params;
   std::string vel_c3 = params.get("Velocidad_C3");
-  QString value = "Jv: "+QString::fromStdString(vel_c3) + " km/h";
+  QString value = "Nd: "+QString::fromStdString(vel_c3) + " km/h";
   QColor color = QColor(255, 255, 255, 255);
 
   return UiElement(value, "", "", color);
