@@ -151,6 +151,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"cambiar_a_der",PERSISTENT},//Adrian Cañadas Gallardo
     {"ForceLaneChangeLeft", PERSISTENT}, // Cambio de carril forzado a la izquierda
     {"ForceLeftBlinker", PERSISTENT}, // Simula intermitente izquierdo activado (Adrián)
+    {"DisableLongControl", PERSISTENT}, // Adrian Cañadas Gallardo
+
 
 
     {"ActivateEvent",PERSISTENT},//Adrian Cañadas Gallardo
