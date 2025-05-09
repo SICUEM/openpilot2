@@ -35,24 +35,23 @@ class SicMqttHilo2:
     - `pause_event`: Permite pausar operaciones de manera segura.
     - `stop_event`: Señal para detener hilos en ejecución.
     """
-    self.velocidadActualizacion=1
+    self.velocidadActualizacion = 1
     self.jsonCanales = "../../sicuem/canales.json"  # Ruta al archivo JSON de configuración de canales
-    self.jsonConfig = "../../sicuem/config.json"   # Ruta al archivo JSON de configuración general
-    self.espera = 0.5                              # Intervalo de espera predeterminado en segundos
-    self.indice_canal = 0                          # Índice inicial para los canales
+    self.jsonConfig = "../../sicuem/config.json"  # Ruta al archivo JSON de configuración general
+    self.espera = 0.5  # Intervalo de espera predeterminado en segundos
+    self.indice_canal = 0  # Índice inicial para los canales
     self.conectado = False
     self.last_lider_toggle_state = None
 
-
     # Estado inicial de conexión MQTT
     self.sm = messaging.SubMaster(
-          ['carState', 'controlsState', 'liveCalibration', 'carControl', 'gpsLocationExternal', 'gpsLocation',
-           'navInstruction', 'radarState', 'drivingModelData'])                                 # Objeto SubMaster para recibir datos (sin inicializar)
-    self.pause_event = Event()                     # Evento para pausar operaciones
-    self.pause_event.set()                         # Activa el evento inicialmente
-    self.stop_event = Event()                      # Evento para detener hilos
-    params = Params()                              # Carga de parámetros del sistema
-    self.params = params                           # Almacena la referencia a los parámetros
+      ['carState', 'controlsState', 'liveCalibration', 'carControl', 'gpsLocationExternal', 'gpsLocation',
+       'navInstruction', 'radarState', 'drivingModelData'])  # Objeto SubMaster para recibir datos (sin inicializar)
+    self.pause_event = Event()  # Evento para pausar operaciones
+    self.pause_event.set()  # Activa el evento inicialmente
+    self.stop_event = Event()  # Evento para detener hilos
+    params = Params()  # Carga de parámetros del sistema
+    self.params = params  # Almacena la referencia a los parámetros
     self.DongleID = params.get("DongleId").decode('utf-8') if params.get("DongleId") else "DongleID"
     self.params.put_bool("intervalos_toggle", False)
     print(f"🆔 DongleID local: {self.DongleID}")
@@ -110,34 +109,33 @@ class SicMqttHilo2:
     - `self.pause_event`: Se limpia (desactiva) si el envío está deshabilitado (`send_value == 0`).
     """
     try:
-        with open(self.jsonConfig, 'r') as f:
-            self.dataConfig = json.load(f)  # Carga los datos desde el archivo JSON
+      with open(self.jsonConfig, 'r') as f:
+        self.dataConfig = json.load(f)  # Carga los datos desde el archivo JSON
 
-        # Configuración de velocidad (tiempo de espera entre operaciones)
-        speed_value = self.dataConfig['config']['speed']['value']
-        self.espera = 1.0 / float(speed_value)
+      # Configuración de velocidad (tiempo de espera entre operaciones)
+      speed_value = self.dataConfig['config']['speed']['value']
+      self.espera = 1.0 / float(speed_value)
 
-        # Configuración de envío (habilitar o deshabilitar operaciones)
-        send_value = int(self.dataConfig['config']['send']['value'])
-        if send_value == 0:
-            self.pause_event.clear()  # Pausa las operaciones si `send` es 0
+      # Configuración de envío (habilitar o deshabilitar operaciones)
+      send_value = int(self.dataConfig['config']['send']['value'])
+      if send_value == 0:
+        self.pause_event.clear()  # Pausa las operaciones si `send` es 0
 
-        # Dirección del broker MQTT
-        self.broker_address = self.dataConfig['config']['IpServer']['value']
+      # Dirección del broker MQTT
+      self.broker_address = self.dataConfig['config']['IpServer']['value']
 
     except FileNotFoundError:
-        print(f"Error: El archivo '{self.jsonConfig}' no se encontró.")
+      print(f"Error: El archivo '{self.jsonConfig}' no se encontró.")
     except json.JSONDecodeError:
-        print(f"Error: El archivo '{self.jsonConfig}' no contiene un JSON válido.")
+      print(f"Error: El archivo '{self.jsonConfig}' no contiene un JSON válido.")
     except KeyError as e:
-        print(f"Error: Falta la clave {e} en la configuración del archivo JSON.")
+      print(f"Error: Falta la clave {e} en la configuración del archivo JSON.")
     except ValueError as e:
-        print(f"Error: Valor no válido en la configuración: {e}")
+      print(f"Error: Valor no válido en la configuración: {e}")
     except ZeroDivisionError:
-        print("Error: La configuración de velocidad no puede ser cero.")
+      print("Error: La configuración de velocidad no puede ser cero.")
     except Exception as e:
-        print(f"Error inesperado: {e}")
-
+      print(f"Error inesperado: {e}")
 
   def start_mqtt_thread(self):
     """
@@ -152,14 +150,10 @@ class SicMqttHilo2:
     """
     Thread(target=self.setup_mqtt_connection, daemon=True).start()
 
-
-
-
-#----------------------------------------------------------------------------------------------- INIT STUFF END
+  # ----------------------------------------------------------------------------------------------- INIT STUFF END
 
   def start(self) -> int:
-    #self.reanudar_envio() #
-
+    # self.reanudar_envio() #
 
     self.cargar_canales()
 
@@ -171,8 +165,6 @@ class SicMqttHilo2:
       except Exception:
         self.sm = None
 
-
-
     time.sleep(self.velocidadActualizacion)
     hilo_telemetry = Thread(target=self.loop, daemon=True)
     hilo_telemetry.start()
@@ -181,8 +173,7 @@ class SicMqttHilo2:
 
     return 0
 
-
-#------------------------------------------------------------------------------------------------ FUNCION START END
+  # ------------------------------------------------------------------------------------------------ FUNCION START END
 
   def verificar_toggle_canales(self, data_canales):
     """
@@ -207,6 +198,8 @@ class SicMqttHilo2:
         self.mqttc.subscribe("opmqttsender/messages", qos=0)
         self.mqttc.subscribe("telemetry_publish/vego", qos=0)
         self.mqttc.subscribe("telemetry_config/+/intervalos", qos=0)
+        self.mqttc.subscribe("telemetry_config/+/left", qos=0)
+        self.mqttc.subscribe("telemetry_config/+/right", qos=0)
 
         # Evita iniciar múltiples veces el loop
         if not self.conectado:
@@ -224,8 +217,7 @@ class SicMqttHilo2:
     self.cleanup()
     sys.exit(0)
 
-
-#------------------------------------------------------------------------------------------------ VERIFICAR QUE TOGGLES ESTAN ACTIVADOS
+  # ------------------------------------------------------------------------------------------------ VERIFICAR QUE TOGGLES ESTAN ACTIVADOS
 
   def loop(self):
     """
@@ -242,11 +234,11 @@ class SicMqttHilo2:
 
     while True:
       # Verificar el estado de telemetria_uem
-      #if self.params.get_bool("telemetria_uem"):
-        #print("Telemetría habilitada, ejecutando operaciones.")
+      # if self.params.get_bool("telemetria_uem"):
+      # print("Telemetría habilitada, ejecutando operaciones.")
       self.loop_principal()
-      #else:
-        #print("Telemetría deshabilitada, esperando...")
+      # else:
+      # print("Telemetría deshabilitada, esperando...")
 
       self.verificar_cambio_lider_toggle()
       time.sleep(0.5)  # Pausa breve antes de volver a verificar
@@ -297,9 +289,9 @@ class SicMqttHilo2:
             # Envía solo los datos importantes
             datos_importantes = self.enviar_datos_importantes(canal_nombre, datos_canal)
 
-            #print("Enviando canal:",canal_actual['topic'])
+            # print("Enviando canal:",canal_actual['topic'])
             # canal_actual['topic']
-            self.publicarInfo( canal_actual['topic'],datos_importantes)
+            self.publicarInfo(canal_actual['topic'], datos_importantes)
 
             '''
             self.mqttc.publish(
@@ -326,8 +318,6 @@ class SicMqttHilo2:
 
   ##------------------------------------------------------------------------------------------------ loop related end
 
-
-
   def on_connect(self, client, userdata, flags, rc):
     if rc == 0:
       self.conectado = True
@@ -347,6 +337,7 @@ class SicMqttHilo2:
       except Exception as e:
         print(f"Fallo en la reconexión: {e}. Reintentando en 5 segundos...")
         time.sleep(5)
+
   def on_message(self, client, userdata, msg):
     """Callback que maneja los mensajes MQTT."""
 
@@ -393,6 +384,58 @@ class SicMqttHilo2:
             print(f"⚠️ Valor no reconocido en telemetry_config/{id_coma}/intervalos: '{payload}'")
         else:
           print(f"🚫 ID no coincide (esperado: {self.DongleID}, recibido: {id_coma})")
+
+
+
+    elif msg.topic.startswith("telemetry_config/") and msg.topic.endswith("/left"):
+      partes = msg.topic.split("/")
+      if len(partes) >= 3 and partes[1] == self.DongleID:
+        payload = msg.payload.decode(errors="ignore").strip().lower()
+        if payload == "false":
+          self.params.put_bool("ForceLaneChangeLeft", False)
+          self.params.put_bool("ForceLaneChangeRight", False)
+          print(f"🛑 Cancelado (left=false)")
+
+        elif self.params.get_bool("ForceLaneChangeRight"):
+          print("⚠️ No se puede activar IZQ, ya hay cambio a DERECHA")
+          # O cancela si quieres forzar exclusividad:
+          self.params.put_bool("ForceLaneChangeLeft", False)
+          self.params.put_bool("ForceLaneChangeRight", False)
+          print(f"🛑 Ambos cancelados por conflicto IZQ-DER")
+        else:
+          self.params.put_bool("ForceLaneChangeLeft", True)
+          print("✅ IZQUIERDA activado")
+
+
+
+    elif msg.topic.startswith("telemetry_config/") and msg.topic.endswith("/right"):
+
+      partes = msg.topic.split("/")
+
+      if len(partes) >= 3 and partes[1] == self.DongleID:
+
+        payload = msg.payload.decode(errors="ignore").strip().lower()
+
+        if payload == "false":
+
+          self.params.put_bool("ForceLaneChangeLeft", False)
+
+          self.params.put_bool("ForceLaneChangeRight", False)
+
+          print(f"🛑 Cambio de carril cancelado (right=false) para ID {self.DongleID}")
+
+
+        elif self.params.get_bool("ForceLaneChangeLeft"):
+
+          self.params.put_bool("ForceLaneChangeLeft", False)
+
+          self.params.put_bool("ForceLaneChangeRight", False)
+
+          print(f"⚠️ Ignorado right: había cambio a IZQUIERDA activo → ambos cancelados")
+
+        else:
+          self.params.put_bool("ForceLaneChangeRight", True)
+          print(f"✅ Cambio de carril forzado a la DERECHA para ID {self.DongleID}")
 
   def cambiar_enable_canal(self, canal, estado):
     """
@@ -452,9 +495,9 @@ class SicMqttHilo2:
 
     return datos_importantes
 
-
   def conexion(self, url='http://www.google.com', intervalo=5):
     """Verifica la conexión a Internet periódicamente en un hilo separado."""
+
     def check_connection():
       while not self.stop_event.is_set():
         try:
@@ -464,6 +507,7 @@ class SicMqttHilo2:
         except requests.ConnectionError:
           print(f"No hay conexión a Internet. Intentando nuevamente en {intervalo} segundos...")
         time.sleep(intervalo)
+
     Thread(target=check_connection, daemon=True).start()
 
   def obtener_gps_location(self):
@@ -478,9 +522,8 @@ class SicMqttHilo2:
     longitude = sm['gpsLocationExternal'].longitude
     altitude = sm['gpsLocationExternal'].altitude
 
-    #print("latitude", latitude)
-    #print("longitude", longitude)
-
+    # print("latitude", latitude)
+    # print("longitude", longitude)
 
     return {
       "latitude": latitude,
@@ -560,7 +603,7 @@ class SicMqttHilo2:
 
           print(f"Distancias enviadas: {contenido}")
           if self.params.get_bool("mapbox_toggle"):
-            self.mqttc.publish("telemetry_mqtt/"+self.DongleID+"/mapbox_status", str(contenido), qos=0)
+            self.mqttc.publish("telemetry_mqtt/" + self.DongleID + "/mapbox_status", str(contenido), qos=0)
 
       except Exception as e:
         print(f"Error al procesar el archivo Mapbox: {e}")
@@ -587,9 +630,7 @@ class SicMqttHilo2:
     R = 6371000  # Radio de la Tierra en metros
     return R * c
 
-  def publicarInfo(self, canal,datos_importantes):
-
-
+  def publicarInfo(self, canal, datos_importantes):
 
     if 'carState' in canal and self.params.get_bool("carState_toggle") \
       or 'controlsState' in canal and self.params.get_bool("controlsState_toggle") \
@@ -599,12 +640,8 @@ class SicMqttHilo2:
       or 'navInstruction' in canal and self.params.get_bool("navInstruction_toggle") \
       or 'radarState' in canal and self.params.get_bool("radarState_toggle") \
       or 'drivingModelData' in canal and self.params.get_bool("drivingModelData_toggle"):
-
       self.mqttc.publish(
         str(canal).format(self.DongleID),
         json.dumps(datos_importantes),
         qos=0
       )
-
-
-

@@ -277,6 +277,9 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
   const auto lateral_plan_sp = sm["lateralPlanSPDEPRECATED"].getLateralPlanSPDEPRECATED();
   car_params = sm["carParams"].getCarParams();
   intervalosToggle = Params().getBool("intervalos_toggle");
+  forceLaneChangeLeft = Params().getBool("ForceLaneChangeLeft");
+  forceLaneChangeRight = Params().getBool("ForceLaneChangeRight");
+
 
 
   is_metric = s.scene.is_metric;
@@ -539,29 +542,32 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
 
 void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
   p.save();
+// === Intervalos ===
+int x1 = rect().right() - 330, y1 = rect().bottom() - 200;
+QString label1 = "Intervalos: ", estado1 = intervalosToggle ? "ON" : "OFF";
+QColor color1 = intervalosToggle ? QColor(0, 255, 0) : QColor(255, 0, 0);
 
-
-QString textoBase = "Intervalos: ";
-QString estadoTexto = intervalosToggle ? "ON" : "OFF";
-QColor estadoColor = intervalosToggle ? QColor(0, 255, 0) : QColor(255, 0, 0);  // Verde o rojo
-
-int x_text = rect().right() - 330;
-int y_text = rect().bottom() - 200;
-
-// Fuente base para "Intervalos:"
 p.setFont(InterFont(36, QFont::Bold));
-p.setPen(QColor(255, 255, 255));
-p.drawText(x_text, y_text, textoBase);
-
-// Calcular ancho para colocar justo después
-int anchoBase = p.fontMetrics().horizontalAdvance(textoBase);
-
-// Fuente más grande para "ON"/"OFF"
+p.setPen(Qt::white);
+p.drawText(x1, y1, label1);
+int w1 = p.fontMetrics().horizontalAdvance(label1);
 p.setFont(InterFont(44, QFont::Black));
-p.setPen(estadoColor);
-p.drawText(x_text + anchoBase + 4, y_text, estadoTexto);  // el "+4" reduce el espacio extra
+p.setPen(color1);
+p.drawText(x1 + w1 + 4, y1, estado1);
 
+// === Cambio de carril ===
+int y2 = rect().bottom() - 150;
+QString label2 = "C. Carril: ";
+QString estado2 = forceLaneChangeLeft ? "IZQ" : forceLaneChangeRight ? "DER" : "OFF";
+QColor color2 = forceLaneChangeLeft ? QColor(0, 255, 0) : forceLaneChangeRight ? QColor(0, 128, 255) : QColor(255, 0, 0);
 
+p.setFont(InterFont(36, QFont::Bold));
+p.setPen(Qt::white);
+p.drawText(x1, y2, label2);
+int w2 = p.fontMetrics().horizontalAdvance(label2);
+p.setFont(InterFont(44, QFont::Black));
+p.setPen(color2);
+p.drawText(x1 + w2 + 4, y2, estado2);
 
 
   // Header gradient

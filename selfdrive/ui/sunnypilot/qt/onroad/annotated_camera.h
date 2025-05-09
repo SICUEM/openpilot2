@@ -223,6 +223,9 @@ private:
   bool cruiseStateEnabled;
   bool experimentalMode;
   bool intervalosToggle = false;// adri
+  bool forceLaneChangeLeft = false;//adri
+bool forceLaneChangeRight = false;//adri
+
 
   bool featureStatusToggle;
 
