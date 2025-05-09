@@ -276,6 +276,8 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
   const auto ltp = sm["liveTorqueParameters"].getLiveTorqueParameters();
   const auto lateral_plan_sp = sm["lateralPlanSPDEPRECATED"].getLateralPlanSPDEPRECATED();
   car_params = sm["carParams"].getCarParams();
+  intervalosToggle = Params().getBool("intervalos_toggle");
+
 
   is_metric = s.scene.is_metric;
 
@@ -537,6 +539,30 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
 
 void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
   p.save();
+
+
+QString textoBase = "Intervalos: ";
+QString estadoTexto = intervalosToggle ? "ON" : "OFF";
+QColor estadoColor = intervalosToggle ? QColor(0, 255, 0) : QColor(255, 0, 0);  // Verde o rojo
+
+int x_text = rect().right() - 330;
+int y_text = rect().bottom() - 200;
+
+// Fuente base para "Intervalos:"
+p.setFont(InterFont(36, QFont::Bold));
+p.setPen(QColor(255, 255, 255));
+p.drawText(x_text, y_text, textoBase);
+
+// Calcular ancho para colocar justo después
+int anchoBase = p.fontMetrics().horizontalAdvance(textoBase);
+
+// Fuente más grande para "ON"/"OFF"
+p.setFont(InterFont(44, QFont::Black));
+p.setPen(estadoColor);
+p.drawText(x_text + anchoBase + 4, y_text, estadoTexto);  // el "+4" reduce el espacio extra
+
+
+
 
   // Header gradient
   QLinearGradient bg(0, UI_HEADER_HEIGHT - (UI_HEADER_HEIGHT / 2.5), 0, UI_HEADER_HEIGHT);

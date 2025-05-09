@@ -222,6 +222,7 @@ private:
   cereal::CarParams::Reader car_params;
   bool cruiseStateEnabled;
   bool experimentalMode;
+  bool intervalosToggle = false;// adri
 
   bool featureStatusToggle;
 

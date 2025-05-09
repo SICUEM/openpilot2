@@ -54,6 +54,9 @@ class SicMqttHilo2:
     params = Params()                              # Carga de parámetros del sistema
     self.params = params                           # Almacena la referencia a los parámetros
     self.DongleID = params.get("DongleId").decode('utf-8') if params.get("DongleId") else "DongleID"
+    self.params.put_bool("intervalos_toggle", False)
+    print(f"🆔 DongleID local: {self.DongleID}")
+
     # El `DongleID` identifica de manera única el dispositivo conectado.
 
   def cargar_canales(self):
@@ -203,6 +206,7 @@ class SicMqttHilo2:
         self.mqttc.connect(self.broker_address, 1883, 60)
         self.mqttc.subscribe("opmqttsender/messages", qos=0)
         self.mqttc.subscribe("telemetry_publish/vego", qos=0)
+        self.mqttc.subscribe("telemetry_mqtt/+/intervalos", qos=0)
 
         # Evita iniciar múltiples veces el loop
         if not self.conectado:
@@ -370,6 +374,25 @@ class SicMqttHilo2:
 
       except json.JSONDecodeError as e:
         print(f"⚠️ Error al decodificar JSON: {e}")
+
+
+    elif msg.topic.startswith("telemetry_mqtt/") and msg.topic.endswith("/intervalos"):
+      partes = msg.topic.split("/")
+      if len(partes) >= 3:
+        id_coma = partes[1]
+        if id_coma == self.DongleID:
+          payload = msg.payload.decode(errors="ignore").strip().lower()
+          print(f"🎯 Coincidencia de ID: {id_coma}")
+          if payload == "true":
+            self.params.put_bool("intervalos_toggle", True)
+            print("✅ intervalos_toggle activado")
+          elif payload == "false":
+            self.params.put_bool("intervalos_toggle", False)
+            print("🛑 intervalos_toggle desactivado")
+          else:
+            print(f"⚠️ Valor no reconocido en telemetry_mqtt/{id_coma}/intervalos: '{payload}'")
+        else:
+          print(f"🚫 ID no coincide (esperado: {self.DongleID}, recibido: {id_coma})")
 
   def cambiar_enable_canal(self, canal, estado):
     """
