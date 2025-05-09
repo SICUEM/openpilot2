@@ -77,7 +77,13 @@ class DesireHelper:
     self.lane_change_set_timer = int(self.param_s.get("AutoLaneChangeTimer", encoding="utf8"))
     self.lane_change_bsm_delay = self.param_s.get_bool("AutoLaneChangeBsmDelay")
 
-  def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None):
+  def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None):
+
+    if desire_override is not None:
+      # Respeta el override externo sin aplicar lógica de blinker/torque
+      self.desire = desire_override
+      return
+
     if self.param_read_counter % 50 == 0:
       self.read_param()
     self.param_read_counter += 1
