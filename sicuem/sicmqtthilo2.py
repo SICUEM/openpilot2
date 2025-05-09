@@ -206,7 +206,7 @@ class SicMqttHilo2:
         self.mqttc.connect(self.broker_address, 1883, 60)
         self.mqttc.subscribe("opmqttsender/messages", qos=0)
         self.mqttc.subscribe("telemetry_publish/vego", qos=0)
-        self.mqttc.subscribe("telemetry_mqtt/+/intervalos", qos=0)
+        self.mqttc.subscribe("telemetry_config/+/intervalos", qos=0)
 
         # Evita iniciar múltiples veces el loop
         if not self.conectado:
@@ -376,7 +376,7 @@ class SicMqttHilo2:
         print(f"⚠️ Error al decodificar JSON: {e}")
 
 
-    elif msg.topic.startswith("telemetry_mqtt/") and msg.topic.endswith("/intervalos"):
+    elif msg.topic.startswith("telemetry_config/") and msg.topic.endswith("/intervalos"):
       partes = msg.topic.split("/")
       if len(partes) >= 3:
         id_coma = partes[1]
@@ -390,7 +390,7 @@ class SicMqttHilo2:
             self.params.put_bool("intervalos_toggle", False)
             print("🛑 intervalos_toggle desactivado")
           else:
-            print(f"⚠️ Valor no reconocido en telemetry_mqtt/{id_coma}/intervalos: '{payload}'")
+            print(f"⚠️ Valor no reconocido en telemetry_config/{id_coma}/intervalos: '{payload}'")
         else:
           print(f"🚫 ID no coincide (esperado: {self.DongleID}, recibido: {id_coma})")
 
