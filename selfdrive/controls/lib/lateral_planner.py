@@ -116,38 +116,8 @@ class LateralPlanner:
 
       # Lane change logic
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
-      #self.DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob, model_data=md)
+      self.DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob, model_data=md)
 
-      # 🔁 Lectura flags forzados
-      # Al principio del update
-      force_left = self.param_s.get_bool("ForceLaneChangeLeft")
-      force_right = self.param_s.get_bool("ForceLaneChangeRight")
-
-      desire_override = None
-      if force_left:
-        sm['carState'].leftBlinker = True
-        desire_override = log.Desire.laneChangeLeft
-        self.LP.l_lane_change_prob = 1.0
-
-      elif force_right:
-        sm['carState'].rightBlinker = True
-        desire_override = log.Desire.laneChangeRight
-        self.LP.r_lane_change_prob = 1.0
-
-
-
-      # 🔁 UPDATE FINAL - mantener override
-      self.DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob, model_data=md,
-                     desire_override=desire_override)
-
-
-      '''
-      if self.param_s.get_bool("ForceLaneChangeLeft"):
-        self.DH.desire = log.Desire.laneChangeLeft
-        self.DH.lane_change_state = log.LaneChangeState.preLaneChange
-        self.DH.lane_change_direction = log.LaneChangeDirection.left
-        self.LP.l_lane_change_prob = 1.0
-        '''
       # Turn off lanes during lane change
       if self.DH.desire == log.Desire.laneChangeRight or self.DH.desire == log.Desire.laneChangeLeft:
         self.LP.lll_prob *= self.DH.lane_change_ll_prob
@@ -206,14 +176,6 @@ class LateralPlanner:
 
     if not self.model_use_lateral_planner:
       self.road_edge = get_road_edge(sm['carState'], md, self.edge_toggle)
-
-
-
-    if self.DH.lane_change_state == LaneChangeState.off:
-      if force_left or force_right:
-        self.param_s.put_bool("ForceLaneChangeLeft", False)
-        self.param_s.put_bool("ForceLaneChangeRight", False)
-        cloudlog.info("🛑 Cambio de carril terminado → flags ForceLaneChange reseteados")
 
   def get_dynamic_lane_profile(self, longitudinal_plan_sp):
     if self.dynamic_lane_profile == 1:
