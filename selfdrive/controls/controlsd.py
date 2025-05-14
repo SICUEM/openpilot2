@@ -67,8 +67,8 @@ PERSONALITY_MAPPING = {0: 0, 1: 1, 2: 2, 3: 2}
 
 class Controls:
   def __init__(self, CI=None):
-    sicMqtt = SicMqttHilo2()
-    sicMqtt.start()
+    #sicMqtt = SicMqttHilo2()
+    #sicMqtt.start()
     self.params = Params()
 
     if CI is None:
@@ -311,7 +311,7 @@ class Controls:
     elif lane_change_svs.laneChangeState == LaneChangeState.preLaneChange:
       direction = lane_change_svs.laneChangeDirection  # ← valor por defecto del modelo
       try:
-        
+
         force_lc = self.params.get("ForceLaneChangeLeft")
         if force_lc is not None and force_lc == b"1":
           direction = LaneChangeDirection.left
