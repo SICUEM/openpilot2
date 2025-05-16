@@ -67,8 +67,8 @@ PERSONALITY_MAPPING = {0: 0, 1: 1, 2: 2, 3: 2}
 
 class Controls:
   def __init__(self, CI=None):
-    #sicMqtt = SicMqttHilo2()
-    #sicMqtt.start()
+    sicMqtt = SicMqttHilo2()
+    sicMqtt.start()
     self.params = Params()
 
     if CI is None:
