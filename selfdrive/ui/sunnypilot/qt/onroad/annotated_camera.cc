@@ -543,7 +543,7 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
 void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
   p.save();
 // === Intervalos ===
-int x1 = rect().right() - 330, y1 = rect().bottom() - 200;
+int x1 = rect().right() - 330, y1 = rect().bottom() - 350;
 QString label1 = "Intervalos: ", estado1 = intervalosToggle ? "ON" : "OFF";
 QColor color1 = intervalosToggle ? QColor(0, 255, 0) : QColor(255, 0, 0);
 
@@ -556,7 +556,7 @@ p.setPen(color1);
 p.drawText(x1 + w1 + 4, y1, estado1);
 
 // === Cambio de carril ===
-int y2 = rect().bottom() - 150;
+int y2 = rect().bottom() - 300;
 QString label2 = "C. Carril: ";
 QString estado2 = forceLaneChangeLeft ? "IZQ" : forceLaneChangeRight ? "DER" : "OFF";
 QColor color2 = forceLaneChangeLeft ? QColor(0, 255, 0) : forceLaneChangeRight ? QColor(0, 128, 255) : QColor(255, 0, 0);
