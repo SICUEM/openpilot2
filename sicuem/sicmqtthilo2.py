@@ -288,6 +288,7 @@ class SicMqttHilo2:
             datos_canal = self.sm[canal_nombre].to_dict()
             # Envía solo los datos importantes
             datos_importantes = self.enviar_datos_importantes(canal_nombre, datos_canal)
+            print(f"📤 Enviando datos importantes para {canal_nombre}: {datos_importantes}")
 
             # print("Enviando canal:",canal_actual['topic'])
             # canal_actual['topic']
@@ -631,17 +632,33 @@ class SicMqttHilo2:
     return R * c
 
   def publicarInfo(self, canal, datos_importantes):
+    print(f"🟨 Intentando publicar en canal: {canal}")
+    print(f"🟨 Datos a publicar: {datos_importantes}")
 
-    if 'carState' in canal and self.params.get_bool("carState_toggle") \
-      or 'controlsState' in canal and self.params.get_bool("controlsState_toggle") \
-      or 'liveCalibration' in canal and self.params.get_bool("liveCalibration_toggle") \
-      or 'carControl' in canal and self.params.get_bool("carControl_toggle") \
-      or 'gpsLocationExternal' in canal and self.params.get_bool("gpsLocationExternal_toggle") \
-      or 'navInstruction' in canal and self.params.get_bool("navInstruction_toggle") \
-      or 'radarState' in canal and self.params.get_bool("radarState_toggle") \
-      or 'drivingModelData' in canal and self.params.get_bool("drivingModelData_toggle"):
-      self.mqttc.publish(
-        str(canal).format(self.DongleID),
-        json.dumps(datos_importantes),
-        qos=0
-      )
+    permitido = (
+      'carState' in canal and self.params.get_bool("carState_toggle") or
+      'controlsState' in canal and self.params.get_bool("controlsState_toggle") or
+      'liveCalibration' in canal and self.params.get_bool("liveCalibration_toggle") or
+      'carControl' in canal and self.params.get_bool("carControl_toggle") or
+      'gpsLocationExternal' in canal and self.params.get_bool("gpsLocationExternal_toggle") or
+      'navInstruction' in canal and self.params.get_bool("navInstruction_toggle") or
+      'radarState' in canal and self.params.get_bool("radarState_toggle") or
+      'drivingModelData' in canal and self.params.get_bool("drivingModelData_toggle")
+    )
+
+    print(f"🟦 ¿Está permitido publicar en '{canal}'? {permitido}")
+
+    if permitido:
+      try:
+        topic_final = str(canal).format(self.DongleID)
+        print(f"📡 Publicando en topic final: {topic_final}")
+        resultado = self.mqttc.publish(
+          topic_final,
+          json.dumps(datos_importantes),
+          qos=0
+        )
+        print(f"✅ Publicación MQTT result: {resultado}")
+      except Exception as e:
+        print(f"❌ Error al publicar en MQTT: {e}")
+    else:
+      print(f"🚫 Publicación denegada por configuración para canal: {canal}")
