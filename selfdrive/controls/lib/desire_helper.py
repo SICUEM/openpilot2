@@ -90,18 +90,28 @@ class DesireHelper:
     lane_change_auto_timer = AUTO_LANE_CHANGE_TIMER.get(self.lane_change_set_timer, 2.0)
     v_ego = carstate.vEgo
     one_blinker = carstate.leftBlinker != carstate.rightBlinker
-    # 🚨 Comprobamos si se forzó un cambio de carril izquierdo manualmente
 
-    '''#cambio de carril forzado por el usuario
-    if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
-      print("🔧 Cambio de carril izquierdo forzado por parámetro.")
-      self.lane_change_state = LaneChangeState.preLaneChange
-      self.lane_change_direction = LaneChangeDirection.left
-      self.lane_change_ll_prob = 1.0
-      self.lane_change_wait_timer = 0
-      self.param_s.put_bool("ForceLaneChangeLeft", False)  # Reset
-      one_blinker = True  # Simulamos que hay blinker para permitir la transición
-    '''
+
+
+    # 🚨 Forzado manual (sin intermitente) si está activado c_carril
+    if self.param_s.get_bool("c_carril"):
+      if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
+        self.lane_change_direction = LaneChangeDirection.left
+        self.lane_change_state = LaneChangeState.preLaneChange
+        self.lane_change_ll_prob = 1.0
+        self.lane_change_wait_timer = 0
+        self.param_s.put_bool("ForceLaneChangeLeft", False)
+        return
+
+      if self.param_s.get_bool("ForceLaneChangeRight") and self.lane_change_state == LaneChangeState.off:
+        self.lane_change_direction = LaneChangeDirection.right
+        self.lane_change_state = LaneChangeState.preLaneChange
+        self.lane_change_ll_prob = 1.0
+        self.lane_change_wait_timer = 0
+        self.param_s.put_bool("ForceLaneChangeRight", False)
+        return
+
+
     # TODO: SP: !659: User-defined minimum lane change speed
     below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
 

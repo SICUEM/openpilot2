@@ -15,6 +15,12 @@ UemPanel::UemPanel(QWidget *parent, int edit) : QFrame(parent) {
       tr("TELEMETRIA UEM"),
       tr("EXPLICACION TELEMETRIA UEM"),
       "../assets/offroad/icon_blank.png",
+    },
+    {
+      "c_carril",
+      tr("FUNC CAMBIO CARRIL"),
+      tr("EXPL CC"),
+      "../assets/offroad/icon_blank.png",
     }
     /**
     {
@@ -48,7 +54,7 @@ UemPanel::UemPanel(QWidget *parent, int edit) : QFrame(parent) {
   mads_settings = new TelUemSettings(this);  // Instancia de TelUemSettings
   main_layout->addWidget(mads_settings);     // AÑADIR TelUemSettings AL QStackedLayout
 
-
+/*
 SubPanelButton *madsSettings2 = new SubPanelButton(tr("INFO SOFTWARE UEM"));
   madsSettings2->setObjectName("mads_btn2");
   QVBoxLayout* madsSettingsLayout2 = new QVBoxLayout;
@@ -72,13 +78,13 @@ SubPanelButton *madsSettings3 = new SubPanelButton(tr("Sender UEM"));
   mads_settings3 = new SenderUem(this);  // Instancia de TelUemSettings
   main_layout->addWidget(mads_settings3);     // AÑADIR TelUemSettings AL QStackedLayout
 
-
+*/
 
   connect(madsSettings, &QPushButton::clicked, [=]() {
     scrollView->setLastScrollPosition();
     main_layout->setCurrentWidget(mads_settings);  // Cambiar al panel de TelUemSettings
   });
-
+/*
   connect(madsSettings2, &QPushButton::clicked, [=]() {
     scrollView->setLastScrollPosition();
     main_layout->setCurrentWidget(mads_settings2);  // Cambiar al panel de TelUemSettings
@@ -88,14 +94,14 @@ SubPanelButton *madsSettings3 = new SubPanelButton(tr("Sender UEM"));
     scrollView->setLastScrollPosition();
     main_layout->setCurrentWidget(mads_settings3);  // Cambiar al panel de TelUemSettings
   });
-
+*/
   // Conectar el evento backPress para regresar a la pantalla principal
   connect(mads_settings, &TelUemSettings::backPress, [=]() {
     scrollView->restoreScrollPosition();
     main_layout->setCurrentWidget(sunnypilotScreen);  // Volver a la pantalla principal
   });
 
-
+/*
     connect(mads_settings2, &InfoUem::backPress, [=]() {
     scrollView->restoreScrollPosition();
     main_layout->setCurrentWidget(sunnypilotScreen);  // Volver a la pantalla principal
@@ -105,7 +111,7 @@ SubPanelButton *madsSettings3 = new SubPanelButton(tr("Sender UEM"));
         scrollView->restoreScrollPosition();
         main_layout->setCurrentWidget(sunnypilotScreen);  // Volver a la pantalla principal
       });
-
+*/
 
   // Añadir toggles y el botón de "Conf. TELEMETRIA UEM"
   for (auto &[param, title, desc, icon] : toggle_defs) {
@@ -119,9 +125,9 @@ SubPanelButton *madsSettings3 = new SubPanelButton(tr("Sender UEM"));
 
 
     }
-     list->addItem(madsSettingsLayout3);  // Añadir el botón debajo del toggle de TELEMETRIA UEM
+     //list->addItem(madsSettingsLayout3);  // Añadir el botón debajo del toggle de TELEMETRIA UEM
       list->addItem(horizontal_line());   // Separador
-      list->addItem(madsSettingsLayout2);  // Añadir el botón debajo del toggle de TELEMETRIA UEM
+     // list->addItem(madsSettingsLayout2);  // Añadir el botón debajo del toggle de TELEMETRIA UEM
 
 
   }
