@@ -158,6 +158,8 @@ std::unordered_map<std::string, uint32_t> keys = {
 
     {"ActivateEvent",PERSISTENT},//Adrian Cañadas Gallardo
     {"telemetria_uem",PERSISTENT},//Adrian Cañadas Gallardo
+    {"c_carril",PERSISTENT},//Adrian Cañadas Gallardo
+
     {"carState_toggle",PERSISTENT},//Adrian Cañadas Gallardo
     {"intervalos_toggle",PERSISTENT},//Adrian Cañadas Gallardo
     {"lider_toggle",PERSISTENT},//Adrian Cañadas Gallardo

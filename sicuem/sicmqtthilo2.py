@@ -169,9 +169,39 @@ class SicMqttHilo2:
     hilo_telemetry = Thread(target=self.loop, daemon=True)
     hilo_telemetry.start()
 
+    self.watchdog_mqtt()
+
     self.enviar_estado_lider_toggle()
 
     return 0
+
+  def watchdog_mqtt(self, intervalo=10):
+    """
+    Verifica si MQTT sigue conectado. Si no, intenta reconectar.
+    Se ejecuta periódicamente cada 'intervalo' segundos.
+    """
+
+    def loop_watchdog():
+      while not self.stop_event.is_set():
+        if not self.conectado or not self.mqttc.is_connected():
+          print("🔁 Watchdog: conexión MQTT inactiva, reintentando...")
+          try:
+            self.mqttc.reconnect()
+            try:
+              self.mqttc.reconnect()
+              self.mqttc.subscribe("opmqttsender/messages", qos=0)
+              self.mqttc.subscribe("telemetry_publish/vego", qos=0)
+              self.mqttc.subscribe("telemetry_config/+/intervalos", qos=0)
+              self.mqttc.subscribe("telemetry_config/+/left", qos=0)
+              self.mqttc.subscribe("telemetry_config/+/right", qos=0)
+            except Exception as e:
+              print("🔁 Watchdog: error al reconectar suscripciones:", e)
+
+          except Exception as e:
+            print(f"❌ Watchdog fallo al reconectar: {e}")
+        time.sleep(intervalo)
+
+    Thread(target=loop_watchdog, daemon=True).start()
 
   # ------------------------------------------------------------------------------------------------ FUNCION START END
 
@@ -386,12 +416,16 @@ class SicMqttHilo2:
         else:
           print(f"🚫 ID no coincide (esperado: {self.DongleID}, recibido: {id_coma})")
 
-
-
     elif msg.topic.startswith("telemetry_config/") and msg.topic.endswith("/left"):
       partes = msg.topic.split("/")
       if len(partes) >= 3 and partes[1] == self.DongleID:
         payload = msg.payload.decode(errors="ignore").strip().lower()
+
+        # Verificar toggle de seguridad c_carril
+        if not self.params.get_bool("c_carril"):
+          print("🛑 Cambio de carril a IZQUIERDA bloqueado por toggle c_carril.")
+          return
+
         if payload == "false":
           self.params.put_bool("ForceLaneChangeLeft", False)
           self.params.put_bool("ForceLaneChangeRight", False)
@@ -399,7 +433,6 @@ class SicMqttHilo2:
 
         elif self.params.get_bool("ForceLaneChangeRight"):
           print("⚠️ No se puede activar IZQ, ya hay cambio a DERECHA")
-          # O cancela si quieres forzar exclusividad:
           self.params.put_bool("ForceLaneChangeLeft", False)
           self.params.put_bool("ForceLaneChangeRight", False)
           print(f"🛑 Ambos cancelados por conflicto IZQ-DER")
@@ -408,30 +441,24 @@ class SicMqttHilo2:
           print("✅ IZQUIERDA activado")
 
 
-
     elif msg.topic.startswith("telemetry_config/") and msg.topic.endswith("/right"):
-
       partes = msg.topic.split("/")
-
       if len(partes) >= 3 and partes[1] == self.DongleID:
-
         payload = msg.payload.decode(errors="ignore").strip().lower()
 
+        # Verificar toggle de seguridad c_carril
+        if not self.params.get_bool("c_carril"):
+          print("🛑 Cambio de carril a DERECHA bloqueado por toggle c_carril.")
+          return
+
         if payload == "false":
-
           self.params.put_bool("ForceLaneChangeLeft", False)
-
           self.params.put_bool("ForceLaneChangeRight", False)
-
           print(f"🛑 Cambio de carril cancelado (right=false) para ID {self.DongleID}")
 
-
         elif self.params.get_bool("ForceLaneChangeLeft"):
-
           self.params.put_bool("ForceLaneChangeLeft", False)
-
           self.params.put_bool("ForceLaneChangeRight", False)
-
           print(f"⚠️ Ignorado right: había cambio a IZQUIERDA activo → ambos cancelados")
 
         else:
@@ -662,3 +689,6 @@ class SicMqttHilo2:
         print(f"❌ Error al publicar en MQTT: {e}")
     else:
       print(f"🚫 Publicación denegada por configuración para canal: {canal}")
+
+
+

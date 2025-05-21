@@ -540,6 +540,7 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
   drivingModelGen = s.scene.driving_model_generation;
 }
 
+
 void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
   p.save();
 // === Intervalos ===
