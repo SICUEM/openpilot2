@@ -93,7 +93,27 @@ class DesireHelper:
 
 
 
-    # 🚨 Forzado manual (sin intermitente) si está activado c_carril
+
+
+    # 🚨 Forzado directo del cambio de carril (sin intermitente ni torque) si está activado c_carril
+    if self.param_s.get_bool("c_carril"):
+      if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
+        self.lane_change_direction = LaneChangeDirection.left
+        self.lane_change_state = LaneChangeState.laneChangeStarting  # 🔥 salto directo al cambio real
+        self.lane_change_ll_prob = 1.0
+        self.lane_change_wait_timer = 0
+        self.param_s.put_bool("ForceLaneChangeLeft", False)
+        return
+
+      if self.param_s.get_bool("ForceLaneChangeRight") and self.lane_change_state == LaneChangeState.off:
+        self.lane_change_direction = LaneChangeDirection.right
+        self.lane_change_state = LaneChangeState.laneChangeStarting  # 🔥 salto directo al cambio real
+        self.lane_change_ll_prob = 1.0
+        self.lane_change_wait_timer = 0
+        self.param_s.put_bool("ForceLaneChangeRight", False)
+        return
+
+    '''# 🚨 Forzado manual (sin intermitente) si está activado c_carril ----(preLaneChange)
     if self.param_s.get_bool("c_carril"):
       if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
         self.lane_change_direction = LaneChangeDirection.left
@@ -109,7 +129,7 @@ class DesireHelper:
         self.lane_change_ll_prob = 1.0
         self.lane_change_wait_timer = 0
         self.param_s.put_bool("ForceLaneChangeRight", False)
-        return
+        return'''
 
 
     # TODO: SP: !659: User-defined minimum lane change speed
