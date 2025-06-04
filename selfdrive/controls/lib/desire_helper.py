@@ -79,7 +79,6 @@ class DesireHelper:
 
   def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None):
 
-    override_blinker = self.param_s.get_bool("c_carril")
     if desire_override is not None:
       # Respeta el override externo sin aplicar lógica de blinker/torque
       self.desire = desire_override
@@ -92,13 +91,15 @@ class DesireHelper:
     v_ego = carstate.vEgo
     one_blinker = carstate.leftBlinker != carstate.rightBlinker
 
+
+
+
+
     # 🚨 Forzado directo del cambio de carril (sin intermitente ni torque) si está activado c_carril
     if self.param_s.get_bool("c_carril"):
       if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
         self.lane_change_direction = LaneChangeDirection.left
-        #blindspot = carstate.leftBlindspot
-        #if not blindspot:
-        self.lane_change_state = LaneChangeState.laneChangeStarting
+        self.lane_change_state = LaneChangeState.laneChangeStarting  # 🔥 salto directo al cambio real
         self.lane_change_ll_prob = 1.0
         self.lane_change_wait_timer = 0
         self.param_s.put_bool("ForceLaneChangeLeft", False)
@@ -106,9 +107,7 @@ class DesireHelper:
 
       if self.param_s.get_bool("ForceLaneChangeRight") and self.lane_change_state == LaneChangeState.off:
         self.lane_change_direction = LaneChangeDirection.right
-        #blindspot = carstate.rightBlindspot
-        #if not blindspot:
-        self.lane_change_state = LaneChangeState.laneChangeStarting
+        self.lane_change_state = LaneChangeState.laneChangeStarting  # 🔥 salto directo al cambio real
         self.lane_change_ll_prob = 1.0
         self.lane_change_wait_timer = 0
         self.param_s.put_bool("ForceLaneChangeRight", False)
