@@ -556,6 +556,36 @@ p.setFont(InterFont(44, QFont::Black));
 p.setPen(color1);
 p.drawText(x1 + w1 + 4, y1, estado1);
 
+
+// === Ángulo Muerto ===
+int y3 = rect().bottom() - 380;
+QString label3 = "Á. Muerto: ";
+QString estado3;
+QColor color3;
+
+if (left_blindspot && right_blindspot) {
+  estado3 = "AMBOS";
+  color3 = QColor(255, 255, 0);  // Amarillo
+} else if (left_blindspot) {
+  estado3 = "IZQ";
+  color3 = QColor(255, 128, 0);  // Naranja izquierda
+} else if (right_blindspot) {
+  estado3 = "DER";
+  color3 = QColor(0, 128, 255);  // Azul derecha
+} else {
+  estado3 = "OFF";
+  color3 = QColor(150, 150, 150);  // Gris
+}
+
+p.setFont(InterFont(36, QFont::Bold));
+p.setPen(Qt::white);
+p.drawText(x1, y3, label3);
+int w3 = p.fontMetrics().horizontalAdvance(label3);
+p.setFont(InterFont(44, QFont::Black));
+p.setPen(color3);
+p.drawText(x1 + w3 + 4, y3, estado3);
+
+
 // === Cambio de carril ===
 int y2 = rect().bottom() - 440;
 QString label2 = "C. Carril: ";
