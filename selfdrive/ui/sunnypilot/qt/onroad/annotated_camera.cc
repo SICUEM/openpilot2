@@ -540,6 +540,37 @@ void AnnotatedCameraWidgetSP::updateState(const UIStateSP &s) {
   drivingModelGen = s.scene.driving_model_generation;
 }
 
+void AnnotatedCameraWidgetSP::drawBlindspotIcons(QPainter &p, int x, int y) {
+  const int size = 26;
+
+  QPen pen(Qt::white);
+  pen.setWidth(2);
+
+  if (left_blindspot) {
+    QPolygon leftTriangle;
+    leftTriangle << QPoint(x, y + size)
+                 << QPoint(x + size / 2, y)
+                 << QPoint(x + size, y + size);
+
+    p.setBrush(QColor(255, 128, 0));  // naranja
+    p.setPen(pen);
+    p.drawPolygon(leftTriangle);
+  }
+
+  if (right_blindspot) {
+    QPolygon rightTriangle;
+    rightTriangle << QPoint(x + 40, y)
+                  << QPoint(x + 40 + size, y)
+                  << QPoint(x + 40 + size / 2, y + size);
+
+    p.setBrush(QColor(0, 128, 255));  // azul
+    p.setPen(pen);
+    p.drawPolygon(rightTriangle);
+  }
+}
+
+
+
 
 void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
   p.save();
@@ -583,7 +614,25 @@ p.drawText(x1, y3, label3);
 int w3 = p.fontMetrics().horizontalAdvance(label3);
 p.setFont(InterFont(44, QFont::Black));
 p.setPen(color3);
-p.drawText(x1 + w3 + 4, y3, estado3);
+drawBlindspotIcons(p, x1 + w3 + 180, y3 - 40);
+// === Icono visual de Ángulo Muerto ===
+int iconSize = 28;
+int iconY = y3 - 40;
+
+if (left_blindspot) {
+  QRect leftIconRect(x1 + w3 + 180, iconY, iconSize, iconSize);
+  p.setBrush(QColor(255, 128, 0));  // Naranja izquierda
+  p.setPen(Qt::NoPen);
+  p.drawEllipse(leftIconRect);
+}
+
+if (right_blindspot) {
+  QRect rightIconRect(x1 + w3 + 220, iconY, iconSize, iconSize);
+  p.setBrush(QColor(0, 128, 255));  // Azul derecha
+  p.setPen(Qt::NoPen);
+  p.drawEllipse(rightIconRect);
+}
+
 
 
 // === Cambio de carril ===

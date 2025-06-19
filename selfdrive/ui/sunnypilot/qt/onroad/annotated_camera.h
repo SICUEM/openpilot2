@@ -97,6 +97,8 @@ private:
   void speedLimitWarning(QPainter &p, QRect sign_rect, const int sign_margin);
   void mousePressEvent(QMouseEvent* e) override;
   void drawRoadNameText(QPainter &p, int x, int y, const QString &text, QColor color);
+  void drawBlindspotIcons(QPainter &p, int x, int y);
+
 
   QVBoxLayout *main_layout;
   ExperimentalButtonSP *experimental_btn;
