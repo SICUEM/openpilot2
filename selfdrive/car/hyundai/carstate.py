@@ -195,9 +195,7 @@ class CarState(CarStateBase):
         self.escc_cmd_act = cp.vl[aeb_src][aeb_sig]
         self.escc_aeb_dec_cmd = cp.vl[aeb_src][aeb_braking_cmd]
 
-    if self.CP.enableBsm:
-      ret.leftBlindspot = cp.vl["LCA11"]["CF_Lca_IndLeft"] != 0
-      ret.rightBlindspot = cp.vl["LCA11"]["CF_Lca_IndRight"] != 0
+
 
     # save the entire LKAS11 and CLU11
     self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
@@ -270,15 +268,8 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = ret.leftBlinkerOn, ret.rightBlinkerOn = self.update_blinker_from_lamp(
       50, cp.vl["BLINKERS"][left_blinker_sig], cp.vl["BLINKERS"][right_blinker_sig])
     if self.CP.enableBsm:
-      if "BSD11" in cp.vl:
-        ret.leftBlindspot = cp.vl["BSD11"].get("BSD_Left", 0) != 0
-        ret.rightBlindspot = cp.vl["BSD11"].get("BSD_Right", 0) != 0
-      elif "BLINDSPOTS_REAR_CORNERS" in cp.vl:
-        ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"].get("FL_INDICATOR", 0) != 0
-        ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"].get("FR_INDICATOR", 0) != 0
-      else:
-        ret.leftBlindspot = False
-        ret.rightBlindspot = False
+      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"].get("FL_INDICATOR", 0) != 0
+      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"].get("FR_INDICATOR", 0) != 0
 
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
@@ -459,7 +450,6 @@ class CarState(CarStateBase):
     if CP.enableBsm:
       messages += [
         ("BLINDSPOTS_REAR_CORNERS", 20),
-        ("BSD11", 20),
       ]
 
     if not (CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value) and not CP.openpilotLongitudinalControl:
