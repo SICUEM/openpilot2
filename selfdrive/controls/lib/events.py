@@ -569,6 +569,23 @@ EVENTS: dict[int, dict[str, Alert | AlertCallbackType]] = {
       Priority.LOW, VisualAlert.none, AudibleAlert.prompt, .1),
   },
 
+EventName.laneChangeBlockedLeft: {
+  ET.WARNING: Alert(
+    "Cambio a IZQ bloqueado",
+    "Ángulo muerto detectado",
+    AlertStatus.userPrompt, AlertSize.small,
+    Priority.MID, VisualAlert.none, AudibleAlert.warningSoft, 2.5),
+},
+
+EventName.laneChangeBlockedRight: {
+  ET.WARNING: Alert(
+    "Cambio a DER bloqueado",
+    "Ángulo muerto detectado",
+    AlertStatus.userPrompt, AlertSize.small,
+    Priority.MID, VisualAlert.none, AudibleAlert.warningSoft, 2.5),
+},
+
+
   EventName.laneChangeRoadEdge: {
     ET.WARNING: Alert(
       "Lane Change Unavailable: Road Edge",

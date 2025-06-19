@@ -105,6 +105,7 @@ private:
   QPixmap dm_img;
   float speed;
   QString speedUnit;
+  bool lane_change_blocked_bsm = false;
   float setSpeed;
   float speedLimit;
   bool is_cruise_set = false;

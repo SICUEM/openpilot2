@@ -304,6 +304,7 @@ class Controls:
         self.events.add(EventName.calibrationInvalid)
 
     # Handle lane change
+
     lane_change_edge_block = self.sm[
       'lateralPlanSPDEPRECATED'].laneChangeEdgeBlockDEPRECATED if self.model_use_lateral_planner else self.sm[
       'modelV2SP'].laneChangeEdgeBlock
@@ -320,6 +321,14 @@ class Controls:
           CS.leftBlinker = True
           self.last_blinker_frame = self.sm.frame
           self.params.delete("ForceLaneChangeLeft")
+
+        # Si hay blindspot y queremos forzar cambio
+        if self.params.get_bool("c_carril"):
+          if direction == LaneChangeDirection.left and CS.leftBlindspot:
+            self.events.add(EventName.laneChangeBlockedLeft)
+          elif direction == LaneChangeDirection.right and CS.rightBlindspot:
+            self.events.add(EventName.laneChangeBlockedRight)
+
 
       except Exception as e:
         cloudlog.error(f"Error leyendo ForceLaneChangeLeft: {e}")
