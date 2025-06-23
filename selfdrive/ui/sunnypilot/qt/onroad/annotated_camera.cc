@@ -587,35 +587,61 @@ p.setFont(InterFont(44, QFont::Black));
 p.setPen(color1);
 p.drawText(x1 + w1 + 4, y1, estado1);
 
-
-// === Ángulo Muerto ===
-int y3 = rect().bottom() - 380;
-QString label3 = "Á. Muerto: ";
-QString estado3;
-QColor color3;
-
-if (left_blindspot && right_blindspot) {
-  estado3 = "AMBOS";
-  color3 = QColor(255, 255, 0);  // Amarillo
-} else if (left_blindspot) {
-  estado3 = "IZQ";
-  color3 = QColor(255, 128, 0);  // Naranja izquierda
-} else if (right_blindspot) {
-  estado3 = "DER";
-  color3 = QColor(0, 128, 255);  // Azul derecha
-} else {
-  estado3 = "OFF";
-  color3 = QColor(150, 150, 150);  // Gris
-}
+// === Cambio de carril ===
+int y2 = rect().bottom() - 440;
+QString label2 = "C. Carril: ";
+QString estado2 = forceLaneChangeLeft ? "IZQ" : forceLaneChangeRight ? "DER" : "OFF";
+QColor color2 = forceLaneChangeLeft ? QColor(0, 255, 0) : forceLaneChangeRight ? QColor(0, 128, 255) : QColor(255, 0, 0);
 
 p.setFont(InterFont(36, QFont::Bold));
 p.setPen(Qt::white);
+p.drawText(x1, y2, label2);
+int w2 = p.fontMetrics().horizontalAdvance(label2);
+p.setFont(InterFont(44, QFont::Black));
+p.setPen(color2);
+p.drawText(x1 + w2 + 4, y2, estado2);
+
+// === Ángulo Muerto ===
+QString label3 = "Á. Muerto: ";
+QString estado3;
+QColor color3;
+int y3 = y2 + 55;  // ✅ ya puedes usar y2 sin error
+
+
+/*
+Estados posibles:
+- OBSTRUIDO → ambos lados ocupados (rojo)
+- IZQ OCUPADO → izquierdo ocupado (naranja)
+- DER OCUPADO → derecho ocupado (naranja)
+- LIBRE → sin coches (verde)
+*/
+
+if (left_blindspot && right_blindspot) {
+  estado3 = "OBSTRUIDO";
+  color3 = QColor(255, 0, 0);  // Rojo fuerte
+} else if (left_blindspot) {
+  estado3 = "IZQ OCUPADO";
+  color3 = QColor(255, 64, 0);  // Naranja izquierda
+} else if (right_blindspot) {
+  estado3 = "DER OCUPADO";
+  color3 = QColor(255, 64, 0);  // Naranja derecha
+} else {
+  estado3 = "LIBRE";
+  color3 = QColor(0, 255, 0);  // Verde
+}
+
+// 🖌 Texto "Á. Muerto:"
+p.setFont(InterFont(36, QFont::Bold));
+p.setPen(Qt::white);
 p.drawText(x1, y3, label3);
+
+// 🖌 Texto dinámico del estado
 int w3 = p.fontMetrics().horizontalAdvance(label3);
 p.setFont(InterFont(44, QFont::Black));
 p.setPen(color3);
-drawBlindspotIcons(p, x1 + w3 + 180, y3 - 40);
-// === Icono visual de Ángulo Muerto ===
+p.drawText(x1 + w3, y3, estado3);
+
+// 🎯 Iconos circulares de estado
 int iconSize = 28;
 int iconY = y3 - 40;
 
@@ -634,20 +660,6 @@ if (right_blindspot) {
 }
 
 
-
-// === Cambio de carril ===
-int y2 = rect().bottom() - 440;
-QString label2 = "C. Carril: ";
-QString estado2 = forceLaneChangeLeft ? "IZQ" : forceLaneChangeRight ? "DER" : "OFF";
-QColor color2 = forceLaneChangeLeft ? QColor(0, 255, 0) : forceLaneChangeRight ? QColor(0, 128, 255) : QColor(255, 0, 0);
-
-p.setFont(InterFont(36, QFont::Bold));
-p.setPen(Qt::white);
-p.drawText(x1, y2, label2);
-int w2 = p.fontMetrics().horizontalAdvance(label2);
-p.setFont(InterFont(44, QFont::Black));
-p.setPen(color2);
-p.drawText(x1 + w2 + 4, y2, estado2);
 
 
   // Header gradient
