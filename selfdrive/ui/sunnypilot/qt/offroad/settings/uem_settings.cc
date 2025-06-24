@@ -21,6 +21,12 @@ UemPanel::UemPanel(QWidget *parent, int edit) : QFrame(parent) {
       tr("FUNC CAMBIO CARRIL"),
       tr("EXPL CC"),
       "../assets/offroad/icon_blank.png",
+    },
+    {
+      "sic_adelantar",
+      tr("ACTIVAR ADELANTAR"),
+      tr("EXPL AA"),
+      "../assets/offroad/icon_blank.png",
     }
     /**
     {

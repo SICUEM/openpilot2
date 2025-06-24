@@ -23,7 +23,9 @@
                 "vCruise",
                 "vCruiseCluster",
                 "vEgo",
-                "vEgoCluster"
+                "vEgoCluster",
+                "leftBlindspot",
+                "rightBlindspot"
             ]
         },
         {
