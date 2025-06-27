@@ -119,7 +119,7 @@ class CarInterface(CarInterfaceBase):
       #ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
       # cambiamos y decimos que tenemos siempre BSM
       # ret.enableBsm = True
-      ret.enableBsm = 0x3F6 in fingerprint[0]
+      ret.enableBsm = 0x3F6 in fingerprint[CAN.ECAN]
 
 
       if 0x1fa in fingerprint[CAN.ECAN]:
