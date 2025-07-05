@@ -573,93 +573,122 @@ void AnnotatedCameraWidgetSP::drawBlindspotIcons(QPainter &p, int x, int y) {
 
 
 void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
-  p.save();
-// === Intervalos ===
-int x1 = rect().right() - 330, y1 = rect().bottom() - 500;
-QString label1 = "Intervalos: ", estado1 = intervalosToggle ? "ON" : "OFF";
-QColor color1 = intervalosToggle ? QColor(0, 255, 0) : QColor(255, 0, 0);
 
-p.setFont(InterFont(36, QFont::Bold));
-p.setPen(Qt::white);
-p.drawText(x1, y1, label1);
-int w1 = p.fontMetrics().horizontalAdvance(label1);
-p.setFont(InterFont(44, QFont::Black));
-p.setPen(color1);
-p.drawText(x1 + w1 + 4, y1, estado1);
+
+p.save();
+
+bool mostrar_intervalos = params.getBool("intervalos_toggle");
+bool mostrar_carril = params.getBool("c_carril");
+bool mostrar_blindspot = params.getBool("show_blindspot");
+bool mostrar_adelantar = params.getBool("sic_adelantar");
+
+int x1 = rect().right() - 330;
+int y_base = rect().bottom() - 500;
+int y_offset = 0;
+
+// === Intervalos ===
+if (mostrar_intervalos) {
+  int y1 = y_base + y_offset;
+  QString label1 = "Intervalos: ";
+  QString estado1 = intervalosToggle ? "ON" : "OFF";
+  QColor color1 = intervalosToggle ? QColor(0, 255, 0) : QColor(255, 0, 0);
+
+  p.setFont(InterFont(36, QFont::Bold));
+  p.setPen(Qt::white);
+  p.drawText(x1, y1, label1);
+  int w1 = p.fontMetrics().horizontalAdvance(label1);
+  p.setFont(InterFont(44, QFont::Black));
+  p.setPen(color1);
+  p.drawText(x1 + w1 + 4, y1, estado1);
+
+  y_offset += 55;
+}
 
 // === Cambio de carril ===
-int y2 = rect().bottom() - 440;
-QString label2 = "C. Carril: ";
-QString estado2 = forceLaneChangeLeft ? "IZQ" : forceLaneChangeRight ? "DER" : "OFF";
-QColor color2 = forceLaneChangeLeft ? QColor(0, 255, 0) : forceLaneChangeRight ? QColor(0, 128, 255) : QColor(255, 0, 0);
+if (mostrar_carril) {
+  int y2 = y_base + y_offset;
+  QString label2 = "C. Carril: ";
+  QString estado2 = forceLaneChangeLeft ? "IZQ" : forceLaneChangeRight ? "DER" : "OFF";
+  QColor color2 = forceLaneChangeLeft ? QColor(0, 255, 0) :
+                    forceLaneChangeRight ? QColor(0, 128, 255) : QColor(255, 0, 0);
 
-p.setFont(InterFont(36, QFont::Bold));
-p.setPen(Qt::white);
-p.drawText(x1, y2, label2);
-int w2 = p.fontMetrics().horizontalAdvance(label2);
-p.setFont(InterFont(44, QFont::Black));
-p.setPen(color2);
-p.drawText(x1 + w2 + 4, y2, estado2);
+  p.setFont(InterFont(36, QFont::Bold));
+  p.setPen(Qt::white);
+  p.drawText(x1, y2, label2);
+  int w2 = p.fontMetrics().horizontalAdvance(label2);
+  p.setFont(InterFont(44, QFont::Black));
+  p.setPen(color2);
+  p.drawText(x1 + w2 + 4, y2, estado2);
+
+  y_offset += 55;
+}
 
 // === Ángulo Muerto ===
-QString label3 = "Á. Muerto: ";
-QString estado3;
-QColor color3;
-int y3 = y2 + 55;  // ✅ ya puedes usar y2 sin error
+if (mostrar_blindspot) {
+  int y3 = y_base + y_offset;
+  QString label3 = "Á. Muerto: ";
+  QString estado3;
+  QColor color3;
 
+  // Estado dinámico
+  if (left_blindspot && right_blindspot) {
+    estado3 = "OBSTRUIDO";
+    color3 = QColor(255, 0, 0);  // Rojo
+  } else if (left_blindspot) {
+    estado3 = "IZQ OCUPADO";
+    color3 = QColor(255, 128, 0);  // Naranja izquierda
+  } else if (right_blindspot) {
+    estado3 = "DER OCUPADO";
+    color3 = QColor(255, 128, 0);  // Naranja derecha
+  } else {
+    estado3 = "LIBRE";
+    color3 = QColor(0, 255, 0);  // Verde
+  }
 
-/*
-Estados posibles:
-- OBSTRUIDO → ambos lados ocupados (rojo)
-- IZQ OCUPADO → izquierdo ocupado (naranja)
-- DER OCUPADO → derecho ocupado (naranja)
-- LIBRE → sin coches (verde)
-*/
+  p.setFont(InterFont(36, QFont::Bold));
+  p.setPen(Qt::white);
+  p.drawText(x1, y3, label3);
+  int w3 = p.fontMetrics().horizontalAdvance(label3);
+  p.setFont(InterFont(44, QFont::Black));
+  p.setPen(color3);
+  p.drawText(x1 + w3 + 4, y3, estado3);
 
-if (left_blindspot && right_blindspot) {
-  estado3 = "OBSTRUIDO";
-  color3 = QColor(255, 0, 0);  // Rojo fuerte
-} else if (left_blindspot) {
-  estado3 = "IZQ OCUPADO";
-  color3 = QColor(255, 64, 0);  // Naranja izquierda
-} else if (right_blindspot) {
-  estado3 = "DER OCUPADO";
-  color3 = QColor(255, 64, 0);  // Naranja derecha
-} else {
-  estado3 = "LIBRE";
-  color3 = QColor(0, 255, 0);  // Verde
+  // Iconos circulares
+  int iconSize = 28;
+  int iconY = y3 - 40;
+  if (left_blindspot) {
+    QRect leftIconRect(x1 + w3 + 180, iconY, iconSize, iconSize);
+    p.setBrush(QColor(255, 128, 0));  // Naranja izquierda
+    p.setPen(Qt::NoPen);
+    p.drawEllipse(leftIconRect);
+  }
+  if (right_blindspot) {
+    QRect rightIconRect(x1 + w3 + 220, iconY, iconSize, iconSize);
+    p.setBrush(QColor(0, 128, 255));  // Azul derecha
+    p.setPen(Qt::NoPen);
+    p.drawEllipse(rightIconRect);
+  }
+
+  y_offset += 55;
 }
 
-// 🖌 Texto "Á. Muerto:"
-p.setFont(InterFont(36, QFont::Bold));
-p.setPen(Qt::white);
-p.drawText(x1, y3, label3);
+// === Adelantar ===
+if (mostrar_adelantar) {
+  int y4 = y_base + y_offset;
+  QString label4 = "Adelantar: ";
+  QString estado4 = "ESPERANDO";  // ⚠️ Simulado por ahora
+  QColor color4 = QColor(255, 255, 0); // Amarillo placeholder
 
-// 🖌 Texto dinámico del estado
-int w3 = p.fontMetrics().horizontalAdvance(label3);
-p.setFont(InterFont(44, QFont::Black));
-p.setPen(color3);
-p.drawText(x1 + w3, y3, estado3);
-
-// 🎯 Iconos circulares de estado
-int iconSize = 28;
-int iconY = y3 - 40;
-
-if (left_blindspot) {
-  QRect leftIconRect(x1 + w3 + 180, iconY, iconSize, iconSize);
-  p.setBrush(QColor(255, 128, 0));  // Naranja izquierda
-  p.setPen(Qt::NoPen);
-  p.drawEllipse(leftIconRect);
+  p.setFont(InterFont(36, QFont::Bold));
+  p.setPen(Qt::white);
+  p.drawText(x1, y4, label4);
+  int w4 = p.fontMetrics().horizontalAdvance(label4);
+  p.setFont(InterFont(44, QFont::Black));
+  p.setPen(color4);
+  p.drawText(x1 + w4 + 4, y4, estado4);
 }
 
-if (right_blindspot) {
-  QRect rightIconRect(x1 + w3 + 220, iconY, iconSize, iconSize);
-  p.setBrush(QColor(0, 128, 255));  // Azul derecha
-  p.setPen(Qt::NoPen);
-  p.drawEllipse(rightIconRect);
-}
-
-
+p.restore();
 
 
   // Header gradient
@@ -1810,6 +1839,8 @@ void AnnotatedCameraWidgetSP::paintGL() {
   }
 
   drawHud(painter);
+  // ✅ Mostrar etiquetas condicionales si los toggles están activados
+
 
   if (left_blinker || right_blinker) {
     blinker_frame++;

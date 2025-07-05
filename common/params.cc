@@ -164,6 +164,8 @@ std::unordered_map<std::string, uint32_t> keys = {
 
     {"carState_toggle",PERSISTENT},//Adrian Cañadas Gallardo
     {"intervalos_toggle",PERSISTENT},//Adrian Cañadas Gallardo
+    {"show_blindspot", PERSISTENT}, // Mostrar info de ángulo muerto
+
     {"lider_toggle",PERSISTENT},//Adrian Cañadas Gallardo
     {"gpsLocationExternal_toggle",PERSISTENT},//Adrian Cañadas Gallardo
     {"carControl_toggle",PERSISTENT},//Adrian Cañadas Gallardo

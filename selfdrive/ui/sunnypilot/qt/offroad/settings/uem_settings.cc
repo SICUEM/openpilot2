@@ -23,6 +23,12 @@ UemPanel::UemPanel(QWidget *parent, int edit) : QFrame(parent) {
       "../assets/offroad/icon_blank.png",
     },
     {
+  "show_blindspot",
+  tr("MOSTRAR ÁNGULO MUERTO"),
+  tr("Muestra estado de ángulo muerto en AnnotatedCamera."),
+  "../assets/offroad/icon_blank.png",
+    },
+    {
       "sic_adelantar",
       tr("ACTIVAR ADELANTAR"),
       tr("EXPL AA"),
