@@ -145,6 +145,8 @@ class DesireHelper:
 
     from openpilot.common.swaglog import cloudlog
 
+    from openpilot.common.swaglog import cloudlog
+
     # 🧠 Adelantamiento automático con retorno al carril derecho
     if radar_state is not None and self.param_s.get_bool("sic_adelantar"):
       try:
@@ -161,13 +163,15 @@ class DesireHelper:
 
         elif self.overtake_active:
           self.overtake_timer += DT_MDL
-          if self.overtake_timer > 5.0 and self.lane_change_state in (LaneChangeState.off,
-                                                                      LaneChangeState.laneChangeFinishing):
-            self.lane_change_direction = LaneChangeDirection.right
-            self.lane_change_state = LaneChangeState.laneChangeStarting
-            cloudlog.info("🔄 Retorno automático al carril derecho tras adelantamiento")
 
+          # ⏱️ Intentar volver al carril derecho solo después de 10 segundos y sin ángulo muerto
           if self.overtake_timer > 10.0:
+            if not carstate.rightBlindspot:
+              self.lane_change_direction = LaneChangeDirection.right
+              self.lane_change_state = LaneChangeState.laneChangeStarting
+              cloudlog.info("🔄 Retorno automático al carril derecho tras 10s y sin BSM")
+
+            # ✅ Finalizar adelantamiento y restaurar velocidad
             self.overtake_active = False
             if self.overtake_v_cruise_last is not None:
               Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
