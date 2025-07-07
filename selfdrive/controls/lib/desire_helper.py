@@ -4,6 +4,7 @@ from openpilot.common.params import Params
 from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.controls.lib.drive_helpers import get_road_edge
 from openpilot.selfdrive.modeld.custom_model_metadata import CustomModelMetadata, ModelCapabilities
+from sicuem.adelantamiento import should_start_overtake, get_overtake_command
 
 LaneChangeState = log.LaneChangeState
 LaneChangeDirection = log.LaneChangeDirection
@@ -41,11 +42,9 @@ AUTO_LANE_CHANGE_TIMER = {
   4: 1.5,
 }
 
-
 def get_min_lateral_speed(value: int, is_metric: bool, default: float = LANE_CHANGE_SPEED_MIN):
   speed: float = default if value == 0 else value * CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS
   return speed
-
 
 class DesireHelper:
   def __init__(self):
@@ -63,7 +62,6 @@ class DesireHelper:
     self.prev_brake_pressed = False
     self.road_edge = False
     self.param_read_counter = 0
-    self.read_param()
     self.edge_toggle = self.param_s.get_bool("RoadEdge")
     self.lane_change_set_timer = int(self.param_s.get("AutoLaneChangeTimer", encoding="utf8"))
     self.lane_change_bsm_delay = self.param_s.get_bool("AutoLaneChangeBsmDelay")
@@ -72,16 +70,20 @@ class DesireHelper:
     self.model_use_lateral_planner = self.custom_model_metadata.valid and \
                                      self.custom_model_metadata.capabilities & ModelCapabilities.LateralPlannerSolution
 
+    self.overtake_active = False
+    self.overtake_timer = 0.0
+    self.overtake_speed_delta = 0.0
+    self.overtake_v_cruise_last = None
+
   def read_param(self):
     self.edge_toggle = self.param_s.get_bool("RoadEdge")
     self.lane_change_set_timer = int(self.param_s.get("AutoLaneChangeTimer", encoding="utf8"))
     self.lane_change_bsm_delay = self.param_s.get_bool("AutoLaneChangeBsmDelay")
 
-  def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None):
+  def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None, radar_state=None):
 
     override_blinker = self.param_s.get_bool("c_carril")
     if desire_override is not None:
-      # Respeta el override externo sin aplicar lógica de blinker/torque
       self.desire = desire_override
       return
 
@@ -139,7 +141,40 @@ class DesireHelper:
         self.lane_change_wait_timer = 0
         self.param_s.put_bool("ForceLaneChangeRight", False)
         return'''
+    # 🚘 Adelantamiento automático por diferencia de velocidad y distancia (hecho por Adrián)
 
+    from openpilot.common.swaglog import cloudlog
+
+    # 🧠 Adelantamiento automático con retorno al carril derecho
+    if radar_state is not None and self.param_s.get_bool("sic_adelantar"):
+      try:
+        if not self.overtake_active and should_start_overtake(carstate, radar_state):
+          self.lane_change_direction, self.lane_change_state = get_overtake_command()
+          self.lane_change_ll_prob = 1.0
+          self.lane_change_wait_timer = 0
+          self.overtake_active = True
+          self.overtake_timer = 0.0
+          self.overtake_v_cruise_last = carstate.cruiseSpeed
+          self.overtake_speed_delta = 5.55  # +20 km/h
+          Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last + self.overtake_speed_delta))
+          cloudlog.info("🟢 Adelantamiento automático activado (+20 km/h)")
+
+        elif self.overtake_active:
+          self.overtake_timer += DT_MDL
+          if self.overtake_timer > 5.0 and self.lane_change_state in (LaneChangeState.off,
+                                                                      LaneChangeState.laneChangeFinishing):
+            self.lane_change_direction = LaneChangeDirection.right
+            self.lane_change_state = LaneChangeState.laneChangeStarting
+            cloudlog.info("🔄 Retorno automático al carril derecho tras adelantamiento")
+
+          if self.overtake_timer > 10.0:
+            self.overtake_active = False
+            if self.overtake_v_cruise_last is not None:
+              Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
+              cloudlog.info("✅ Restablecida velocidad original tras adelantamiento")
+
+      except Exception as e:
+        cloudlog.error(f"❌ Error en lógica de adelantamiento: {e}")
 
     # TODO: SP: !659: User-defined minimum lane change speed
     below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
