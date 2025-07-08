@@ -83,7 +83,7 @@ class DesireHelper:
     self.lane_change_bsm_delay = self.param_s.get_bool("AutoLaneChangeBsmDelay")
 
   def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None, radar_state=None):
-  
+
     override_blinker = self.param_s.get_bool("c_carril")
     if desire_override is not None:
       self.desire = desire_override
@@ -181,6 +181,40 @@ class DesireHelper:
 
       except Exception as e:
         cloudlog.error(f"❌ Error en lógica de adelantamiento: {e}")
+
+
+    #sin BSM
+    if radar_state is not None and self.param_s.get_bool("sic_adelantar_sin_bsm"):
+      try:
+        # 🚗 Iniciar adelantamiento si se cumplen condiciones de velocidad y distancia
+        if not self.overtake_active and should_start_overtake(carstate, radar_state):
+          self.lane_change_direction, self.lane_change_state = get_overtake_command()
+          self.lane_change_ll_prob = 1.0
+          self.lane_change_wait_timer = 0
+          self.overtake_active = True
+          self.overtake_timer = 0.0
+          self.overtake_v_cruise_last = carstate.cruiseSpeed
+          self.overtake_speed_delta = 5.55  # +20 km/h
+          Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last + self.overtake_speed_delta))
+          cloudlog.info("🟢 Adelantamiento automático activado (+20 km/h)")
+
+        # 🔁 Una vez iniciado, esperar 10s y volver al carril derecho
+        elif self.overtake_active:
+          self.overtake_timer += DT_MDL
+
+          if self.overtake_timer > 10.0:
+            self.lane_change_direction = LaneChangeDirection.right
+            self.lane_change_state = LaneChangeState.laneChangeStarting
+            cloudlog.info("🔄 Retorno automático al carril derecho tras 10s (sin BSM)")
+
+            # ✅ Restaurar velocidad anterior y finalizar estado
+            self.overtake_active = False
+            if self.overtake_v_cruise_last is not None:
+              Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
+              cloudlog.info("✅ Restablecida velocidad original tras adelantamiento")
+
+      except Exception as e:
+        cloudlog.error(f"❌ Error en lógica de adelantamiento (sin BSM): {e}")
 
     # TODO: SP: !659: User-defined minimum lane change speed
     below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN

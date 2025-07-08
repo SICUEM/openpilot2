@@ -30,7 +30,13 @@ UemPanel::UemPanel(QWidget *parent, int edit) : QFrame(parent) {
     },
     {
       "sic_adelantar",
-      tr("ACTIVAR ADELANTAR"),
+      tr("ACTIVAR ADELANTAR (con BSM)"),
+      tr("EXPL AA"),
+      "../assets/offroad/icon_blank.png",
+    },
+     {
+      "sic_adelantar",
+      tr("ACTIVAR ADELANTAR (sin BSM)"),
       tr("EXPL AA"),
       "../assets/offroad/icon_blank.png",
     }
