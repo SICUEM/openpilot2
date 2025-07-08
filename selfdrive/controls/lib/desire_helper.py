@@ -83,14 +83,7 @@ class DesireHelper:
     self.lane_change_bsm_delay = self.param_s.get_bool("AutoLaneChangeBsmDelay")
 
   def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None, radar_state=None):
-    # 🟢 Inicializar BSM una sola vez si no existen
-    if not hasattr(carstate, '_bsm_initialized'):
-      if not hasattr(carstate, 'leftBlindspot'):
-        setattr(carstate, 'leftBlindspot', False)
-      if not hasattr(carstate, 'rightBlindspot'):
-        setattr(carstate, 'rightBlindspot', False)
-      setattr(carstate, '_bsm_initialized', True)
-
+  
     override_blinker = self.param_s.get_bool("c_carril")
     if desire_override is not None:
       self.desire = desire_override
