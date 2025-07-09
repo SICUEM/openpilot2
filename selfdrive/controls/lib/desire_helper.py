@@ -1,4 +1,5 @@
 from cereal import log
+from common.swaglog import cloudlog
 from openpilot.common.conversions import Conversions as CV
 from openpilot.common.params import Params
 from openpilot.common.realtime import DT_MDL
@@ -82,6 +83,98 @@ class DesireHelper:
     self.lane_change_set_timer = int(self.param_s.get("AutoLaneChangeTimer", encoding="utf8"))
     self.lane_change_bsm_delay = self.param_s.get_bool("AutoLaneChangeBsmDelay")
 
+  def check_and_force_lane_change_param(self, carstate):
+    if not self.param_s.get_bool("c_carril") or self.lane_change_state != LaneChangeState.off:
+      return
+
+    # Izquierda
+    if self.param_s.get_bool("ForceLaneChangeLeft"):
+      self.param_s.put_bool("ForceLaneChangeLeft", False)
+      if carstate.leftBlindspot:
+        #cloudlog.warning("🔴 Cambio a izquierda bloqueado por ángulo muerto")
+        return
+      self.lane_change_direction = LaneChangeDirection.left
+      self.lane_change_state = LaneChangeState.laneChangeStarting
+      self.lane_change_ll_prob = 1.0
+      self.lane_change_wait_timer = 0
+      #cloudlog.info("⬅️ Cambio de carril forzado a la izquierda")
+      return
+
+    # Derecha
+    if self.param_s.get_bool("ForceLaneChangeRight"):
+      self.param_s.put_bool("ForceLaneChangeRight", False)
+      if carstate.rightBlindspot:
+        #cloudlog.warning("🔴 Cambio a derecha bloqueado por ángulo muerto")
+        return
+      self.lane_change_direction = LaneChangeDirection.right
+      self.lane_change_state = LaneChangeState.laneChangeStarting
+      self.lane_change_ll_prob = 1.0
+      self.lane_change_wait_timer = 0
+      #cloudlog.info("➡️ Cambio de carril forzado a la derecha")
+
+  def auto_overtake_with_bsm(self, carstate, radar_state):
+    try:
+      if not self.overtake_active and should_start_overtake(carstate, radar_state):
+        self.lane_change_direction, self.lane_change_state = get_overtake_command()
+        self.lane_change_ll_prob = 1.0
+        self.lane_change_wait_timer = 0
+        self.overtake_active = True
+        self.overtake_timer = 0.0
+        self.overtake_v_cruise_last = carstate.cruiseSpeed
+        self.overtake_speed_delta = 5.55  # +20 km/h
+        Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last + self.overtake_speed_delta))
+        cloudlog.info("🟢 Adelantamiento automático (con BSM) activado (+20 km/h)")
+
+      elif self.overtake_active:
+        self.overtake_timer += DT_MDL
+        if self.overtake_timer > 10.0:
+          if not carstate.rightBlindspot:
+            self.lane_change_direction = LaneChangeDirection.right
+            self.lane_change_state = LaneChangeState.laneChangeStarting
+            cloudlog.info("🔄 Retorno automático al carril derecho tras 10s y sin BSM")
+
+          self.overtake_active = False
+          if self.overtake_v_cruise_last is not None:
+            Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
+            cloudlog.info("✅ Restablecida velocidad original tras adelantamiento")
+
+    except Exception as e:
+      cloudlog.error(f"❌ Error en lógica de adelantamiento (con BSM): {e}")
+
+  def auto_overtake_without_bsm(self, carstate, radar_state):
+    try:
+      lead = getattr(radar_state, 'leadOne', None)
+      if lead is not None and lead.status:
+        distance_ok = lead.dRel < 50.0
+        speed_diff_ok = lead.vRel < -2.77  # 10 km/h más lento
+
+        if not self.overtake_active and distance_ok and speed_diff_ok:
+          self.lane_change_direction = LaneChangeDirection.left
+          self.lane_change_state = LaneChangeState.laneChangeStarting
+          self.lane_change_ll_prob = 1.0
+          self.lane_change_wait_timer = 0
+          self.overtake_active = True
+          self.overtake_timer = 0.0
+          self.overtake_v_cruise_last = carstate.cruiseSpeed
+          self.overtake_speed_delta = 2.77  # +10 km/h
+          Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last + self.overtake_speed_delta))
+          cloudlog.info("🟢 Adelantamiento automático (sin BSM) activado (+10 km/h)")
+
+      elif self.overtake_active:
+        self.overtake_timer += DT_MDL
+        if self.overtake_timer > 10.0:
+          self.lane_change_direction = LaneChangeDirection.right
+          self.lane_change_state = LaneChangeState.laneChangeStarting
+          cloudlog.info("🔄 Retorno automático al carril derecho tras 10s (sin BSM)")
+
+          self.overtake_active = False
+          if self.overtake_v_cruise_last is not None:
+            Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
+            cloudlog.info("✅ Restablecida velocidad original tras adelantamiento")
+
+    except Exception as e:
+      cloudlog.error(f"❌ Error en lógica de adelantamiento (sin BSM): {e}")
+
   def update(self, carstate, lateral_active, lane_change_prob, model_data=None, lat_plan_sp=None, desire_override=None, radar_state=None):
 
     override_blinker = self.param_s.get_bool("c_carril")
@@ -96,125 +189,20 @@ class DesireHelper:
     v_ego = carstate.vEgo
     one_blinker = carstate.leftBlinker != carstate.rightBlinker
 
-    # 🚨 Forzado directo del cambio de carril (sin intermitente ni torque) si está activado c_carril
-    if self.param_s.get_bool("c_carril"):
-      if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
-        self.lane_change_direction = LaneChangeDirection.left
-        blindspot = carstate.leftBlindspot
-        if blindspot:
-          cloudlog.warning("🔴 Cambio a izquierda bloqueado por ángulo muerto")
-          self.param_s.put_bool("ForceLaneChangeLeft", False)
-          return
-        else:
-          self.lane_change_state = LaneChangeState.laneChangeStarting
-          self.lane_change_ll_prob = 1.0
-          self.lane_change_wait_timer = 0
-          self.param_s.put_bool("ForceLaneChangeLeft", False)
-          return
 
-      if self.param_s.get_bool("ForceLaneChangeRight") and self.lane_change_state == LaneChangeState.off:
-        self.lane_change_direction = LaneChangeDirection.right
-        blindspot = carstate.rightBlindspot
-        if blindspot:
-          cloudlog.warning("🔴 Cambio a derecha bloqueado por ángulo muerto")
-          self.param_s.put_bool("ForceLaneChangeRight", False)
-          return
-        else:
-          self.lane_change_state = LaneChangeState.laneChangeStarting
-          self.lane_change_ll_prob = 1.0
-          self.lane_change_wait_timer = 0
-          self.param_s.put_bool("ForceLaneChangeRight", False)
-          return
+    #Cambio de carril (hecho por Adrián)
+    self.check_and_force_lane_change_param(carstate)
 
-    '''# 🚨 Forzado manual (sin intermitente) si está activado c_carril ----(preLaneChange)
-    if self.param_s.get_bool("c_carril"):
-      if self.param_s.get_bool("ForceLaneChangeLeft") and self.lane_change_state == LaneChangeState.off:
-        self.lane_change_direction = LaneChangeDirection.left
-        self.lane_change_state = LaneChangeState.preLaneChange
-        self.lane_change_ll_prob = 1.0
-        self.lane_change_wait_timer = 0
-        self.param_s.put_bool("ForceLaneChangeLeft", False)
-        return
 
-      if self.param_s.get_bool("ForceLaneChangeRight") and self.lane_change_state == LaneChangeState.off:
-        self.lane_change_direction = LaneChangeDirection.right
-        self.lane_change_state = LaneChangeState.preLaneChange
-        self.lane_change_ll_prob = 1.0
-        self.lane_change_wait_timer = 0
-        self.param_s.put_bool("ForceLaneChangeRight", False)
-        return'''
     # 🚘 Adelantamiento automático por diferencia de velocidad y distancia (hecho por Adrián)
 
-    from openpilot.common.swaglog import cloudlog
+    # 🧠 Adelantamiento automático
+    if radar_state is not None:
+      if self.param_s.get_bool("sic_adelantar_bsm"):
+        self.auto_overtake_with_bsm(carstate, radar_state)
+      elif self.param_s.get_bool("sic_adelantar_nobsm"):
+        self.auto_overtake_without_bsm(carstate, radar_state)
 
-    from openpilot.common.swaglog import cloudlog
-
-    # 🧠 Adelantamiento automático con retorno al carril derecho
-    if radar_state is not None and self.param_s.get_bool("sic_adelantar"):
-      try:
-        if not self.overtake_active and should_start_overtake(carstate, radar_state):
-          self.lane_change_direction, self.lane_change_state = get_overtake_command()
-          self.lane_change_ll_prob = 1.0
-          self.lane_change_wait_timer = 0
-          self.overtake_active = True
-          self.overtake_timer = 0.0
-          self.overtake_v_cruise_last = carstate.cruiseSpeed
-          self.overtake_speed_delta = 5.55  # +20 km/h
-          Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last + self.overtake_speed_delta))
-          cloudlog.info("🟢 Adelantamiento automático activado (+20 km/h)")
-
-        elif self.overtake_active:
-          self.overtake_timer += DT_MDL
-
-          # ⏱️ Intentar volver al carril derecho solo después de 10 segundos y sin ángulo muerto
-          if self.overtake_timer > 10.0:
-            if not carstate.rightBlindspot:
-              self.lane_change_direction = LaneChangeDirection.right
-              self.lane_change_state = LaneChangeState.laneChangeStarting
-              cloudlog.info("🔄 Retorno automático al carril derecho tras 10s y sin BSM")
-
-            # ✅ Finalizar adelantamiento y restaurar velocidad
-            self.overtake_active = False
-            if self.overtake_v_cruise_last is not None:
-              Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
-              cloudlog.info("✅ Restablecida velocidad original tras adelantamiento")
-
-      except Exception as e:
-        cloudlog.error(f"❌ Error en lógica de adelantamiento: {e}")
-
-
-    #sin BSM
-    if radar_state is not None and self.param_s.get_bool("sic_adelantar_sin_bsm"):
-      try:
-        # 🚗 Iniciar adelantamiento si se cumplen condiciones de velocidad y distancia
-        if not self.overtake_active and should_start_overtake(carstate, radar_state):
-          self.lane_change_direction, self.lane_change_state = get_overtake_command()
-          self.lane_change_ll_prob = 1.0
-          self.lane_change_wait_timer = 0
-          self.overtake_active = True
-          self.overtake_timer = 0.0
-          self.overtake_v_cruise_last = carstate.cruiseSpeed
-          self.overtake_speed_delta = 5.55  # +20 km/h
-          Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last + self.overtake_speed_delta))
-          cloudlog.info("🟢 Adelantamiento automático activado (+20 km/h)")
-
-        # 🔁 Una vez iniciado, esperar 10s y volver al carril derecho
-        elif self.overtake_active:
-          self.overtake_timer += DT_MDL
-
-          if self.overtake_timer > 10.0:
-            self.lane_change_direction = LaneChangeDirection.right
-            self.lane_change_state = LaneChangeState.laneChangeStarting
-            cloudlog.info("🔄 Retorno automático al carril derecho tras 10s (sin BSM)")
-
-            # ✅ Restaurar velocidad anterior y finalizar estado
-            self.overtake_active = False
-            if self.overtake_v_cruise_last is not None:
-              Params().put("OverrideCruiseSpeed", str(self.overtake_v_cruise_last))
-              cloudlog.info("✅ Restablecida velocidad original tras adelantamiento")
-
-      except Exception as e:
-        cloudlog.error(f"❌ Error en lógica de adelantamiento (sin BSM): {e}")
 
     # TODO: SP: !659: User-defined minimum lane change speed
     below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN

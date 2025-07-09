@@ -28,18 +28,19 @@ UemPanel::UemPanel(QWidget *parent, int edit) : QFrame(parent) {
   tr("Muestra estado de ángulo muerto en AnnotatedCamera."),
   "../assets/offroad/icon_blank.png",
     },
-    {
-      "sic_adelantar",
-      tr("ACTIVAR ADELANTAR (con BSM)"),
-      tr("EXPL AA"),
-      "../assets/offroad/icon_blank.png",
-    },
-     {
-      "sic_adelantar",
-      tr("ACTIVAR ADELANTAR (sin BSM)"),
-      tr("EXPL AA"),
-      "../assets/offroad/icon_blank.png",
-    }
+  {
+  "sic_adelantar_bsm",
+  tr("ACTIVAR ADELANTAR (con BSM)"),
+  tr("Usar BSM para adelantar automáticamente."),
+  "../assets/offroad/icon_blank.png",
+},
+{
+  "sic_adelantar_nobsm",
+  tr("ACTIVAR ADELANTAR (sin BSM)"),
+  tr("Adelantamiento automático sin usar BSM."),
+  "../assets/offroad/icon_blank.png",
+},
+
     /**
     {
       "toggle_op1",
@@ -133,9 +134,37 @@ SubPanelButton *madsSettings3 = new SubPanelButton(tr("Sender UEM"));
 
   // Añadir toggles y el botón de "Conf. TELEMETRIA UEM"
   for (auto &[param, title, desc, icon] : toggle_defs) {
+
+
+
     auto toggle = new ParamControlSP(param, title, desc, icon, this);
     list->addItem(toggle);
     toggles[param.toStdString()] = toggle;
+
+
+  if (param == "sic_adelantar_bsm") {
+  connect(toggle, &ToggleControlSP::toggleFlipped, [=](bool state) {
+    if (state) {
+      toggles["sic_adelantar_nobsm"]->setEnabled(false);
+      toggles["sic_adelantar_nobsm"]->setValue("0");  // ✅ usar QString
+    } else {
+      toggles["sic_adelantar_nobsm"]->setEnabled(true);
+    }
+  });
+}
+
+    if (param == "sic_adelantar_nobsm") {
+      connect(toggle, &ToggleControlSP::toggleFlipped, [=](bool state) {
+        if (state) {
+          toggles["sic_adelantar_bsm"]->setEnabled(false);
+          toggles["sic_adelantar_bsm"]->setValue("0");  // ✅ usar QString
+        } else {
+          toggles["sic_adelantar_bsm"]->setEnabled(true);
+        }
+      });
+    }
+
+
 
     if (param == "telemetria_uem") {
       list->addItem(madsSettingsLayout);  // Añadir el botón debajo del toggle de TELEMETRIA UEM

@@ -576,13 +576,15 @@ void AnnotatedCameraWidgetSP::drawHud(QPainter &p) {
 
 
 p.save();
+p.save();
 
 bool mostrar_intervalos = params.getBool("intervalos_toggle");
 bool mostrar_carril = params.getBool("c_carril");
 bool mostrar_blindspot = params.getBool("show_blindspot");
-bool mostrar_adelantar = params.getBool("sic_adelantar");
+bool adelantar_bsm = Params().getBool("sic_adelantar_bsm");
+bool adelantar_nobsm = Params().getBool("sic_adelantar_nobsm");
 
-int x1 = rect().right() - 330;
+int x1 = rect().right() - 630;   // 🔁 POSICIÓN HORIZONTAL COMÚN PARA TODOS
 int y_base = rect().bottom() - 500;
 int y_offset = 0;
 
@@ -630,19 +632,18 @@ if (mostrar_blindspot) {
   QString estado3;
   QColor color3;
 
-  // Estado dinámico
   if (left_blindspot && right_blindspot) {
     estado3 = "OBSTRUIDO";
-    color3 = QColor(255, 0, 0);  // Rojo
+    color3 = QColor(255, 0, 0);
   } else if (left_blindspot) {
     estado3 = "IZQ OCUPADO";
-    color3 = QColor(255, 128, 0);  // Naranja izquierda
+    color3 = QColor(255, 128, 0);
   } else if (right_blindspot) {
     estado3 = "DER OCUPADO";
-    color3 = QColor(255, 128, 0);  // Naranja derecha
+    color3 = QColor(255, 128, 0);
   } else {
     estado3 = "LIBRE";
-    color3 = QColor(0, 255, 0);  // Verde
+    color3 = QColor(0, 255, 0);
   }
 
   p.setFont(InterFont(36, QFont::Bold));
@@ -653,18 +654,18 @@ if (mostrar_blindspot) {
   p.setPen(color3);
   p.drawText(x1 + w3 + 4, y3, estado3);
 
-  // Iconos circulares
+  // Iconos visuales
   int iconSize = 28;
   int iconY = y3 - 40;
   if (left_blindspot) {
     QRect leftIconRect(x1 + w3 + 180, iconY, iconSize, iconSize);
-    p.setBrush(QColor(255, 128, 0));  // Naranja izquierda
+    p.setBrush(QColor(255, 128, 0));
     p.setPen(Qt::NoPen);
     p.drawEllipse(leftIconRect);
   }
   if (right_blindspot) {
     QRect rightIconRect(x1 + w3 + 220, iconY, iconSize, iconSize);
-    p.setBrush(QColor(0, 128, 255));  // Azul derecha
+    p.setBrush(QColor(0, 128, 255));
     p.setPen(Qt::NoPen);
     p.drawEllipse(rightIconRect);
   }
@@ -673,11 +674,18 @@ if (mostrar_blindspot) {
 }
 
 // === Adelantar ===
-if (mostrar_adelantar) {
+if (adelantar_bsm || adelantar_nobsm) {
   int y4 = y_base + y_offset;
-  QString label4 = "Adelantar: ";
-  QString estado4 = "ESPERANDO";  // ⚠️ Simulado por ahora
-  QColor color4 = QColor(255, 255, 0); // Amarillo placeholder
+  QString label4 = "Adelantar ";
+  if (adelantar_bsm) label4 += "(BSM): ";
+  else if (adelantar_nobsm) label4 += "(no BSM): ";
+
+  QString estado4 = QString::fromStdString(Params().get("overtakeStatus", false));
+  if (estado4.isEmpty()) estado4 = "ESPERANDO";
+
+  QColor color4 = QColor(255, 255, 0);
+  if (estado4 == "ADELANTANDO") color4 = QColor(0, 255, 0);
+  else if (estado4 == "FINALIZADO") color4 = QColor(255, 255, 255);
 
   p.setFont(InterFont(36, QFont::Bold));
   p.setPen(Qt::white);
@@ -686,6 +694,8 @@ if (mostrar_adelantar) {
   p.setFont(InterFont(44, QFont::Black));
   p.setPen(color4);
   p.drawText(x1 + w4 + 4, y4, estado4);
+
+  y_offset += 55;
 }
 
 p.restore();

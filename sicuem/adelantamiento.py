@@ -8,7 +8,9 @@ from openpilot.common.params import Params
 LaneChangeDirection = log.LaneChangeDirection
 LaneChangeState = log.LaneChangeState
 
-params = Params()
+from openpilot.common.params import Params
+
+params = Params("/tmp")  # usa ruta temporal solo para desarrollo fuera del dispositivo Comma
 
 def should_start_overtake(carstate, radarstate):
   """
