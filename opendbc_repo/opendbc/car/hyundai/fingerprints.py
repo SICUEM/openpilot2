@@ -1081,6 +1081,12 @@ FW_VERSIONS = {
       b'\xf1\x00NX4__               1.00 1.02 99110-N9000         ',
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
     ],
+    (Ecu.cornerRadar, 0x7b7, None): [
+      b'\xf1\x00064',
+    ],
+    (Ecu.hvav, 0x7b3, None): [
+      b"\xf1\x00NX4e  97255-CZ021CONTROL ASS'Y-HEV   1.04 NX4e HEV DATC(-)0.7 ",
+    ],
   },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
